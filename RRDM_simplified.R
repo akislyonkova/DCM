@@ -56,5 +56,4 @@ for (step in 1:Nr) {
   }
 }
 
-PImat
-
+print(PImat)
