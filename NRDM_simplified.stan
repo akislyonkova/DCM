@@ -1,4 +1,3 @@
-
 data{
   int Np;
   int Ni;
@@ -22,34 +21,36 @@ transformed parameters{
   vector[Ni] li_1_col;
   matrix[Nstep, Ni] li_1_cumul_t;
   
-  for (item in 1:Ni){
-    for (pf in 1:Nc){
-      PImat[item, pf, 1] = 0;
-    }
-  }
+  //for (item in 1:Ni){
+  //  for (pf in 1:Nc){
+  //    PImat[item, pf, 1] = 0;
+  //  }
+  //}
+  //
+  //li_0_cumul_t = li_0';
+  //li_1_cumul_t = li_1';
+  //
+  //for (step in 1:Nstep){
+  //  li_0_col = col(li_0, step);
+  //  li_0_cumul_t[step] = cumulative_sum(li_0_col)';
+  //  li_1_col = col(li_1, step);
+  //  li_1_cumul_t[step] = cumulative_sum(li_1_col)';
+  //} 
   
-  li_0_cumul_t = li_0';
-  li_1_cumul_t = li_1';
   
-  for (step in 1:Nstep){
+  for (step in 1:Nstep) {
     li_0_col = col(li_0, step);
     li_0_cumul_t[step] = cumulative_sum(li_0_col)';
     li_1_col = col(li_1, step);
     li_1_cumul_t[step] = cumulative_sum(li_1_col)';
-  } 
-  
-  
-  for (step in 1:Nstep) {
     for (item in 1:Ni) {
       for (pf in 1:Nc){
+        PImat[item, pf, 1] = 0;
         PImat[item, pf, step+1] = li_0_cumul_t[step,item]+li_1_cumul_t[step,item];
       }
-      
     }
   }
 } 
-
-
 
 model {
   vector[Nc] contributionsC;
@@ -61,7 +62,6 @@ model {
   
   Vc~dirichlet(rep_vector(2.0, Nc));
   
-  
   ////Likelihood
   for (iterp in 1:Np){
     for (iterc in 1:Nc){
@@ -72,12 +72,13 @@ model {
     }
     target+=log_sum_exp(contributionsC);
   }
-  
 }
 
 generated quantities {
   matrix[Np,Nc] contributionsPC;
+  matrix[Np,Nc] log_lik;
   vector[Ni] contributionsI;
+  
   //Posterior
   for (iterp in 1:Np){
     for (iterc in 1:Nc){
@@ -85,19 +86,7 @@ generated quantities {
         contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
       }
       contributionsPC[iterp,iterc]=prod(exp(contributionsI));
-    }
-    
-  }
-  
-  matrix[Np,Nc] log_lik;
-  //Posterior
-  for (iterp in 1:Np){
-    for (iterc in 1:Nc){
-      for (iteri in 1:Ni){
-        contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
-      }
       log_lik[iterp,iterc]=prod(exp(contributionsI));
-    }  
+    }
   }
-  
 }

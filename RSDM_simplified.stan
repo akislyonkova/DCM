@@ -1,4 +1,3 @@
-
 data{
   int Np;
   int Ni;
@@ -26,34 +25,22 @@ transformed parameters{
   matrix[Nstep, Nc] ls_1_cumul_t;
   real Wmat;
   
-  for (item in 1:Ni){
-    for (pf in 1:Nc){
-      PImat[item, pf, 1] = 0;
-    }
-  }
-  
-  
   ls_0_cumul_t = ls_0';
   ls_1_cumul_t = ls_1';
   
-  for (step in 1:Nstep){
+  for (step in 1:Nstep) {
     ls_0_col = col(ls_0, step);
     ls_0_cumul_t[step] = cumulative_sum(ls_0_col)';
     ls_1_col = col(ls_1, step);
     ls_1_cumul_t[step] = cumulative_sum(ls_1_col)';
-  } 
-  
-  
-  for (step in 1:Nstep) {
     for (item in 1:Ni) {
       for (pf in 1:Nc){
+        PImat[item, pf, 1] = 0;
         Wmat = W[item,pf];
         PImat[item, pf, step+1] = (li_0[item] + li_1[item]*Wmat) - ls_0_cumul_t[step,pf] + ls_1_cumul_t[step,pf]*Wmat;
       }
-      
     }
   }
-  
 }
 
 model {
@@ -79,12 +66,13 @@ model {
     }
     target+=log_sum_exp(contributionsC);    
   }
-  
 }
 
 generated quantities {
   matrix[Np,Nc] contributionsPC;
+  matrix[Np,Nc] log_lik;
   vector[Ni] contributionsI;
+  
   //Posterior
   for (iterp in 1:Np){
     for (iterc in 1:Nc){
@@ -92,8 +80,7 @@ generated quantities {
         contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
       }
       contributionsPC[iterp,iterc]=prod(exp(contributionsI));
+      log_lik[iterp,iterc]=prod(exp(contributionsI));
     }
-    
   }
-  
 }
