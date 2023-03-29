@@ -21,23 +21,6 @@ transformed parameters{
   vector[Ni] li_1_col;
   matrix[Nstep, Ni] li_1_cumul_t;
   
-  //for (item in 1:Ni){
-  //  for (pf in 1:Nc){
-  //    PImat[item, pf, 1] = 0;
-  //  }
-  //}
-  //
-  //li_0_cumul_t = li_0';
-  //li_1_cumul_t = li_1';
-  //
-  //for (step in 1:Nstep){
-  //  li_0_col = col(li_0, step);
-  //  li_0_cumul_t[step] = cumulative_sum(li_0_col)';
-  //  li_1_col = col(li_1, step);
-  //  li_1_cumul_t[step] = cumulative_sum(li_1_col)';
-  //} 
-  
-  
   for (step in 1:Nstep) {
     li_0_col = col(li_0, step);
     li_0_cumul_t[step] = cumulative_sum(li_0_col)';
