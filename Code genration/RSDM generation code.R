@@ -19,7 +19,7 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   #li_1 - item main effect, list with nitems length 
   li_1 <- rep(c("NA"), n_items)
   for (i in 1:n_items){
-    li_1[i]<-paste('l',i,'M', sep='')
+    li_1[i]<-paste('l',i,'M', sep='') 
   }
   #ls_0 - step intercepts, matrix with nitems by nsteps dimensions
   ls_0 <- matrix("NA", n_items,nstep)
@@ -141,12 +141,14 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   vector[Ni] log_lik[Np];
   vector[Ni] contributionsI;
   matrix[Ni,Nc] contributionsIC;
+  matrix[Np,Nc] contributionsPC;
   //Posterior
   for (iterp in 1:Np){
     for (iteri in 1:Ni){
       for (iterc in 1:Nc){
         contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
         contributionsIC[iteri,iterc]=log(Vc[iterc])+contributionsI[iteri];
+        contributionsPC[iterp,iterc]=prod(exp(contributionsI));
       }
       log_lik[iterp,iteri]=log_sum_exp(contributionsIC[iteri,]);
     }
