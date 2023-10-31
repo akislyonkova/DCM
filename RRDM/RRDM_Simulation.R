@@ -13,17 +13,19 @@ N <- 901 # number of people
 ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind,] # simulated pattern ("truth") for all attributes for each person 
 
-   # a document with parameters for an RRDM 
-#library(rio)
-#RRDM_para <- import("RRDMpara.xlsx")
+# a document with parameters for an RRDM 
 library("rstan")
-RRDM_ordmdat<-summary(estimated_model_simp)$summary
-#par <-RRDM_para[,-1]
+RRDM<-summary(estimated_model)$summary
+library(rio)
+steps <- import("C:/Users/User/Desktop/param.xlsx")
+main<-rnorm(80)
+#main <- import("C:/Users/User/Desktop/main.xlsx")
 
-steps <- matrix(para,40,4) # matrix with 4 steps for 40 questions (there are 5 response options)
-colnames(steps) <- c("s1","s2","s3","s4") # names each step 
+main <- matrix(main,40,2) # matrix with 2 vectors (main effects and intercepts) for 40 questions
+colnames(main) <- c("l0","l1") # names each step 
 steps <- (round(steps,4)) # rounds the step parameters to the 4th decimal point 
-t <- matrix(NA,40,4) # empty T matrix 40 questions and 4 profiles (profile by item matrix)
+main<-(round(main,4))
+t <- matrix(NA,40,4) # empty T matrix 40 questions and 4 profiles (item by profile matrix)
 r <- matrix(NA,901,40) # empty response matrix, 40 questions, 901 people 
 responses <- list() # creates an empty list for holding responses 
 
@@ -31,13 +33,13 @@ responses <- list() # creates an empty list for holding responses
 # the loops generate responses for each person on each question based on the alpha patterns 
 
 for(k in 1:nrow(alpha)) { # k - person 
-  for(i in 1:10) { # i - item, questions 1 through 5 (1st attribute) 
-    t1=(exp(steps[i,1]+alpha[k,1]*steps[i,4]))/(1+(exp(steps[i,1]+alpha[k,1]*steps[i,4])))
-    t2=exp(steps[i,2]+alpha[k,1]*steps[i,5])
-    t3=exp(steps[i,3]+alpha[k,1]*steps[i,6])
-    t4=exp((0-steps[i,2]-steps[i,3])+alpha[k,1]*(0-steps[i,5]-steps[i,6]))
-    t6=t2+t3+t4
-    t[i,]=c(t1,((1-t1)*(t2/t6)),((1-t1)*(t3/t6)),((1-t1)*(t4/t6))) 
+  for(i in 1:10) { # i - item, questions 1 through 10 (1st attribute) 
+    t1=exp(1(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1])
+    t2=exp(2(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2])
+    t3=exp(3(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3])
+    t4=exp(4(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
+    sum=t1+t2+t3+t4
+    t[i,]=c(0, ) 
     ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
     r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] #which() function returns the position/index of the value
   }
@@ -73,8 +75,6 @@ for(k in 1:nrow(alpha)) { # k - person
   }
 }
 responses[[length(responses)+1]]=as.data.frame(r)
-
-
 
 save(responses, file = "simresponses.rda")
 
