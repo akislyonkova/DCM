@@ -14,8 +14,8 @@ ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind,] # simulated pattern ("truth") for all attributes for each person 
 
 # a document with parameters for an RRDM 
-library("rstan")
-RRDM<-summary(estimated_model)$summary
+#library("rstan")
+#RRDM<-summary(estimated_model)$summary
 library(rio)
 steps <- import("C:/Users/User/Desktop/param.xlsx")
 main<-rnorm(80)
@@ -25,7 +25,7 @@ main <- matrix(main,40,2) # matrix with 2 vectors (main effects and intercepts) 
 colnames(main) <- c("l0","l1") # names each step 
 steps <- (round(steps,4)) # rounds the step parameters to the 4th decimal point 
 main<-(round(main,4))
-t <- matrix(NA,40,4) # empty T matrix 40 questions and 4 profiles (item by profile matrix)
+t <- matrix(NA,40,5) # empty T matrix 40 questions and 4 profiles (item by profile matrix)
 r <- matrix(NA,901,40) # empty response matrix, 40 questions, 901 people 
 responses <- list() # creates an empty list for holding responses 
 
@@ -34,43 +34,43 @@ responses <- list() # creates an empty list for holding responses
 
 for(k in 1:nrow(alpha)) { # k - person 
   for(i in 1:10) { # i - item, questions 1 through 10 (1st attribute) 
-    t1=exp(1(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1])
-    t2=exp(2(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2])
-    t3=exp(3(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3])
-    t4=exp(4(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
-    sum=t1+t2+t3+t4
-    t[i,]=c(0, ) 
+    t1=exp(1*(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1])
+    t2=exp(2*(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2])
+    t3=exp(3*(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3])
+    t4=exp(4*(main[i,1]+main[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
+    sum=1+t1+t2+t3+t4
+    t[i,]=c(1, t1/sum,t2/sum,t3/sum, t4/sum) 
     ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
     r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] #which() function returns the position/index of the value
   }
   for(i in 11:20) { # questions 11 through 20 (2nd attribute) 
-    t1=(exp(steps[i,1]+alpha[k,2]*steps[i,4]))/(1+(exp(steps[i,1]+alpha[k,2]*steps[i,4])))
-    t2=exp(steps[i,2]+alpha[k,2]*steps[i,5])
-    t3=exp(steps[i,3]+alpha[k,2]*steps[i,6])
-    t4=exp((0-steps[i,2]-steps[i,3])+alpha[k,2]*(0-steps[i,5]-steps[i,6]))
-    t6=t2+t3+t4
-    t[i,]=c(t1,((1-t1)*(t2/t6)),((1-t1)*(t3/t6)),((1-t1)*(t4/t6)))
-    ppp=rmultinom(n=1, size=1, prob=t[i,])
-    r[k,i]=which(ppp == 1, arr.ind=TRUE)[1]
+    t1=exp(1(main[i,1]+main[i,2]*alpha[k,2]) + step[i,1])
+    t2=exp(2(main[i,1]+main[i,2]*alpha[k,2]) + step[i,1] + step[i,2])
+    t3=exp(3(main[i,1]+main[i,2]*alpha[k,2]) + step[i,1] + step[i,2] + step[i,3])
+    t4=exp(4(main[i,1]+main[i,2]*alpha[k,2]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
+    sum=1+t1+t2+t3+t4
+    t[i,]=c(1,t1/sum,t2/sum,t3/sum, t4/sum) 
+    ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
+    r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] #which() function returns the position/index of the value
   }
   for(i in 21:30) { # questions 21 through 30 (3rd attribute) 
-    t1=(exp(steps[i,1]+alpha[k,2]*steps[i,4]))/(1+(exp(steps[i,1]+alpha[k,2]*steps[i,4])))
-    t2=exp(steps[i,2]+alpha[k,2]*steps[i,5])
-    t3=exp(steps[i,3]+alpha[k,2]*steps[i,6])
-    t4=exp((0-steps[i,2]-steps[i,3])+alpha[k,2]*(0-steps[i,5]-steps[i,6]))
-    t6=t2+t3+t4
-    t[i,]=c(t1,((1-t1)*(t2/t6)),((1-t1)*(t3/t6)),((1-t1)*(t4/t6)))
-    ppp=rmultinom(n=1, size=1, prob=t[i,])
+    t1=exp(1*(main[i,1]+main[i,2]*alpha[k,3]) + step[i,1])
+    t2=exp(2*(main[i,1]+main[i,2]*alpha[k,3]) + step[i,1] + step[i,2])
+    t3=exp(3*(main[i,1]+main[i,2]*alpha[k,3]) + step[i,1] + step[i,2] + step[i,3])
+    t4=exp(4*(main[i,1]+main[i,2]*alpha[k,3]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
+    sum=1+t1+t2+t3+t4
+    t[i,]=c(1,t1/sum,t2/sum,t3/sum, t4/sum) 
+    ppp=rmultinom(n=1, size=1, prob=t[i,]) 
     r[k,i]=which(ppp == 1, arr.ind=TRUE)[1]
   }
   for(i in 31:40) { # questions 31 through 40 (4th attribute) 
-    t1=(exp(steps[i,1]+alpha[k,2]*steps[i,4]))/(1+(exp(steps[i,1]+alpha[k,2]*steps[i,4])))
-    t2=exp(steps[i,2]+alpha[k,2]*steps[i,5])
-    t3=exp(steps[i,3]+alpha[k,2]*steps[i,6])
-    t4=exp((0-steps[i,2]-steps[i,3])+alpha[k,2]*(0-steps[i,5]-steps[i,6]))
-    t6=t2+t3+t4
-    t[i,]=c(t1,((1-t1)*(t2/t6)),((1-t1)*(t3/t6)),((1-t1)*(t4/t6)))
-    ppp=rmultinom(n=1, size=1, prob=t[i,])
+    t1=exp(1*(main[i,1]+main[i,2]*alpha[k,4]) + step[i,1])
+    t2=exp(2*(main[i,1]+main[i,2]*alpha[k,4]) + step[i,1] + step[i,2])
+    t3=exp(3*(main[i,1]+main[i,2]*alpha[k,4]) + step[i,1] + step[i,2] + step[i,3])
+    t4=exp(4*(main[i,1]+main[i,2]*alpha[k,4]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
+    sum=1+t1+t2+t3+t4
+    t[i,]=c(1,t1/sum,t2/sum,t3/sum, t4/sum) 
+    ppp=rmultinom(n=1, size=1, prob=t[i,]) 
     r[k,i]=which(ppp == 1, arr.ind=TRUE)[1]
   }
 }
