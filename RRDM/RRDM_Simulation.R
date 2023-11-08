@@ -31,7 +31,7 @@ for(k in 1:nrow(alpha)) {  # k - person
     t3=exp(3*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3])
     t4=exp(4*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
     sum=1+t1+t2+t3+t4
-    t[i,]=c(1, t1/sum,t2/sum,t3/sum, t4/sum) 
+    t[i,]=c(1/sum, t1/sum,t2/sum,t3/sum, t4/sum) 
     ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
     r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] #which() function returns the position/index of the value
   }
@@ -41,7 +41,7 @@ for(k in 1:nrow(alpha)) {  # k - person
     t3=exp(3*(item[i,1]+item[i,2]*alpha[k,2]) + step[i,1] + step[i,2] + step[i,3])
     t4=exp(4*(item[i,1]+item[i,2]*alpha[k,2]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
     sum=1+t1+t2+t3+t4
-    t[i,]=c(1,t1/sum,t2/sum,t3/sum, t4/sum) 
+    t[i,]=c(1/sum,t1/sum,t2/sum,t3/sum, t4/sum) 
     ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
     r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] #which() function returns the position/index of the value
   }
@@ -51,7 +51,7 @@ for(k in 1:nrow(alpha)) {  # k - person
     t3=exp(3*(item[i,1]+item[i,2]*alpha[k,3]) + step[i,1] + step[i,2] + step[i,3])
     t4=exp(4*(item[i,1]+item[i,2]*alpha[k,3]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
     sum=1+t1+t2+t3+t4
-    t[i,]=c(1,t1/sum,t2/sum,t3/sum, t4/sum) 
+    t[i,]=c(1/sum,t1/sum,t2/sum,t3/sum, t4/sum) 
     ppp=rmultinom(n=1, size=1, prob=t[i,]) 
     r[k,i]=which(ppp == 1, arr.ind=TRUE)[1]
   }
@@ -61,14 +61,14 @@ for(k in 1:nrow(alpha)) {  # k - person
     t3=exp(3*(item[i,1]+item[i,2]*alpha[k,4]) + step[i,1] + step[i,2] + step[i,3])
     t4=exp(4*(item[i,1]+item[i,2]*alpha[k,4]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
     sum=1+t1+t2+t3+t4
-    t[i,]=c(1,t1/sum,t2/sum,t3/sum, t4/sum) 
+    t[i,]=c(1/sum,t1/sum,t2/sum,t3/sum, t4/sum) 
     ppp=rmultinom(n=1, size=1, prob=t[i,]) 
     r[k,i]=which(ppp == 1, arr.ind=TRUE)[1]
   }
 }
 
 
-export(r,'dataset10.xlsx')
+export(r,'dataset1.xlsx')
 
 
 # responses[[length(responses)+1]]=as.data.frame(r)
