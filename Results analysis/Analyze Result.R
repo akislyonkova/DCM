@@ -251,7 +251,8 @@ print(loo_3)
 
 
 
-contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
+contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T) # returns a matrix with one column per chain and an additional column for all chains combined.
+# [,3] specifies two chains + the combined one, 901 rows, 16 columns
 A_RRDM=unlist(lapply(1:901,function(x){which.max(contributionsPC1[x,])}))
 
 contributionsPC2<-matrix(get_posterior_mean(estimated_nrdm_ordmdat,pars = c("contributionsPC"))[,3],901,16,byrow = T)
