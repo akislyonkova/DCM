@@ -73,5 +73,13 @@ export(r,'dataset1.xlsx')
 
 # responses[[length(responses)+1]]=as.data.frame(r)
 # save(responses, file = "simresponses.rda")
-
-
+i=1
+k=1
+t1=exp(1*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1])
+t2=exp(2*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2])
+t3=exp(3*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3])
+t4=exp(4*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
+sum=1+t1+t2+t3+t4
+t[i,]=c(1/sum, t1/sum,t2/sum,t3/sum, t4/sum) 
+ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
+r[k,i]=which(ppp == 1, arr.ind=TRUE)[1]
