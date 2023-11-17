@@ -41,9 +41,9 @@ NRDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="NRDM"){
         Reparm[loopi,loopc,loops+1]<-paste('  PImat[',loopi,',',loopc,'][',loops+1,']=', li_0_sum[loopi,loops],
                                            '+(', li_1_sum[loopi,loops], ')*', PfbyI[loopi,loopc], 
                                            ';\n', sep='') 
-    }
-  }   
-}
+      }
+    }   
+  }
   
   # build a Frankenstein 
   Modelcontainer<-paste('   vector[Nc] contributionsC;\n','    vector[Ni] contributionsI;\n\n',sep='')
@@ -97,36 +97,32 @@ NRDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="NRDM"){
   generatedQuantities.spec<-'
   \n
   generated quantities {
-  vector[Ni] log_lik[Np];
   vector[Ni] contributionsI;
-  matrix[Ni,Nc] contributionsIC;
   matrix[Np,Nc] contributionsPC;
   //Posterior
   for (iterp in 1:Np){
-    for (iteri in 1:Ni){
-      for (iterc in 1:Nc){
+    for (iterc in 1:Nc){
+      for (iteri in 1:Ni){
         contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
-        contributionsIC[iteri,iterc]=log(Vc[iterc])+contributionsI[iteri];
-        contributionsPC[iterp,iterc]=prod(exp(contributionsI));
       }
-      log_lik[iterp,iteri]=log_sum_exp(contributionsIC[iteri,]);
+      contributionsPC[iterp,iterc]=prod(exp(contributionsI));
     }
   }
-  }
+}
   '
-  if (.Platform$OS.type == "unix") {
-    filename = paste(paste(save.path,save.name,sep='/'),'.stan',sep='')
-  }else{
-    filename = paste(paste(save.path,save.name,sep='\\'),'.stan',sep='')
-  }
-  
-  sink(file= filename,append=FALSE)
-  cat(
-    paste(c('   ',
-            data.spec,parm.spec,transparm.spec,model.spec,generatedQuantities.spec)
-    ))
-  sink(NULL)
-  
+if (.Platform$OS.type == "unix") {
+  filename = paste(paste(save.path,save.name,sep='/'),'.stan',sep='')
+}else{
+  filename = paste(paste(save.path,save.name,sep='\\'),'.stan',sep='')
+}
+
+sink(file= filename,append=FALSE)
+cat(
+  paste(c('   ',
+          data.spec,parm.spec,transparm.spec,model.spec,generatedQuantities.spec)
+  ))
+sink(NULL)
+
 }
 
 

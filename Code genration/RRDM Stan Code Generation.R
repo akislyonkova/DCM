@@ -36,10 +36,10 @@ RRDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RRDM"){
   ls_0_cumul[,2] <- paste(ls_0[,1],'+',ls_0[,2],sep='')
   ls_0_cumul[,3] <- paste(ls_0[,1],'+',ls_0[,2],'+',ls_0[,3],sep='')
   ls_0_cumul[,4] <- paste(ls_0[,1],'+',ls_0[,2],'+',ls_0[,3],'+',ls_0[,4],sep='')
- 
+  
   ##################################################################################################################################  
   ls_0_unique <-unique(ls_0)
-
+  
   Reparm<-array(rep(0,n_items*nclass*(scale.num)),dim = c(n_items,nclass,(scale.num))) # placeholder for the loop results 
   
   
@@ -114,37 +114,33 @@ RRDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RRDM"){
   generatedQuantities.spec<-'
   \n
   generated quantities {
-  vector[Ni] log_lik[Np];
   vector[Ni] contributionsI;
-  matrix[Ni,Nc] contributionsIC;
   matrix[Np,Nc] contributionsPC;
   //Posterior
   for (iterp in 1:Np){
-    for (iteri in 1:Ni){
-      for (iterc in 1:Nc){
+    for (iterc in 1:Nc){
+      for (iteri in 1:Ni){
         contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
-        contributionsIC[iteri,iterc]=log(Vc[iterc])+contributionsI[iteri];
-        contributionsPC[iterp,iterc]=prod(exp(contributionsI));
       }
-      log_lik[iterp,iteri]=log_sum_exp(contributionsIC[iteri,]);
+      contributionsPC[iterp,iterc]=prod(exp(contributionsI));
     }
   }
-  }
+}
   
   '
-  if (.Platform$OS.type == "unix") {
-    filename = paste(paste(save.path,save.name,sep='/'),'.stan',sep='')
-  }else{
-    filename = paste(paste(save.path,save.name,sep='\\'),'.stan',sep='')
-  }
-  
-  sink(file= filename,append=FALSE)
-  cat(
-    paste(c('   ',
-            data.spec,parm.spec,transparm.spec,model.spec,generatedQuantities.spec)
-    ))
-  sink(NULL)
-  
+if (.Platform$OS.type == "unix") {
+  filename = paste(paste(save.path,save.name,sep='/'),'.stan',sep='')
+}else{
+  filename = paste(paste(save.path,save.name,sep='\\'),'.stan',sep='')
+}
+
+sink(file= filename,append=FALSE)
+cat(
+  paste(c('   ',
+          data.spec,parm.spec,transparm.spec,model.spec,generatedQuantities.spec)
+  ))
+sink(NULL)
+
 }
 
 

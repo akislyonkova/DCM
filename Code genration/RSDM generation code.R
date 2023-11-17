@@ -7,14 +7,14 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   PS <- t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) # profile set 
   PfbyI <- Q %*% PS # profile by item matrix, weight matrix 
   nclass <- ncol(PfbyI) # number of profiles 
-
+  
   
   #li_0 - item intercept, list with nitems length 
   li_0 <- rep(c("NA"), n_items)
   for (i in 1:n_items){
     li_0[i]<-paste('l',i,'I', sep='')
   }
-
+  
   item_intercepts <- li_0
   #li_1 - item main effect, list with nitems length 
   li_1 <- rep(c("NA"), n_items)
@@ -54,32 +54,32 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   ls_1_cumul[,4] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],sep='')
   
   
-##################################################################################################################################  
+  ##################################################################################################################################  
   ls_0_unique <-unique(ls_0)
   ls_1_unique <-unique(ls_1)
-
   
-    
-    
-    Reparm<-array(rep(0,n_items*nclass*(scale.num)),dim = c(n_items,nclass,(scale.num))) # placeholder for the loop results 
-
-    
-    for (loops in 1:nstep){
-      for(loopi in 1:n_items){
-        for(loopc in 1:nclass){
-          Reparm[loopi,loopc,1]<-paste('  PImat[',loopi,',',loopc,'][1]=0;\n',sep='')
-          Reparm[loopi,loopc,loops+1]<-paste('  PImat[',loopi,',',loopc,'][',loops+1,']=',li_0[loopi],
-                                             '+', li_1[loopi], '*', PfbyI[loopi,loopc], 
-                                             "+" ,ls_0_cumul[loopi,loops],
-                                             "+(" ,ls_1_cumul[loopi,loops],')*', PfbyI[loopi,loopc],';\n',sep='')
-        }
-        
+  
+  
+  
+  Reparm<-array(rep(0,n_items*nclass*(scale.num)),dim = c(n_items,nclass,(scale.num))) # placeholder for the loop results 
+  
+  
+  for (loops in 1:nstep){
+    for(loopi in 1:n_items){
+      for(loopc in 1:nclass){
+        Reparm[loopi,loopc,1]<-paste('  PImat[',loopi,',',loopc,'][1]=0;\n',sep='')
+        Reparm[loopi,loopc,loops+1]<-paste('  PImat[',loopi,',',loopc,'][',loops+1,']=',li_0[loopi],
+                                           '+', li_1[loopi], '*', PfbyI[loopi,loopc], 
+                                           "+" ,ls_0_cumul[loopi,loops],
+                                           "+(" ,ls_1_cumul[loopi,loops],')*', PfbyI[loopi,loopc],';\n',sep='')
       }
-    }   
-    
-    
+      
+    }
+  }   
+  
+  
   # build a Frankenstein 
-    
+  
   Modelcontainer<-paste('   vector[Nc] contributionsC;\n','    vector[Ni] contributionsI;\n\n',sep='')
   Parmprior<-paste(c(paste('   //Prior\n'),
                      paste( li_0,'~normal(0,2)',';\n'),
@@ -122,7 +122,7 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
                      '}\n')
                    ,collapse='')
   
-
+  
   
   #Reparameter Specification
   
@@ -136,39 +136,34 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   model.spec<-model.spec[!startsWith(str_remove_all(model.spec," "),"~")]
   
   generatedQuantities.spec<-'
-  \n
   generated quantities {
-  vector[Ni] log_lik[Np];
   vector[Ni] contributionsI;
-  matrix[Ni,Nc] contributionsIC;
   matrix[Np,Nc] contributionsPC;
   //Posterior
   for (iterp in 1:Np){
     for (iterc in 1:Nc){
       for (iteri in 1:Ni){
         contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
-        contributionsIC[iteri,iterc]=log(Vc[iterc])+contributionsI[iteri];
-        log_lik[iterp,iteri]=log_sum_exp(contributionsIC[iteri,]);
       }
       contributionsPC[iterp,iterc]=prod(exp(contributionsI));
     }
   }
-  }
+}
   '
-  if (.Platform$OS.type == "unix") {
-    filename = paste(paste(save.path,save.name,sep='/'),'.stan',sep='')
-  }else{
-    filename = paste(paste(save.path,save.name,sep='\\'),'.stan',sep='')
-  }
-  
-  sink(file= filename,append=FALSE)
-  cat(
-    paste(c('   ',
-            data.spec,parm.spec,transparm.spec,model.spec,generatedQuantities.spec)
-    ))
-  sink(NULL)
-  
-  }
+if (.Platform$OS.type == "unix") {
+  filename = paste(paste(save.path,save.name,sep='/'),'.stan',sep='')
+}else{
+  filename = paste(paste(save.path,save.name,sep='\\'),'.stan',sep='')
+}
+
+sink(file= filename,append=FALSE)
+cat(
+  paste(c('   ',
+          data.spec,parm.spec,transparm.spec,model.spec,generatedQuantities.spec)
+  ))
+sink(NULL)
+
+}
 
 
 
