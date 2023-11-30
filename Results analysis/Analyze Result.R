@@ -5,39 +5,46 @@ library(ggplot2)
 library(reshape2) 
 library(loo)
 
-rrdm=summary(estimated_rrdm)$summary
-nrdm=summary(estimated_nrdm)$summary
-rsdm=summary(estimated_rsdm)$summary
+#rrdm=summary(estimated_rrdm)$summary
+#nrdm=summary(estimated_nrdm)$summary
+#rsdm=summary(estimated_rsdm)$summary
+
+rrdm <- read.csv("rrdm_18Oct2023.csv")
 
 # For RRDM computing item probabilities
-item = data.frame(cbind(rrdm[c(17:56),1],rrdm[c(57:96),1]))
-step = data.frame(cbind(rrdm[c(97:100),1], rrdm[c(101:104),1], rrdm[c(105:108),1], rrdm[c(109:112),1]))
-colnames(item) = c("li_I","li_M")
-colnames(step) = c("ls_1", "ls_2", "ls_3", "ls_4")
-export(item, "item.xlsx")
-export(step, "step.xlsx")
+item <- data.frame(cbind(rrdm[c(17:56),2],rrdm[c(57:96),2]))
+step <- data.frame(cbind(rrdm[c(97:100),2], rrdm[c(101:104),2], rrdm[c(105:108),2], rrdm[c(109:112),2]))
+colnames(item) <- c("li_I","li_M")
+colnames(step) <- c("ls_1", "ls_2", "ls_3", "ls_4")
+#export(item, "item.xlsx")
+#export(step, "step.xlsx")
 
+# item: rows item number, col 1 - intercept, col 2 - main effect 
+# step: rows dimensions, col - step number 
+# expand the step dataframe, so that every step parameter is repeated 10 times
+step <- step[rep(seq_len(nrow(step)), each = 10), ]
 
 t=matrix(NA,40,5)
-k=1
+k=1 # the the k=1, these profiles have an attribute
 for(i in 1:40) {
-  t2=exp((item[i,1]*k+item[i,2])+step[1,1])
-  t3=exp(2*(item[i,1]*k+item[i,2])+step[1,1]+step[2,1])
-  t4=exp(3*(item[i,1]*k+item[i,2])+step[1,1]+step[2,1]+step[3,1])
-  t5=exp(4*(item[i,1]*k+item[i,2])+step[1,1]+step[2,1]+step[3,1]+step[4,1])
+  t2=exp((item[i,2]*k+item[i,1])+step[i,1]) # *k multiply the main effect by 1 or 0
+  t3=exp(2*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]) # step[i,2] - second step for each item
+  t4=exp(3*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]+step[i,3]) # item[i,2] - item main effect
+  t5=exp(4*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]+step[i,3]+step[i,4]) # item[i,1] - item intercept
   t6=1+t2+t3+t4+t5
   t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
-
 t1=t
 
+# clearing the t matrix to avoid an accidental mix up
+# change the k to 0, no latent attribute 
 t=matrix(NA,40,5)
 k=0
 for(i in 1:40) {
-  t2=exp((item[i,1]*k+item[i,2])-step[1,1])
-  t3=exp(2*(item[i,1]*k+item[i,2])-step[1,1]-step[2,1])
-  t4=exp(3*(item[i,1]*k+item[i,2])-step[1,1]-step[2,1]-step[3,1])
-  t5=exp(4*(item[i,1]*k+item[i,2])-step[1,1]-step[2,1]-step[3,1]-step[4,1])
+  t2=exp((item[i,2]*k+item[i,1])+step[i,1]) 
+  t3=exp(2*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]) 
+  t4=exp(3*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]+step[i,3]) 
+  t5=exp(4*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]+step[i,3]+step[i,4]) 
   t6=1+t2+t3+t4+t5
   t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
@@ -62,13 +69,13 @@ summary(rrdm.t)
 
 dfm <- melt(rrdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
 
-item=subset(dfm,item=="1")
+item=subset(dfm,item=="13")
 
 p<-ggplot(item, aes(x=variable,y=value,group=class)) +
   geom_line(aes(color=class))+
   geom_point(aes(color=class))+
   theme_light()+
-  ggtitle("Probability to select a response option (item 1)")+
+  ggtitle("Probability to select a response option (item 13)")+
   xlab("Response options")+
   ylab("Probability")
 p
@@ -251,8 +258,8 @@ print(loo_3)
 
 
 
-contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T) # returns a matrix with one column per chain and an additional column for all chains combined.
-# [,3] specifies two chains + the combined one, 901 rows, 16 columns
+contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
+contributionsPC1 <-read.csv("ContributionsPC_RRDM.csv")
 A_RRDM=unlist(lapply(1:901,function(x){which.max(contributionsPC1[x,])}))
 
 contributionsPC2<-matrix(get_posterior_mean(estimated_nrdm_ordmdat,pars = c("contributionsPC"))[,3],901,16,byrow = T)
@@ -260,6 +267,7 @@ A_RSDM=unlist(lapply(1:901,function(x){which.max(contributionsPC2[x,])}))
 
 contributionsPC3<-matrix(get_posterior_mean(estimated_nrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
 A_NRDM=unlist(lapply(1:901,function(x){which.max(abs(contributionsPC3[x,]))}))
+
 
 
 
@@ -277,16 +285,11 @@ with(da, table(A_RSDM,A_RRDM))
 p =ggplot(t, aes(x=V1, fill=as.factor(t))) +  geom_bar(stat="count")+geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]))+
   scale_fill_manual(values=c("#999999", "#E69F00"),
                     name="Classification Agreement", labels=c("Different", "Same"))+
-xlab("Attribute Profiles") + ylab("Number of Examinees") + theme(legend.position="bottom")+ 
+  xlab("Attribute Profiles") + ylab("Number of Examinees") + theme(legend.position="bottom")+ 
   scale_x_discrete(labels=c("0000" ,"0001" ,"0010" ,"0011", "0100", "0101" ,"0110" ,"0111", "1000", "1001", "1010", "1011", "1100", "1101" ,"1110", "1111"))
-                                                                                                            
+
 p
 
 ggsave("filename.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
 
-# Extract class definition
-nc=4
-temp.table.col<-unique(apply(combn(rep(c(0,1),nc),nc),2,function(x){paste(x,collapse = "")}))
-temp.table.col<-temp.table.col[order(temp.table.col)]
-temp.table.col
 
