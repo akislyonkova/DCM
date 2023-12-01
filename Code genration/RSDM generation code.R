@@ -34,8 +34,8 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   #creating a cumulative matrix with a sum of "-" step intercepts 
   ls_0_cumul <- ls_0
   ls_0_cumul[,2] <- paste(ls_0[,1],'+',ls_0[,2],sep='')
-  ls_0_cumul[,3] <- paste(ls_0[,1],'+',ls_0[,2],'-',ls_0[,3],sep='')
-  ls_0_cumul[,4] <- paste(ls_0[,1],'+',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],sep='')
+  ls_0_cumul[,3] <- paste(ls_0[,1],'+',ls_0[,2],'+',ls_0[,3],sep='')
+  ls_0_cumul[,4] <- paste(ls_0[,1],'+',ls_0[,2],'+',ls_0[,3],'+',ls_0[,4],sep='')
   
   #ls_1 - step main effects , matrix with nitems by nsteps dimensions
   ls_1 <- matrix("NA", n_items,nstep)
@@ -171,27 +171,3 @@ Q=matrix(c(rep(c(1,0,0,0),10),rep(c(0,1,0,0),10),rep(c(0,0,1,0),10),rep(c(0,0,0,
 RSDM(Q,5)
 
 
-#n_attr<-dim(Q)[2]
-#PS<-t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE)))  
-#PfbyI<-Q %*% PS  
-
-
-
-
-
-
-
-
-
-
-# After generation needs to:
-# 1. change the priors of main effects to 1.5,2
-# 2. Change int Y[Np, Ni];
-# 3. change generated quantities
-
-
-# Extract class definition
-#n_attr=4
-#temp.table.col<-unique(apply(combn(rep(c(0,1),n_attr),n_attr),2,function(x){paste(x,collapse = "")}))
-#temp.table.col<-temp.table.col[order(temp.table.col)]
-#temp.table.col
