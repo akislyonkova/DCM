@@ -262,7 +262,7 @@ contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributio
 contributionsPC1 <-read.csv("ContributionsPC_RRDM.csv")
 A_RRDM=unlist(lapply(1:901,function(x){which.max(contributionsPC1[x,])}))
 
-contributionsPC2<-matrix(get_posterior_mean(estimated_nrdm_ordmdat,pars = c("contributionsPC"))[,3],901,16,byrow = T)
+contributionsPC2<-matrix(get_posterior_mean(estimated_rsdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
 A_RSDM=unlist(lapply(1:901,function(x){which.max(contributionsPC2[x,])}))
 
 contributionsPC3<-matrix(get_posterior_mean(estimated_nrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
