@@ -151,6 +151,7 @@ p
 # For RSDM computing item probabilities
 
 rsdm <- summary(estimated_rsdm)$summary
+#rsdm <- read.csv("RSDMest_12Dec2023.csv") faster upload without row names 
 items <- data.frame(rsdm[c(17:56),1], rsdm[c(57:96),1])
 steps_i <- data.frame(rsdm[c(97:100),1], rsdm[c(101:104),1],rsdm[c(105:108),1],rsdm[c(109:112),1])
 steps_m <- data.frame(rsdm[c(113:116),1], rsdm[c(117:120),1],rsdm[c(121:124),1],rsdm[c(125:128),1])
