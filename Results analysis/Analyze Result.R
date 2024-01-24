@@ -150,76 +150,57 @@ p
 
 # For RSDM computing item probabilities
 
-rsdm=summary(estimated_rsdm_ordmdat)$summary
-items = data.frame(rsdm[c(17:56),1], rsdm[c(57:96),1])
-steps_i = data.frame(rsdm[c(97:100),1], rsdm[c(101:104),1],rsdm[c(105:108),1],rsdm[c(109:112),1])
-steps_m = data.frame(rsdm[c(113:116),1], rsdm[c(117:120),1],rsdm[c(121:124),1],rsdm[c(125:128),1])
-colnames(items) = c("li_I","li_M")
-colnames(steps_i) = c("lI_step1", "lI_step2", "lI_step3", "lI_step4")
-colnames(steps_m) = c("lM_step1", "lM_step2", "lM_step3", "lM_step4")
+rsdm <- summary(estimated_rsdm)$summary
+items <- data.frame(rsdm[c(17:56),1], rsdm[c(57:96),1])
+steps_i <- data.frame(rsdm[c(97:100),1], rsdm[c(101:104),1],rsdm[c(105:108),1],rsdm[c(109:112),1])
+steps_m <- data.frame(rsdm[c(113:116),1], rsdm[c(117:120),1],rsdm[c(121:124),1],rsdm[c(125:128),1])
+# expand the step main effects and intercept (repeat each row 10 times, # of items)
+steps_i <- steps_i[rep(seq_len(nrow(steps_i)), each = 10), ]
+steps_m <- steps_m[rep(seq_len(nrow(steps_m)), each = 10), ]
+# label the columns 
+colnames(items) <- c("li_I","li_M")
+colnames(steps_i) <- c("lI_step1", "lI_step2", "lI_step3", "lI_step4")
+colnames(steps_m) <- c("lM_step1", "lM_step2", "lM_step3", "lM_step4")
 
-export(items, "items.xlsx")
-export(steps_i, "steps_i.xlsx")
-export(steps_m, "steps_m.xlsx")
-steps_m = read_excel("steps_m.xlsx")
-steps_i = read_excel("steps_i.xlsx")
-
-colnames(items) = c("li_0", "li_1")
-colnames(steps_i) = c("ls_1", "ls_2", "ls_3", "ls_4")
-colnames(steps_m) = c("ls_1", "ls_2", "ls_3", "ls_4")
-
-
-t=matrix(NA,40,5)
-k=1
+t=matrix(NA,40,5)  # crate a null t matrix for calculating the probabilities 
+k=1 # fix the k to 1 to create t matrix for people with the latent trait 
+# loop for calculting the probabilities 
 for(i in 1:40) {
-  t2=exp(((items[i,1]+steps_m[i,1])*k+items[i,2]-steps_i[i,1]))
-  t3=exp(((items[i,1]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]-steps_i[i,1]-steps_i[i,2]))
-  t4=exp(((items[i,1]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,2]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]))
-  t5=exp(((items[i,1]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,2]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]-steps_i[i,4]))
-  t6=1+t2+t3+t4+t5
-  t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+  t2 <- exp(((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1]))
+  t3 <- exp(((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2]))
+  t4 <- exp(((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]))
+  t5 <- exp(((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4]))
+  t6 <- 1+t2+t3+t4+t5
+  t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
-
-(items[1,1]+steps_m[1,1])*1+items[1,2]-steps_i[1,1]
-
-t1=t
-
-t=matrix(NA,40,5)
-k=0
-for(i in 1:40) {
-  t2=exp(((items[i,1]+steps_m[i,1])*k+items[i,2]-steps_i[i,1]))
-  t3=exp(((items[i,1]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]-steps_i[i,1]-steps_i[i,2]))
-  t4=exp(((items[i,1]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,2]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]))
-  t5=exp(((items[i,1]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,2]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]-steps_i[i,4]))
-  t6=1+t2+t3+t4+t5
-  t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
-}
-t0=t
-rsdm.t=rbind(t0,t1)
-
-
+t1 <- t # save the result for people with the latent trait 
+t <- matrix(NA,40,5) # make the base t matrix null again 
+k <- 0 # fix the k to 0 to create t matrix for people without the latent trait 
+# !!!!!!!!!!!!!!!!!!!! run the loop again 
+t0 <- t # save the result for people with the latent trait 
+rsdm.t <- rbind(t0,t1) # combine the results into one matrix 
 
 # Plot
-rsdm.t= round(rsdm.t,4)
-gr = c(rep("no attribute",40),rep("attribute",40),rep("o0",40),rep("o1",40))
-id = c(rep(c(1:40),4))
-rsdm.t = data.frame(cbind(id,gr,rsdm.t))
-colnames(rsdm.t) = c("item","class", "SD", "D", "N", "A", "SA")
+rsdm.t <- round(rsdm.t,4)
+gr <- c(rep("no attribute",40),rep("attribute",40),rep("o0",40),rep("o1",40))
+id <- c(rep(c(1:40),4))
+rsdm.t <- data.frame(cbind(id,gr,rsdm.t))
+colnames(rsdm.t) <- c("item","class", "SD", "D", "N", "A", "SA")
 
 sapply(rsdm.t, class)
-rsdm.t = transform(rsdm.t, SD = as.numeric(as.character(SD)))
-rsdm.t = transform(rsdm.t, D = as.numeric(as.character(D)))
-rsdm.t = transform(rsdm.t, N = as.numeric(as.character(N)))
-rsdm.t = transform(rsdm.t, A = as.numeric(as.character(A)))
-rsdm.t = transform(rsdm.t, SA = as.numeric(as.character(SA)))
+rsdm.t <- transform(rsdm.t, SD = as.numeric(as.character(SD)))
+rsdm.t <- transform(rsdm.t, D = as.numeric(as.character(D)))
+rsdm.t <- transform(rsdm.t, N = as.numeric(as.character(N)))
+rsdm.t <- transform(rsdm.t, A = as.numeric(as.character(A)))
+rsdm.t <- transform(rsdm.t, SA = as.numeric(as.character(SA)))
 summary(rsdm.t)
 
 
 dfm <- melt(rsdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
 
-item=subset(dfm,item=="40")
+item <- subset(dfm,item=="40")
 
-p<-ggplot(item, aes(x=variable,y=value,group=class)) +
+p <- ggplot(item, aes(x=variable,y=value,group=class)) +
   geom_line(aes(color=class))+
   geom_point(aes(color=class))+
   theme_light()+
