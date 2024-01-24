@@ -4,6 +4,7 @@ library(rio)
 library(ggplot2)
 library(reshape2) 
 library(loo)
+library(dplyr)
 
 #rrdm=summary(estimated_rrdm)$summary
 #nrdm=summary(estimated_nrdm)$summary
@@ -167,17 +168,24 @@ t=matrix(NA,40,5)  # crate a null t matrix for calculating the probabilities
 k=1 # fix the k to 1 to create t matrix for people with the latent trait 
 # loop for calculting the probabilities 
 for(i in 1:40) {
-  t2 <- exp(((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1]))
-  t3 <- exp(((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2]))
-  t4 <- exp(((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]))
-  t5 <- exp(((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4]))
+  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
+  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
+  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
+  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
   t6 <- 1+t2+t3+t4+t5
   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
 t1 <- t # save the result for people with the latent trait 
 t <- matrix(NA,40,5) # make the base t matrix null again 
 k <- 0 # fix the k to 0 to create t matrix for people without the latent trait 
-# !!!!!!!!!!!!!!!!!!!! run the loop again 
+for(i in 1:40) {
+  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
+  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
+  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
+  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
+  t6 <- 1+t2+t3+t4+t5
+  t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+}
 t0 <- t # save the result for people with the latent trait 
 rsdm.t <- rbind(t0,t1) # combine the results into one matrix 
 
@@ -187,15 +195,8 @@ gr <- c(rep("no attribute",40),rep("attribute",40),rep("o0",40),rep("o1",40))
 id <- c(rep(c(1:40),4))
 rsdm.t <- data.frame(cbind(id,gr,rsdm.t))
 colnames(rsdm.t) <- c("item","class", "SD", "D", "N", "A", "SA")
-
-sapply(rsdm.t, class)
-rsdm.t <- transform(rsdm.t, SD = as.numeric(as.character(SD)))
-rsdm.t <- transform(rsdm.t, D = as.numeric(as.character(D)))
-rsdm.t <- transform(rsdm.t, N = as.numeric(as.character(N)))
-rsdm.t <- transform(rsdm.t, A = as.numeric(as.character(A)))
-rsdm.t <- transform(rsdm.t, SA = as.numeric(as.character(SA)))
+rsdm.t[,3:7] <- sapply(rsdm.t[,3:7],as.numeric) # change the rype of var for response option probabilities 
 summary(rsdm.t)
-
 
 dfm <- melt(rsdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
 
