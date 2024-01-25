@@ -200,16 +200,24 @@ summary(rsdm.t)
 
 dfm <- melt(rsdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
 
-item <- subset(dfm,item=="40")
-
-p <- ggplot(item, aes(x=variable,y=value,group=class)) +
-  geom_line(aes(color=class))+
-  geom_point(aes(color=class))+
-  theme_light()+
-  ggtitle("Probability to select a response option (item 40)")+
-  xlab("Response options")+
-  ylab("Probability")
-p
+path = file.path(getwd(), 'plots/')
+dir.create(path)
+# save the plots for every item
+for (i in 1:40){
+  item <- subset(dfm, item==i) # subsetting the melted dataframe 
+  p <- ggplot(item, aes(x=variable,y=value,group=class)) + # creates a ggplot 
+    item <- subset(dfm,item=="40")
+  p <- ggplot(item, aes(x=variable,y=value,group=class)) +
+    geom_line(aes(color=class))+
+    geom_point(aes(color=class))+
+    theme_light()+
+    ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle 
+    xlab("Response options")+
+    ylab("Probability")
+  filename <- paste("item_", i, ".png", sep = "") # creates the file name for each plot 
+  filepath = file.path(path, filename) # creates the path for each plot 
+  ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
+}
 
 
 
