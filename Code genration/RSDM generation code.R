@@ -117,7 +117,7 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
                      simplex[Nc] Vc;\n ',
                      paste('real',li_0,';\n '),
                      paste('real<lower=0>',li_1,';\n '),
-                     paste('real<lower=0>',ls_0_unique,';\n '),
+                     paste('real<upper=0>',ls_0_unique,';\n '),
                      paste('real<lower=0>',ls_1_unique,';\n '),
                      '}\n')
                    ,collapse='')
