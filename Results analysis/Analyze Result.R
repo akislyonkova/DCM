@@ -60,26 +60,25 @@ rrdm.t = data.frame(cbind(id,gr,rrdm.t))
 colnames(rrdm.t) = c("item","class", "SD", "D", "N", "A", "SA")
 
 sapply(rrdm.t, class)
-rrdm.t = transform(rrdm.t, SD = as.numeric(as.character(SD)))
-rrdm.t = transform(rrdm.t, D = as.numeric(as.character(D)))
-rrdm.t = transform(rrdm.t, N = as.numeric(as.character(N)))
-rrdm.t = transform(rrdm.t, A = as.numeric(as.character(A)))
-rrdm.t = transform(rrdm.t, SA = as.numeric(as.character(SA)))
+rrdm.t[,3:7] <- sapply(rrdm.t[,3:7],as.numeric)
 summary(rrdm.t)
 
 
 dfm <- melt(rrdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
-
-item=subset(dfm,item=="13")
-
-p<-ggplot(item, aes(x=variable,y=value,group=class)) +
-  geom_line(aes(color=class))+
-  geom_point(aes(color=class))+
-  theme_light()+
-  ggtitle("Probability to select a response option (item 13)")+
-  xlab("Response options")+
-  ylab("Probability")
-p
+# save the plots for every item
+for (i in 1:40){
+  item <- subset(dfm,item==i)
+  p <- ggplot(item, aes(x=variable,y=value,group=class)) +
+    geom_line(aes(color=class))+
+    geom_point(aes(color=class))+
+    theme_light()+
+    ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle 
+    xlab("Response options")+
+    ylab("Probability")
+  filename <- paste("item_", i, ".png", sep = "") # creates the file name for each plot 
+  filepath = file.path(path, filename) # creates the path for each plot 
+  ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
+}
 
 
 # For NRDM computing item probabilities
@@ -88,8 +87,6 @@ maineff = data.frame(nrdm[c(17:56),1], nrdm[c(57:96),1], nrdm[c(97:136),1],nrdm[
 intercepts = data.frame(nrdm[c(177:216),1], nrdm[c(217:256),1],nrdm[c(257:296),1],nrdm[c(297:336),1]) # extracting step parameters for each item's intercept 
 colnames(maineff) = c("lM_step1", "lM_step2", "lM_step3", "lM_step4") # l - lambda, M - main effect 
 colnames(intercepts) = c("lI_step1", "lI_step2", "lI_step3", "lI_step4") # I - intercept 
-export(maineff, "maineff.xlsx")
-export(intercepts, "intercepts.xlsx")
 
 t=matrix(NA,40,5)
 k=1
@@ -126,26 +123,28 @@ nrdm.t = data.frame(cbind(id,gr,nrdm.t))
 colnames(nrdm.t) = c("item","class", "SD", "D", "N", "A", "SA")
 
 sapply(nrdm.t, class)
-nrdm.t = transform(nrdm.t, SD = as.numeric(as.character(SD)))
-nrdm.t = transform(nrdm.t, D = as.numeric(as.character(D)))
-nrdm.t = transform(nrdm.t, N = as.numeric(as.character(N)))
-nrdm.t = transform(nrdm.t, A = as.numeric(as.character(A)))
-nrdm.t = transform(nrdm.t, SA = as.numeric(as.character(SA)))
+nrdm.t[,3:7] <- sapply(nrdm.t[,3:7],as.numeric)
 summary(nrdm.t)
-
 
 dfm <- melt(nrdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
 
-item=subset(dfm,item=="40")
+path = file.path(getwd(), 'plots/')
+dir.create(path)
+# save the plots for every item
+for (i in 1:40){
+    item <- subset(dfm,item==i)
+    p <- ggplot(item, aes(x=variable,y=value,group=class)) +
+        geom_line(aes(color=class))+
+        geom_point(aes(color=class))+
+        theme_light()+
+        ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle 
+        xlab("Response options")+
+        ylab("Probability")
+  filename <- paste("item_", i, ".png", sep = "") # creates the file name for each plot 
+  filepath = file.path(path, filename) # creates the path for each plot 
+  ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
+}
 
-p<-ggplot(item, aes(x=variable,y=value,group=class)) +
-  geom_line(aes(color=class))+
-  geom_point(aes(color=class))+
-  theme_light()+
-  ggtitle("Probability to select a response option (item 40)")+
-  xlab("Response options")+
-  ylab("Probability")
-p
 
 
 
@@ -204,9 +203,7 @@ path = file.path(getwd(), 'plots/')
 dir.create(path)
 # save the plots for every item
 for (i in 1:40){
-  item <- subset(dfm, item==i) # subsetting the melted dataframe 
-  p <- ggplot(item, aes(x=variable,y=value,group=class)) + # creates a ggplot 
-    item <- subset(dfm,item=="40")
+  item <- subset(dfm,item==i)
   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
     geom_line(aes(color=class))+
     geom_point(aes(color=class))+
@@ -262,8 +259,13 @@ A_NRDM=unlist(lapply(1:901,function(x){which.max(abs(contributionsPC3[x,]))}))
 
 
 
+# Plots for the profile overlap 
+# Quick look at the results 
 summary(as.factor(A_RRDM))
 summary(as.factor(A_RSDM))
+summary(as.factor(A_NRDM))
+
+#RRDM and RSDM 
 sum(A_RRDM==A_RSDM)/901
 t = (as.factor(A_RRDM)==as.factor(A_RSDM))*1
 t = as.data.frame(cbind(as.factor(A_RSDM),t)) 
@@ -273,14 +275,17 @@ da = cbind(A_RSDM,A_RRDM)
 with(da, table(A_RSDM,A_RRDM)) 
 
 
-p =ggplot(t, aes(x=V1, fill=as.factor(t))) +  geom_bar(stat="count")+geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]))+
-  scale_fill_manual(values=c("#999999", "#E69F00"),
-                    name="Classification Agreement", labels=c("Different", "Same"))+
-  xlab("Attribute Profiles") + ylab("Number of Examinees") + theme(legend.position="bottom")+ 
+p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
+  geom_bar(stat="count") +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
+  scale_fill_manual(values=c("#999999", "#E69F00"),name="Classification Agreement", labels=c("Different", "Same"))+
+  xlab("Attribute Profiles") + 
+  ylab("Number of Examinees") + 
+  theme(legend.position="bottom")+ 
   scale_x_discrete(labels=c("0000" ,"0001" ,"0010" ,"0011", "0100", "0101" ,"0110" ,"0111", "1000", "1001", "1010", "1011", "1100", "1101" ,"1110", "1111"))
 
 p
 
-ggsave("filename.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
+ggsave("RRDM_RSDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
 
 
