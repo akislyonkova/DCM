@@ -33,9 +33,9 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   }
   #creating a cumulative matrix with a sum of "-" step intercepts 
   ls_0_cumul <- ls_0
-  ls_0_cumul[,2] <- paste(ls_0[,1],'+',ls_0[,2],sep='')
-  ls_0_cumul[,3] <- paste(ls_0[,1],'+',ls_0[,2],'+',ls_0[,3],sep='')
-  ls_0_cumul[,4] <- paste(ls_0[,1],'+',ls_0[,2],'+',ls_0[,3],'+',ls_0[,4],sep='')
+  ls_0_cumul[,2] <- paste(ls_0[,1],'-',ls_0[,2],sep='')
+  ls_0_cumul[,3] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],sep='')
+  ls_0_cumul[,4] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],sep='')
   
   #ls_1 - step main effects , matrix with nitems by nsteps dimensions
   ls_1 <- matrix("NA", n_items,nstep)
@@ -70,7 +70,7 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
         Reparm[loopi,loopc,1]<-paste('  PImat[',loopi,',',loopc,'][1]=0;\n',sep='')
         Reparm[loopi,loopc,loops+1]<-paste('  PImat[',loopi,',',loopc,'][',loops+1,']=',li_0[loopi],
                                            '+', li_1[loopi], '*', PfbyI[loopi,loopc], 
-                                           "+" ,ls_0_cumul[loopi,loops],
+                                           "-" ,ls_0_cumul[loopi,loops],
                                            "+(" ,ls_1_cumul[loopi,loops],')*', PfbyI[loopi,loopc],';\n',sep='')
       }
       
@@ -117,7 +117,7 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
                      simplex[Nc] Vc;\n ',
                      paste('real',li_0,';\n '),
                      paste('real<lower=0>',li_1,';\n '),
-                     paste('real<upper=0>',ls_0_unique,';\n '),
+                     paste('real<lower=0>',ls_0_unique,';\n '),
                      paste('real<lower=0>',ls_1_unique,';\n '),
                      '}\n')
                    ,collapse='')
