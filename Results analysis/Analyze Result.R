@@ -11,6 +11,16 @@ library(dplyr)
 #rsdm=summary(estimated_rsdm)$summary
 
 
+disc_data <- read.csv("disc_dat.csv")
+disc_data[,1:40] <- sapply(disc_data[,1:40],as.character)
+
+
+for (i in 1:10){
+  i_freq <- round((table(disc_data[,i])/901)*100,2)
+  print(i_freq)
+}
+
+
 
 # For RRDM computing item probabilities
 item <- data.frame(cbind(rrdm[c(17:56),2],rrdm[c(57:96),2]))
@@ -239,7 +249,7 @@ print(loo_2)
 
 
 # RSDM
-log_lik_3 <- extract(estimated_rsdm_ordmdat, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
+log_lik_3 <- extract(rsdm, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
 r_eff3 <- relative_eff(exp(log_lik_3)) 
 loo_3 <- loo(log_lik_3, r_eff = r_eff3)
 waic(log_lik_3)
@@ -288,5 +298,31 @@ p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
 p
 
 ggsave("RRDM_RSDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
+
+
+
+sim1 <- read.table("RRDMsim1.txt") 
+sim2 <- read.table("RRDMsim2.txt") 
+sim3 <- read.table("RRDMsim3.txt") 
+sim4 <- read.table("RRDMsim4.txt") 
+sim5 <- read.table("RRDMsim5.txt") 
+sim6 <- read.table("RRDMsim6.txt") 
+sim7 <- read.table("RRDMsim7.txt")
+sim8 <- read.table("RRDMsim8.txt") 
+sim9 <- read.table("RRDMsim9.txt") 
+sim10 <- read.table("RRDMsim10.txt") 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
