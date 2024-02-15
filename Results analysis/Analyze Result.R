@@ -258,7 +258,7 @@ print(loo_3)
 
 
 contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
-contributionsPC1 <-read.csv("ContributionsPC_RRDM.csv")
+#contributionsPC1 <-read.csv("ContributionsPC_RRDM.csv")
 A_RRDM=unlist(lapply(1:901,function(x){which.max(contributionsPC1[x,])}))
 
 contributionsPC2<-matrix(get_posterior_mean(estimated_rsdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
@@ -300,7 +300,31 @@ p
 ggsave("RRDM_RSDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
 
 
+#RRDM and NSDM 
+sum(A_RRDM==A_NRDM)/901
+t = (as.factor(A_RRDM)==as.factor(A_NRDM))*1
+t = as.data.frame(cbind(as.factor(A_NRDM),t)) 
+t = transform(t, V1 = as.factor(V1))
 
+da = cbind(A_NRDM,A_RRDM)
+with(da, table(A_NRDM,A_RRDM)) 
+
+
+p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
+  geom_bar(stat="count") +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
+  scale_fill_manual(values=c("#999999", "#E69F00"),name="Classification Agreement", labels=c("Different", "Same"))+
+  xlab("Attribute Profiles") + 
+  ylab("Number of Examinees") + 
+  theme(legend.position="bottom")+ 
+  scale_x_discrete(labels=c("0000" ,"0001" ,"0010" ,"0011", "0100", "0101" ,"0110" ,"0111", "1000", "1001", "1010", "1011", "1100", "1101" ,"1110", "1111"))
+
+p
+
+ggsave("RRDM_NRDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
+
+
+# Simulation part 
 sim1 <- read.table("RRDMsim1.txt") 
 sim2 <- read.table("RRDMsim2.txt") 
 sim3 <- read.table("RRDMsim3.txt") 
