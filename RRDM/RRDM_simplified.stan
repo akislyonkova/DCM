@@ -4,6 +4,7 @@ data{
   int Nc;
   int Ns;
   int Nr;
+  int Nd;
   int Y[Np, Ni];
   int W[Ni, Nc];
 }
@@ -12,22 +13,30 @@ parameters{
   simplex[Nc] Vc;
   vector <lower=0> [Ni] li_1;
   vector [Ni] li_0;
-  vector <lower=0> [Nr] ls_0;
+  matrix <lower=0> [Ns,Nd] ls_0;
 }
 
 transformed parameters{
   vector[Ns] PImat[Ni, Nc];
   
+  matrix[Nstep, Nc] ls_0_cumul_t;
+  
   real current_sum;
   real new_sum;
   real Wmat;
+  
+  vector[Nc] ls_0_col;
+  matrix[Ns, Nd] ls_0_cumul_t;
+  real Wmat;
+  
+  ls_0_cumul_t = ls_0';
   
   current_sum = 0;
   
   for (pf in 1:Nc) {
     for (item in 1:Ni) {
       for (step in 1:Nr){
-        new_sum = ls_0[step];
+        new_sum = ls_0_cumul_t[step];
         current_sum = current_sum + new_sum;
         PImat[item, pf, 1] = 0;
         Wmat = W[item,pf];
