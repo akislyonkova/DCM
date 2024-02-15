@@ -313,16 +313,27 @@ with(da, table(A_NRDM,A_RRDM))
 p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
   geom_bar(stat="count") +
   geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
-  scale_fill_manual(values=c("#999999", "#E69F00"),name="Classification Agreement", labels=c("Different", "Same"))+
+  scale_fill_manual(values=c("#6699FF", "#99CCff"),
+                    name="Classification Agreement", 
+                    labels=c("Different", "Same"))+
   xlab("Attribute Profiles") + 
   ylab("Number of Examinees") + 
   theme(legend.position="bottom")+ 
-  scale_x_discrete(labels=c("0000" ,"0001" ,"0010" ,"0011", "0100", "0101" ,"0110" ,"0111", "1000", "1001", "1010", "1011", "1100", "1101" ,"1110", "1111"))
+  scale_x_discrete(labels=c("0000", "0001",
+                            "0010", "0011", 
+                            "0100", "0101",
+                            "0110", "0111", 
+                            "1000", "1001", 
+                            "1010", "1011", 
+                            "1100", "1101",
+                            "1110", "1111"))+
+  theme_light()
+  
 
 p
 
-ggsave("RRDM_NRDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
-
+ggsave("RRDM_NRDM_profile_overlap.png",plot = p,width = 10, height = 6, dpi = 500, units = "in", device='png')
+getwd()
 
 # Simulation part 
 sim1 <- read.table("RRDMsim1.txt") 
