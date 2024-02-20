@@ -333,20 +333,29 @@ p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
 p
 
 ggsave("RRDM_NRDM_profile_overlap.png",plot = p,width = 10, height = 6, dpi = 500, units = "in", device='png')
-getwd()
+
 
 # Simulation part 
-sim1 <- read.table("RRDMsim1.txt") 
-sim2 <- read.table("RRDMsim2.txt") 
-sim3 <- read.table("RRDMsim3.txt") 
-sim4 <- read.table("RRDMsim4.txt") 
-sim5 <- read.table("RRDMsim5.txt") 
-sim6 <- read.table("RRDMsim6.txt") 
-sim7 <- read.table("RRDMsim7.txt")
-sim8 <- read.table("RRDMsim8.txt") 
-sim9 <- read.table("RRDMsim9.txt") 
-sim10 <- read.table("RRDMsim10.txt") 
+rrdm <- read.table("RRDMest_15Nov2023.txt") # uploading the original estimated model 
+rrdm_param <- data.frame(rrdm[c(rows_start:rows_end),1]) # selecting the parameters 
 
+n_sim <- 10  # number of datasets on simulated data
+rows_start <- 17 # location of the first parameter 
+rows_end <- 112  # location of the second parameter 
+
+
+sim_param <- NA # placeholder for uploading the simulated parameters 
+for (i in 1:n_sim) { # loop for uploading and selecting the correct parameters for n simulations 
+  sim_name <- sprintf("RRDMsim%i.txt", i)
+  sim_param <- cbind(sim_param,read.table(sim_name)[c(rows_start:rows_end),1])
+}
+sim_param <- sim_param[,-1] # deleting the first NA column 
+
+rrdm_param_n <- data.frame(rep(rrdm_param, n_sim)) # duplicating the columns with the original parameters
+sim_param_dif <- rrdm_param_n - sim_param # calulating the differences 
+bias <- data.frame(rowSums(sim_param_dif)/n_sim) # calculating raw bias 
+
+write.table(bias, "RRDM_bias.txt") # saving the results 
 
 
 
