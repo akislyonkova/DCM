@@ -23,8 +23,8 @@ for (i in 1:10){
 
 
 # For RRDM computing item probabilities
-item <- data.frame(cbind(rrdm[c(17:56),2],rrdm[c(57:96),2]))
-step <- data.frame(cbind(rrdm[c(97:100),2], rrdm[c(101:104),2], rrdm[c(105:108),2], rrdm[c(109:112),2]))
+item <- data.frame(cbind(rrdm[c(17:56),1],rrdm[c(57:96),1]))
+step <- data.frame(cbind(rrdm[c(97:100),1], rrdm[c(101:104),1], rrdm[c(105:108),1], rrdm[c(109:112),1]))
 colnames(item) <- c("li_I","li_M")
 colnames(step) <- c("ls_1", "ls_2", "ls_3", "ls_4")
 #export(item, "item.xlsx")
@@ -93,10 +93,11 @@ for (i in 1:40){
 
 # For NRDM computing item probabilities
 
-maineff = data.frame(nrdm[c(17:56),1], nrdm[c(57:96),1], nrdm[c(97:136),1],nrdm[c(137:176),1]) # extracting step parameters for each item's main effect 
-intercepts = data.frame(nrdm[c(177:216),1], nrdm[c(217:256),1],nrdm[c(257:296),1],nrdm[c(297:336),1]) # extracting step parameters for each item's intercept 
+intercepts = data.frame(nrdm[c(17:56),1], nrdm[c(57:96),1], nrdm[c(97:136),1],nrdm[c(137:176),1]) # extracting step parameters for each item's main effect 
+maineff = data.frame(nrdm[c(177:216),1], nrdm[c(217:256),1],nrdm[c(257:296),1],nrdm[c(297:336),1]) # extracting step parameters for each item's intercept
 colnames(maineff) = c("lM_step1", "lM_step2", "lM_step3", "lM_step4") # l - lambda, M - main effect 
 colnames(intercepts) = c("lI_step1", "lI_step2", "lI_step3", "lI_step4") # I - intercept 
+
 
 t=matrix(NA,40,5)
 k=1
