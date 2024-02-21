@@ -340,13 +340,13 @@ ggsave("RRDM_NRDM_profile_overlap.png",plot = p,width = 10, height = 6, dpi = 50
 
 
 # Simulation part 
-rrdm <- read.table("RRDMest_15Nov2023.txt") # uploading the original estimated model 
-rrdm_param <- data.frame(rrdm[c(rows_start:rows_end),1]) # selecting the parameters 
 
 n_sim <- 10  # number of datasets on simulated data
 rows_start <- 17 # location of the first parameter 
 rows_end <- 112  # location of the second parameter 
 
+rrdm <- read.table("RRDMest_15Nov2023.txt") # uploading the original estimated model 
+rrdm_param <- data.frame(rrdm[c(rows_start:rows_end),1]) # selecting the parameters 
 
 sim_param <- NA # placeholder for uploading the simulated parameters 
 for (i in 1:n_sim) { # loop for uploading and selecting the correct parameters for n simulations 
@@ -355,13 +355,40 @@ for (i in 1:n_sim) { # loop for uploading and selecting the correct parameters f
 }
 sim_param <- sim_param[,-1] # deleting the first NA column 
 
+# Calculating raw bias
 rrdm_param_n <- data.frame(rep(rrdm_param, n_sim)) # duplicating the columns with the original parameters
 sim_param_dif <- rrdm_param_n - sim_param # calulating the differences 
 bias <- data.frame(rowSums(sim_param_dif)/n_sim) # calculating raw bias 
+colnames(bias) <- "raw_bias"
 
-write.table(bias, "RRDM_bias.txt") # saving the results 
+# write.table(bias, "RRDM_bias.txt") # saving the results 
 
+hist(bias$raw_bias)
+summary(bias[1:10,1]) # intercepts for A1
+summary(bias[11:20,1]) #  intercepts for A2
+summary(bias[21:30,1]) #  intercepts for A3
+summary(bias[31:40,1]) # intercepts for A4
+summary(bias[41:50,1]) # main effects for A1
+summary(bias[51:60,1]) # main effects for A2
+summary(bias[61:70,1]) # main effects for A3
+summary(bias[71:80,1]) # main effects for A4
+summary(bias[81:96,1]) # steps 
 
+# Calculating RMSE
+
+bias$rmse <- NA
+bias$rmse <-sqrt((bias$raw_bias)^2/n_sim)
+hist(bias$rmse)
+
+summary(bias[1:10,2]) # intercepts for A1
+summary(bias[11:20,2]) #  intercepts for A2
+summary(bias[21:30,2]) #  intercepts for A3
+summary(bias[31:40,2]) # intercepts for A4
+summary(bias[41:50,2]) # main effects for A1
+summary(bias[51:60,2]) # main effects for A2
+summary(bias[61:70,2]) # main effects for A3
+summary(bias[71:80,2]) # main effects for A4
+summary(bias[81:96,2]) # steps 
 
 
 
