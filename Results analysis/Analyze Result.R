@@ -10,16 +10,19 @@ library(dplyr)
 #nrdm=summary(estimated_nrdm)$summary
 #rsdm=summary(estimated_rsdm)$summary
 
+n_i <- 40 # number of items 
+n_p <- 901 # number of people
+n_r <- 5 # number of response options
 
 disc_data <- read.csv("disc_dat.csv")
-disc_data[,1:40] <- sapply(disc_data[,1:40],as.character)
+disc_data[,1:n_i] <- sapply(disc_data[,1:n_i],as.character)
 
 
-for (i in 1:10){
-  i_freq <- round((table(disc_data[,i])/901)*100,2)
-  print(i_freq)
+for (i in 1:n_i){
+  print(paste("item №",i, sep = " "))
+  print(round(table(disc_data[,i]),2))
+  print(round(table(disc_data[,i])/n_p*100,2))
 }
-
 
 
 # For RRDM computing item probabilities
@@ -35,9 +38,9 @@ colnames(step) <- c("ls_1", "ls_2", "ls_3", "ls_4")
 # expand the step dataframe, so that every step parameter is repeated 10 times
 step <- step[rep(seq_len(nrow(step)), each = 10), ]
 
-t=matrix(NA,40,5)
+t=matrix(NA,n_i,n_r)
 k=1 # the the k=1, these profiles have an attribute
-for(i in 1:40) {
+for(i in 1:n_i) {
   t2=exp((item[i,2]*k+item[i,1])+step[i,1]) # *k multiply the main effect by 1 or 0
   t3=exp(2*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]) # step[i,2] - second step for each item
   t4=exp(3*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]+step[i,3]) # item[i,2] - item main effect
@@ -49,9 +52,9 @@ t1=t
 
 # clearing the t matrix to avoid an accidental mix up
 # change the k to 0, no latent attribute 
-t=matrix(NA,40,5)
+t=matrix(NA,n_i,n_r)
 k=0
-for(i in 1:40) {
+for(i in 1:n_i) {
   t2=exp((item[i,2]*k+item[i,1])+step[i,1]) 
   t3=exp(2*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]) 
   t4=exp(3*(item[i,2]*k+item[i,1])+step[i,1]+step[i,2]+step[i,3]) 
@@ -64,8 +67,8 @@ rrdm.t =rbind(t0,t1)
 
 # Plot
 rrdm.t= round(rrdm.t,4)
-gr = c(rep("no attribute",40),rep("attribute",40),rep("o0",40),rep("o1",40))
-id = c(rep(c(1:40),4))
+gr = c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
+id = c(rep(c(1:n_i),4))
 rrdm.t = data.frame(cbind(id,gr,rrdm.t))
 colnames(rrdm.t) = c("item","class", "SD", "D", "N", "A", "SA")
 
@@ -76,7 +79,7 @@ summary(rrdm.t)
 
 dfm <- melt(rrdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
 # save the plots for every item
-for (i in 1:40){
+for (i in 1:n_i){
   item <- subset(dfm,item==i)
   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
     geom_line(aes(color=class))+
@@ -99,9 +102,9 @@ colnames(maineff) = c("lM_step1", "lM_step2", "lM_step3", "lM_step4") # l - lamb
 colnames(intercepts) = c("lI_step1", "lI_step2", "lI_step3", "lI_step4") # I - intercept 
 
 
-t=matrix(NA,40,5)
+t=matrix(NA,n_i,n_r)
 k=1
-for(i in 1:40) {
+for(i in 1:n_i) {
   t2=exp(maineff[i,1]*k+intercepts[i,1])
   t3=exp((maineff[i,1]+maineff[i,2])*k+intercepts[i,1]+intercepts[i,2])
   t4=exp((maineff[i,1]+maineff[i,2]+maineff[i,3])*k+intercepts[i,1]+intercepts[i,2]+intercepts[i,3])
@@ -113,9 +116,9 @@ for(i in 1:40) {
 
 t1=t
 
-t=matrix(NA,40,5)
+t=matrix(NA,n_i,n_r)
 k=0
-for(i in 1:40) {
+for(i in 1:n_i) {
   t2=exp(maineff[i,1]*k+intercepts[i,1])
   t3=exp((maineff[i,1]+maineff[i,2])*k+intercepts[i,1]+intercepts[i,2])
   t4=exp((maineff[i,1]+maineff[i,2]+maineff[i,3])*k+intercepts[i,1]+intercepts[i,2]+intercepts[i,3])
@@ -127,9 +130,9 @@ t0=t
 nrdm.t=rbind(t0,t1)
 
 # Plot
-nrdm.t= round(nrdm.t,4)
-gr = c(rep("no attribute",40),rep("attribute",40),rep("o0",40),rep("o1",40))
-id = c(rep(c(1:40),4))
+nrdm.t= round(nrdm.t,n_r)
+gr = c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
+id = c(rep(c(1:n_i),4))
 nrdm.t = data.frame(cbind(id,gr,nrdm.t))
 colnames(nrdm.t) = c("item","class", "SD", "D", "N", "A", "SA")
 
@@ -142,15 +145,15 @@ dfm <- melt(nrdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", 
 path = file.path(getwd(), 'plots/')
 dir.create(path)
 # save the plots for every item
-for (i in 1:40){
-    item <- subset(dfm,item==i)
-    p <- ggplot(item, aes(x=variable,y=value,group=class)) +
-        geom_line(aes(color=class))+
-        geom_point(aes(color=class))+
-        theme_light()+
-        ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle 
-        xlab("Response options")+
-        ylab("Probability")
+for (i in 1:n_i){
+  item <- subset(dfm,item==i)
+  p <- ggplot(item, aes(x=variable,y=value,group=class)) +
+    geom_line(aes(color=class))+
+    geom_point(aes(color=class))+
+    theme_light()+
+    ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle 
+    xlab("Response options")+
+    ylab("Probability")
   filename <- paste("item_", i, ".png", sep = "") # creates the file name for each plot 
   filepath = file.path(path, filename) # creates the path for each plot 
   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
@@ -175,10 +178,10 @@ colnames(items) <- c("li_I","li_M")
 colnames(steps_i) <- c("lI_step1", "lI_step2", "lI_step3", "lI_step4")
 colnames(steps_m) <- c("lM_step1", "lM_step2", "lM_step3", "lM_step4")
 
-t=matrix(NA,40,5)  # crate a null t matrix for calculating the probabilities 
+t=matrix(NA,n_i,n_r)  # crate a null t matrix for calculating the probabilities 
 k=1 # fix the k to 1 to create t matrix for people with the latent trait 
 # loop for calculting the probabilities 
-for(i in 1:40) {
+for(i in 1:n_i) {
   t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
   t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
   t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
@@ -187,9 +190,9 @@ for(i in 1:40) {
   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
 t1 <- t # save the result for people with the latent trait 
-t <- matrix(NA,40,5) # make the base t matrix null again 
+t <- matrix(NA,n_i,n_r) # make the base t matrix null again 
 k <- 0 # fix the k to 0 to create t matrix for people without the latent trait 
-for(i in 1:40) {
+for(i in 1:n_i) {
   t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
   t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
   t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
@@ -202,8 +205,8 @@ rsdm.t <- rbind(t0,t1) # combine the results into one matrix
 
 # Plot
 rsdm.t <- round(rsdm.t,4)
-gr <- c(rep("no attribute",40),rep("attribute",40),rep("o0",40),rep("o1",40))
-id <- c(rep(c(1:40),4))
+gr <- c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
+id <- c(rep(c(1:n_i),4))
 rsdm.t <- data.frame(cbind(id,gr,rsdm.t))
 colnames(rsdm.t) <- c("item","class", "SD", "D", "N", "A", "SA")
 rsdm.t[,3:7] <- sapply(rsdm.t[,3:7],as.numeric) # change the rype of var for response option probabilities 
@@ -214,7 +217,7 @@ dfm <- melt(rsdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", 
 path = file.path(getwd(), 'plots/')
 dir.create(path)
 # save the plots for every item
-for (i in 1:40){
+for (i in 1:n_i){
   item <- subset(dfm,item==i)
   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
     geom_line(aes(color=class))+
@@ -260,13 +263,13 @@ print(loo_3)
 
 contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
 #contributionsPC1 <-read.csv("ContributionsPC_RRDM.csv")
-A_RRDM=unlist(lapply(1:901,function(x){which.max(contributionsPC1[x,])}))
+A_RRDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC1[x,])}))
 
 contributionsPC2<-matrix(get_posterior_mean(estimated_rsdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
-A_RSDM=unlist(lapply(1:901,function(x){which.max(contributionsPC2[x,])}))
+A_RSDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC2[x,])}))
 
 contributionsPC3<-matrix(get_posterior_mean(estimated_nrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
-A_NRDM=unlist(lapply(1:901,function(x){which.max(abs(contributionsPC3[x,]))}))
+A_NRDM=unlist(lapply(1:n_p,function(x){which.max(abs(contributionsPC3[x,]))}))
 
 
 
@@ -278,7 +281,7 @@ summary(as.factor(A_RSDM))
 summary(as.factor(A_NRDM))
 
 #RRDM and RSDM 
-sum(A_RRDM==A_RSDM)/901
+sum(A_RRDM==A_RSDM)/n_p
 t = (as.factor(A_RRDM)==as.factor(A_RSDM))*1
 t = as.data.frame(cbind(as.factor(A_RSDM),t)) 
 t = transform(t, V1 = as.factor(V1))
@@ -302,7 +305,7 @@ ggsave("RRDM_RSDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500
 
 
 #RRDM and NSDM 
-sum(A_RRDM==A_NRDM)/901
+sum(A_RRDM==A_NRDM)/n_p
 t = (as.factor(A_RRDM)==as.factor(A_NRDM))*1
 t = as.data.frame(cbind(as.factor(A_NRDM),t)) 
 t = transform(t, V1 = as.factor(V1))
@@ -329,7 +332,7 @@ p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
                             "1100", "1101",
                             "1110", "1111"))+
   theme_light()
-  
+
 
 p
 
