@@ -377,7 +377,7 @@ summary(bias[81:96,1]) # steps
 # Calculating RMSE
 
 bias$rmse <- NA
-bias$rmse <-sqrt((bias$raw_bias)^2/n_sim)
+bias$rmse <-sqrt((bias$raw_bias^2)/(n_sim-1))
 hist(bias$rmse)
 
 summary(bias[1:10,2]) # intercepts for A1
