@@ -1,19 +1,19 @@
 data{
-  int Np;
-  int Ni;
-  int Nc;
-  int Ns;
-  int Nstep;
-  int Y[Np, Ni];
-  int W[Ni, Nc];
+  int Np;           // number of participants 
+  int Ni;           // number of items 
+  int Nc;           // number of profiles 
+  int Ns;           // number of response options 
+  int Nstep;        // number of steps 
+  int Y[Np, Ni];    // response matrix 
+  int W[Ni, Nc];    // weight matrix (which item measures which class )
 }
 
 parameters{
   simplex[Nc] Vc;
-  vector <lower=0> [Ni] li_1;
-  vector [Ni] li_0;
-  matrix <lower=0> [Nc, Nstep] ls_0;
-  matrix <lower=0> [Nc, Nstep] ls_1;
+  vector [Ni] li_0;                     // vector of global item intercepts
+  vector <lower=0> [Ni] li_1;           // vector of global item main effects 
+  matrix <lower=0> [Nc, Nstep] ls_0;    // matrix of step intercepts
+  matrix <lower=0> [Nc, Nstep] ls_1;    // matrix of step main effects
 }
 
 transformed parameters{
@@ -48,10 +48,10 @@ model {
   vector[Ni] contributionsI;
   
   //Prior
-  li_1 ~ normal(0,20);
-  li_0 ~ normal(0,20);
-  ls_0 [Nc, Nstep] ~ normal(0,20);
-  ls_1 [Nc, Nstep] ~ normal(0,20);
+  li_1 ~ normal(0,2);
+  li_0 ~ normal(0,2);
+  ls_0 [Nc, Nstep] ~ normal(0,2);
+  ls_1 [Nc, Nstep] ~ normal(0,2);
   
   Vc~dirichlet(rep_vector(2.0, Nc)); 
   

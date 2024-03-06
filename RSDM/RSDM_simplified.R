@@ -16,7 +16,14 @@ rsdm_model_simp <- stan_model("RSDM_simplified.stan") # compiles a model into a 
 
 # suggested code to estimate a model
 estimated_rsdm_ordmdat<-sampling(rsdm_model_simp, # specifies the model
-                          data=list(Y=respMatrix, Ns=5, Np=nrow(respMatrix), Ni=ncol(respMatrix), init=list(inilist1,inilist2), Nc=16, W=PfbyI, Nstep=4), # specifies the data
+                          data=list(Y=respMatrix, 
+                                    Ns=5, 
+                                    Np=nrow(respMatrix), 
+                                    Ni=ncol(respMatrix), 
+                                    init=list(inilist1,inilist2), 
+                                    Nc=16, 
+                                    W=PfbyI, 
+                                    Nstep=4), # specifies the data
                           iter=100,chains=1) # specifies the number of chains and iterations
 
 
