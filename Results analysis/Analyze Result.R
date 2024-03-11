@@ -10,9 +10,10 @@ library(dplyr)
 #nrdm=summary(estimated_nrdm)$summary
 #rsdm=summary(estimated_rsdm)$summary
 
-n_i <- 40 # number of items 
+n_i <- 40  # number of items 
 n_p <- 901 # number of people
-n_r <- 5 # number of response options
+n_r <- 5   # number of response options
+n_c <- 16  # number of profiles  
 
 disc_data <- read.csv("disc_dat.csv")
 disc_data[,1:n_i] <- sapply(disc_data[,1:n_i],as.character)
@@ -261,14 +262,13 @@ print(loo_3)
 
 
 
-contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
-#contributionsPC1 <-read.csv("ContributionsPC_RRDM.csv")
+contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_RRDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC1[x,])}))
 
-contributionsPC2<-matrix(get_posterior_mean(estimated_rsdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
+contributionsPC2<-matrix(get_posterior_mean(estimated_rsdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_RSDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC2[x,])}))
 
-contributionsPC3<-matrix(get_posterior_mean(estimated_nrdm,pars = c("contributionsPC"))[,3],901,16,byrow = T)
+contributionsPC3<-matrix(get_posterior_mean(estimated_nrdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_NRDM=unlist(lapply(1:n_p,function(x){which.max(abs(contributionsPC3[x,]))}))
 
 
@@ -304,7 +304,7 @@ p
 ggsave("RRDM_RSDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
 
 
-#RRDM and NSDM 
+#RRDM and NRDM 
 sum(A_RRDM==A_NRDM)/n_p
 t = (as.factor(A_RRDM)==as.factor(A_NRDM))*1
 t = as.data.frame(cbind(as.factor(A_NRDM),t)) 
@@ -314,7 +314,7 @@ da = cbind(A_NRDM,A_RRDM)
 with(da, table(A_NRDM,A_RRDM)) 
 
 
-p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
+p1 <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
   geom_bar(stat="count") +
   geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
   scale_fill_manual(values=c("#6699FF", "#99CCff"),
@@ -332,13 +332,27 @@ p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
                             "1100", "1101",
                             "1110", "1111"))+
   theme_light()
+p1
+ggsave("RRDM_NRDM_profile_overlap.png",plot = p1,width = 10, height = 6, dpi = 500, units = "in", device='png')
 
 
-p
-
-ggsave("RRDM_NRDM_profile_overlap.png",plot = p,width = 10, height = 6, dpi = 500, units = "in", device='png')
-
-
+# profile differences 
+plot(A_NRDM, A_RRDM)
+A_NRDM <- as.matrix(A_NRDM)
+A_RRDM <- as.matrix(A_RRDM)
+prf_NRDM_RRDM <- as.data.frame(cbind(A_NRDM,A_RRDM))
+colnames(prf_NRDM_RRDM) <- c("nrdm", "rrdm")
+p2 <- ggplot(prf_NRDM_RRDM, aes(x=nrdm, y=rrdm))+ 
+  geom_point(color='darkblue')+
+  theme_light()+
+  scale_y_continuous(breaks = seq(1, 16, by = 1))+
+  scale_x_continuous(breaks = seq(1, 16, by = 1))+
+  ggtitle('Profile differences between NRDM and RRDM')+
+  ylab('RRDM classification')+
+  xlab('NRDM classification')
+p2
+ggsave("RRDM_NRDM_diff.png",plot = p2,width = 10, height = 6, dpi = 500, units = "in", device='png')
+getwd()
 # Simulation part 
 
 n_sim <- 10  # number of datasets on simulated data
