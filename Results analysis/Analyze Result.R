@@ -343,7 +343,7 @@ A_RRDM <- as.matrix(A_RRDM)
 prf_NRDM_RRDM <- as.data.frame(cbind(A_NRDM,A_RRDM))
 colnames(prf_NRDM_RRDM) <- c("nrdm", "rrdm")
 p2 <- ggplot(prf_NRDM_RRDM, aes(x=nrdm, y=rrdm))+ 
-  geom_point(color='darkblue')+
+  geom_count(color='darkblue')+
   theme_light()+
   scale_y_continuous(breaks = seq(1, 16, by = 1))+
   scale_x_continuous(breaks = seq(1, 16, by = 1))+
@@ -352,7 +352,9 @@ p2 <- ggplot(prf_NRDM_RRDM, aes(x=nrdm, y=rrdm))+
   xlab('NRDM classification')
 p2
 ggsave("RRDM_NRDM_diff.png",plot = p2,width = 10, height = 6, dpi = 500, units = "in", device='png')
-getwd()
+
+
+
 # Simulation part 
 
 n_sim <- 10  # number of datasets on simulated data
