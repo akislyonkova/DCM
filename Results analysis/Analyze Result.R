@@ -373,7 +373,7 @@ sim_param <- sim_param[,-1] # deleting the first NA column
 
 ### Calculating raw bias
 rrdm_param_n <- data.frame(rep(rrdm_param, n_sim)) # duplicating the columns with the original parameters
-sim_param_dif <- (rrdm_param_n - sim_param) # calulating the differences 
+sim_param_dif <- (sim_param - rrdm_param_n) # calulating the differences 
 for (i in 1:n_sim) {
   colnames(sim_param_dif)[i] <- paste("sim", i, sep='') # renaming the columns 
 }
@@ -398,7 +398,7 @@ summary(bias[81:96,1]) # steps
 ### Calculating RMSE
 
 bias$rmse <- NA #placeholder for rmse
-bias$rmse <-sqrt((bias$raw_bias^2)/(n_sim-1)) # calculating rmse
+bias$rmse <- sqrt((rowSums(sim_param_dif)/n_sim)^2/(n_sim-1)) # calculating rmse
 hist(bias$rmse) # checking if everything looks right 
 
 summary(bias[1:10,2]) # intercepts for A1
