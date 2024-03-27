@@ -357,7 +357,7 @@ ggsave("RRDM_NRDM_diff.png",plot = p2,width = 10, height = 6, dpi = 500, units =
 
 ### Simulation part 
 
-n_sim <- 21  # number of datasets on simulated data
+n_sim <- 11  # number of datasets on simulated data
 rows_start <- 17 # location of the first parameter 
 rows_end <- 112  # location of the second parameter 
 
@@ -371,20 +371,20 @@ for (i in 1:n_sim) { # loop for uploading and selecting the correct parameters f
 }
 sim_param <- sim_param[,-1] # deleting the first NA column 
 
+
 ### Calculating raw bias
 rrdm_param_n <- data.frame(rep(rrdm_param, n_sim)) # duplicating the columns with the original parameters
 sim_param_dif <- (sim_param - rrdm_param_n) # calulating the differences 
 for (i in 1:n_sim) {
   colnames(sim_param_dif)[i] <- paste("sim", i, sep='') # renaming the columns 
 }
-#par(mfrow = c(2, 2))
-hist(sim_param_dif$sim1) # checking if everything looks right 
+
 bias <- data.frame(rowSums(sim_param_dif)/n_sim) # calculating raw bias 
 colnames(bias) <- "raw_bias" # renaming the column
 
 # write.table(bias, "RRDM_bias.txt") # saving the results 
 
-hist(bias$raw_bias) # checking if everything looks right 
+hist(bias$raw_bias)# checking if everything looks right 
 summary(bias[1:10,1]) # intercepts for A1
 summary(bias[11:20,1]) #  intercepts for A2
 summary(bias[21:30,1]) #  intercepts for A3
@@ -398,7 +398,7 @@ summary(bias[81:96,1]) # steps
 ### Calculating RMSE
 
 bias$rmse <- NA #placeholder for rmse
-bias$rmse <- sqrt((rowSums(sim_param_dif)/n_sim)^2/(n_sim-1)) # calculating rmse
+bias$rmse <- sqrt((rowSums(sim_param_dif))^2/(n_sim-1)) # calculating rmse
 hist(bias$rmse) # checking if everything looks right 
 
 summary(bias[1:10,2]) # intercepts for A1
