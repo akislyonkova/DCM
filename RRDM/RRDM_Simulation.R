@@ -70,7 +70,7 @@ for(k in 1:nrow(alpha)) {  # k - person
 
 
 
-export(r,'dataset20.xlsx')
+export(r,'dataset40.xlsx')
 
 
 # responses[[length(responses)+1]]=as.data.frame(r)
