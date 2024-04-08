@@ -68,17 +68,17 @@ rrdm.t =rbind(t0,t1)
 
 # Plot
 rrdm.t= round(rrdm.t,4)
-gr = c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
+gr = c(rep("No attribute",n_i),rep("Attribute",n_i),rep("o0",n_i),rep("o1",n_i))
 id = c(rep(c(1:n_i),4))
 rrdm.t = data.frame(cbind(id,gr,rrdm.t))
-colnames(rrdm.t) = c("item","class", "SD", "D", "N", "A", "SA")
+colnames(rrdm.t) = c("item","class", "Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")
 
 sapply(rrdm.t, class)
 rrdm.t[,3:7] <- sapply(rrdm.t[,3:7],as.numeric)
 summary(rrdm.t)
 
 
-dfm <- melt(rrdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
+dfm_r <- melt(rrdm.t, id.vars=c("item", "class"),measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 # save the plots for every item
 for (i in 1:n_i){
   item <- subset(dfm,item==i)
@@ -132,16 +132,17 @@ nrdm.t=rbind(t0,t1)
 
 # Plot
 nrdm.t= round(nrdm.t,n_r)
-gr = c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
+gr = c(rep("No attribute",n_i),rep("Attribute",n_i),rep("o0",n_i),rep("o1",n_i))
 id = c(rep(c(1:n_i),4))
 nrdm.t = data.frame(cbind(id,gr,nrdm.t))
-colnames(nrdm.t) = c("item","class", "SD", "D", "N", "A", "SA")
+colnames(nrdm.t) = c("item","class", "Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")
 
 sapply(nrdm.t, class)
 nrdm.t[,3:7] <- sapply(nrdm.t[,3:7],as.numeric)
 summary(nrdm.t)
 
-dfm <- melt(nrdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
+dfm_n <- melt(nrdm.t, id.vars=c("item", "class"),
+              measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 
 path = file.path(getwd(), 'plots/')
 dir.create(path)
@@ -165,73 +166,100 @@ for (i in 1:n_i){
 
 # For RSDM computing item probabilities
 
-RSDM <- summary(estimated_rsdm)$summary
+# RSDM <- summary(estimated_rsdm)$summary
+# 
+# #rsdm <- read.csv("RSDMest_12Dec2023.csv") faster upload without row names 
+# items <- data.frame(RSDM[c(17:56),1], RSDM[c(57:96),1])
+# steps_i <- data.frame(RSDM[c(97:100),1], RSDM[c(101:104),1],RSDM[c(105:108),1],RSDM[c(109:112),1])
+# steps_m <- data.frame(RSDM[c(113:116),1], RSDM[c(117:120),1],RSDM[c(121:124),1],RSDM[c(125:128),1])
+# # expand the step main effects and intercept (repeat each row 10 times, # of items)
+# steps_i <- steps_i[rep(seq_len(nrow(steps_i)), each = 10), ]
+# steps_m <- steps_m[rep(seq_len(nrow(steps_m)), each = 10), ]
+# # label the columns 
+# colnames(items) <- c("li_I","li_M")
+# colnames(steps_i) <- c("lI_step1", "lI_step2", "lI_step3", "lI_step4")
+# colnames(steps_m) <- c("lM_step1", "lM_step2", "lM_step3", "lM_step4")
+# 
+# t=matrix(NA,n_i,n_r)  # crate a null t matrix for calculating the probabilities 
+# k=1 # fix the k to 1 to create t matrix for people with the latent trait 
+# # loop for calculting the probabilities 
+# for(i in 1:n_i) {
+#   t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
+#   t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
+#   t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
+#   t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
+#   t6 <- 1+t2+t3+t4+t5
+#   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+# }
+# t1 <- t # save the result for people with the latent trait 
+# t <- matrix(NA,n_i,n_r) # make the base t matrix null again 
+# k <- 0 # fix the k to 0 to create t matrix for people without the latent trait 
+# for(i in 1:n_i) {
+#   t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
+#   t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
+#   t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
+#   t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
+#   t6 <- 1+t2+t3+t4+t5
+#   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+# }
+# t0 <- t # save the result for people with the latent trait 
+# rsdm.t <- rbind(t0,t1) # combine the results into one matrix 
+# 
+# # Plot
+# rsdm.t <- round(rsdm.t,4)
+# gr <- c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
+# id <- c(rep(c(1:n_i),4))
+# rsdm.t <- data.frame(cbind(id,gr,rsdm.t))
+# colnames(rsdm.t) <- c("item","class", "SD", "D", "N", "A", "SA")
+# rsdm.t[,3:7] <- sapply(rsdm.t[,3:7],as.numeric) # change the rype of var for response option probabilities 
+# summary(rsdm.t)
+# 
+# dfm <- melt(rsdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
+# 
+# path = file.path(getwd(), 'plots/')
+# dir.create(path)
+# # save the plots for every item
+# for (i in 1:n_i){
+#   item <- subset(dfm,item==i)
+#   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
+#     geom_line(aes(color=class))+
+#     geom_point(aes(color=class))+
+#     theme_light()+
+#     ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle 
+#     xlab("Response options")+
+#     ylab("Probability")
+#   filename <- paste("item_", i, ".png", sep = "") # creates the file name for each plot 
+#   filepath = file.path(path, filename) # creates the path for each plot 
+#   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
+# }
+# 
 
-#rsdm <- read.csv("RSDMest_12Dec2023.csv") faster upload without row names 
-items <- data.frame(RSDM[c(17:56),1], RSDM[c(57:96),1])
-steps_i <- data.frame(RSDM[c(97:100),1], RSDM[c(101:104),1],RSDM[c(105:108),1],RSDM[c(109:112),1])
-steps_m <- data.frame(RSDM[c(113:116),1], RSDM[c(117:120),1],RSDM[c(121:124),1],RSDM[c(125:128),1])
-# expand the step main effects and intercept (repeat each row 10 times, # of items)
-steps_i <- steps_i[rep(seq_len(nrow(steps_i)), each = 10), ]
-steps_m <- steps_m[rep(seq_len(nrow(steps_m)), each = 10), ]
-# label the columns 
-colnames(items) <- c("li_I","li_M")
-colnames(steps_i) <- c("lI_step1", "lI_step2", "lI_step3", "lI_step4")
-colnames(steps_m) <- c("lM_step1", "lM_step2", "lM_step3", "lM_step4")
 
-t=matrix(NA,n_i,n_r)  # crate a null t matrix for calculating the probabilities 
-k=1 # fix the k to 1 to create t matrix for people with the latent trait 
-# loop for calculting the probabilities 
-for(i in 1:n_i) {
-  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
-  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
-  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
-  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
-  t6 <- 1+t2+t3+t4+t5
-  t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
-}
-t1 <- t # save the result for people with the latent trait 
-t <- matrix(NA,n_i,n_r) # make the base t matrix null again 
-k <- 0 # fix the k to 0 to create t matrix for people without the latent trait 
-for(i in 1:n_i) {
-  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
-  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
-  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
-  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
-  t6 <- 1+t2+t3+t4+t5
-  t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
-}
-t0 <- t # save the result for people with the latent trait 
-rsdm.t <- rbind(t0,t1) # combine the results into one matrix 
+## Side by side graphs
 
-# Plot
-rsdm.t <- round(rsdm.t,4)
-gr <- c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
-id <- c(rep(c(1:n_i),4))
-rsdm.t <- data.frame(cbind(id,gr,rsdm.t))
-colnames(rsdm.t) <- c("item","class", "SD", "D", "N", "A", "SA")
-rsdm.t[,3:7] <- sapply(rsdm.t[,3:7],as.numeric) # change the rype of var for response option probabilities 
-summary(rsdm.t)
+i<-19
+item_r <- subset(dfm_r,item==i)
+item_n <- subset(dfm_n,item==i)
 
-dfm <- melt(rsdm.t, id.vars=c("item", "class"),measure.vars = c("SD", "D", "N", "A", "SA"))
+p1 <- ggplot(item_r, aes(x=variable,y=value,group=class)) +
+  geom_line(aes(linetype = class))+
+  geom_point(aes())+
+  theme_light()+
+  ggtitle(paste("RRDM"))+ # use paste for ggtitle 
+  xlab("Response options")+
+  ylab("Probability")
+p1
 
-path = file.path(getwd(), 'plots/')
-dir.create(path)
-# save the plots for every item
-for (i in 1:n_i){
-  item <- subset(dfm,item==i)
-  p <- ggplot(item, aes(x=variable,y=value,group=class)) +
-    geom_line(aes(color=class))+
-    geom_point(aes(color=class))+
-    theme_light()+
-    ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle 
-    xlab("Response options")+
-    ylab("Probability")
-  filename <- paste("item_", i, ".png", sep = "") # creates the file name for each plot 
-  filepath = file.path(path, filename) # creates the path for each plot 
-  ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
-}
+p2 <- ggplot(item_n, aes(x=variable,y=value,group=class)) +
+  geom_line(aes(linetype = class))+
+  geom_point(aes())+
+  theme_light()+
+  ggtitle(paste("NRDM"))+ # use paste for ggtitle 
+  xlab("Response options")+
+  ylab("Probability")
+p2
 
+grid.arrange(p1, p2, ncol = 2)
 
 
 
@@ -317,7 +345,7 @@ with(da, table(A_NRDM,A_RRDM))
 p1 <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
   geom_bar(stat="count") +
   geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
-  scale_fill_manual(values=c("#6699FF", "#99CCff"),
+  scale_fill_manual(values=c("black", "grey59"),
                     name="Classification Agreement", 
                     labels=c("Different", "Same"))+
   xlab("Attribute Profiles") + 
@@ -343,7 +371,7 @@ A_RRDM <- as.matrix(A_RRDM)
 prf_NRDM_RRDM <- as.data.frame(cbind(A_NRDM,A_RRDM))
 colnames(prf_NRDM_RRDM) <- c("nrdm", "rrdm")
 p2 <- ggplot(prf_NRDM_RRDM, aes(x=nrdm, y=rrdm))+ 
-  geom_count(color='darkblue')+
+  geom_count(color='black')+
   theme_light()+
   scale_y_continuous(breaks = seq(1, 16, by = 1))+
   scale_x_continuous(breaks = seq(1, 16, by = 1))+
@@ -351,7 +379,7 @@ p2 <- ggplot(prf_NRDM_RRDM, aes(x=nrdm, y=rrdm))+
   ylab('RRDM classification')+
   xlab('NRDM classification')
 p2
-ggsave("RRDM_NRDM_diff.png",plot = p2,width = 10, height = 6, dpi = 500, units = "in", device='png')
+ggsave("RRDM_NRDM_diff.png",plot = p2,width = 10, height = 9, dpi = 500, units = "in", device='png')
 
 
 
