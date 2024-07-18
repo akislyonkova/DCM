@@ -373,8 +373,22 @@ colnames(prf_NRDM_RRDM) <- c("nrdm", "rrdm")
 p2 <- ggplot(prf_NRDM_RRDM, aes(x=nrdm, y=rrdm))+ 
   geom_count(color='black')+
   theme_light()+
-  scale_y_continuous(breaks = seq(1, 16, by = 1))+
-  scale_x_continuous(breaks = seq(1, 16, by = 1))+
+  scale_y_continuous(breaks = seq(1, 16, by = 1), labels=c("0000", "0001",
+                                                           "0010", "0011", 
+                                                           "0100", "0101",
+                                                           "0110", "0111", 
+                                                           "1000", "1001", 
+                                                           "1010", "1011", 
+                                                           "1100", "1101",
+                                                           "1110", "1111"))+
+  scale_x_continuous(breaks = seq(1, 16, by = 1), labels=c("0000", "0001",
+                                                           "0010", "0011", 
+                                                           "0100", "0101",
+                                                           "0110", "0111", 
+                                                           "1000", "1001", 
+                                                           "1010", "1011", 
+                                                           "1100", "1101",
+                                                           "1110", "1111"))+
   ggtitle('Profile differences between NRDM and RRDM')+
   ylab('RRDM classification')+
   xlab('NRDM classification')
