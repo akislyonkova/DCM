@@ -27,10 +27,10 @@ for (i in 1:n_i){
 
 
 # For RRDM computing item probabilities
-item <- data.frame(cbind(rrdm[c(17:56),1],rrdm[c(57:96),1]))
-step <- data.frame(cbind(rrdm[c(97:100),1], rrdm[c(101:104),1], rrdm[c(105:108),1], rrdm[c(109:112),1]))
-colnames(item) <- c("li_I","li_M")
-colnames(step) <- c("ls_1", "ls_2", "ls_3", "ls_4")
+  item <- data.frame(cbind(rrdm[c(17:56),1],rrdm[c(57:96),1]))
+  step <- data.frame(cbind(rrdm[c(97:100),1], rrdm[c(101:104),1], rrdm[c(105:108),1], rrdm[c(109:112),1]))
+  colnames(item) <- c("li_I","li_M")
+  colnames(step) <- c("ls_1", "ls_2", "ls_3", "ls_4")
 #export(item, "item.xlsx")
 #export(step, "step.xlsx")
 
@@ -80,8 +80,10 @@ summary(rrdm.t)
 
 dfm_r <- melt(rrdm.t, id.vars=c("item", "class"),measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 # save the plots for every item
+path <- file.path(getwd(), 'plots/')
+dir.create(path)
 for (i in 1:n_i){
-  item <- subset(dfm,item==i)
+  item <- subset(dfm_r,item==i)
   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
     geom_line(aes(color=class))+
     geom_point(aes(color=class))+
@@ -144,7 +146,7 @@ summary(nrdm.t)
 dfm_n <- melt(nrdm.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 
-path = file.path(getwd(), 'plots/')
+path <- file.path(getwd(), 'plots/')
 dir.create(path)
 # save the plots for every item
 for (i in 1:n_i){
@@ -236,8 +238,9 @@ for (i in 1:n_i){
 
 
 ## Side by side graphs
+library(gridExtra)
 
-i<-19
+i<-34
 item_r <- subset(dfm_r,item==i)
 item_n <- subset(dfm_n,item==i)
 
@@ -247,7 +250,8 @@ p1 <- ggplot(item_r, aes(x=variable,y=value,group=class)) +
   theme_light()+
   ggtitle(paste("RRDM"))+ # use paste for ggtitle 
   xlab("Response options")+
-  ylab("Probability")
+  ylab("Probability")+
+  scale_x_discrete(guide = guide_axis(angle = 45))
 p1
 
 p2 <- ggplot(item_n, aes(x=variable,y=value,group=class)) +
@@ -256,7 +260,8 @@ p2 <- ggplot(item_n, aes(x=variable,y=value,group=class)) +
   theme_light()+
   ggtitle(paste("NRDM"))+ # use paste for ggtitle 
   xlab("Response options")+
-  ylab("Probability")
+  ylab("Probability")+
+  scale_x_discrete(guide = guide_axis(angle = 45))
 p2
 
 grid.arrange(p1, p2, ncol = 2)
@@ -293,11 +298,11 @@ print(loo_3)
 contributionsPC1<-matrix(get_posterior_mean(estimated_rrdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_RRDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC1[x,])}))
 
-contributionsPC2<-matrix(get_posterior_mean(estimated_rsdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
-A_RSDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC2[x,])}))
-
 contributionsPC3<-matrix(get_posterior_mean(estimated_nrdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_NRDM=unlist(lapply(1:n_p,function(x){which.max(abs(contributionsPC3[x,]))}))
+
+# contributionsPC2<-matrix(get_posterior_mean(estimated_rsdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
+# A_RSDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC2[x,])}))
 
 
 
@@ -305,31 +310,31 @@ A_NRDM=unlist(lapply(1:n_p,function(x){which.max(abs(contributionsPC3[x,]))}))
 # Plots for the profile overlap 
 # Quick look at the results 
 summary(as.factor(A_RRDM))
-summary(as.factor(A_RSDM))
+# summary(as.factor(A_RSDM))
 summary(as.factor(A_NRDM))
 
 #RRDM and RSDM 
-sum(A_RRDM==A_RSDM)/n_p
-t = (as.factor(A_RRDM)==as.factor(A_RSDM))*1
-t = as.data.frame(cbind(as.factor(A_RSDM),t)) 
-t = transform(t, V1 = as.factor(V1))
-
-da = cbind(A_RSDM,A_RRDM)
-with(da, table(A_RSDM,A_RRDM)) 
-
-
-p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
-  geom_bar(stat="count") +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
-  scale_fill_manual(values=c("#999999", "#E69F00"),name="Classification Agreement", labels=c("Different", "Same"))+
-  xlab("Attribute Profiles") + 
-  ylab("Number of Examinees") + 
-  theme(legend.position="bottom")+ 
-  scale_x_discrete(labels=c("0000" ,"0001" ,"0010" ,"0011", "0100", "0101" ,"0110" ,"0111", "1000", "1001", "1010", "1011", "1100", "1101" ,"1110", "1111"))
-
-p
-
-ggsave("RRDM_RSDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
+# sum(A_RRDM==A_RSDM)/n_p
+# t = (as.factor(A_RRDM)==as.factor(A_RSDM))*1
+# t = as.data.frame(cbind(as.factor(A_RSDM),t)) 
+# t = transform(t, V1 = as.factor(V1))
+# 
+# da = cbind(A_RSDM,A_RRDM)
+# with(da, table(A_RSDM,A_RRDM)) 
+# 
+# 
+# p <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
+#   geom_bar(stat="count") +
+#   geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
+#   scale_fill_manual(values=c("#999999", "#E69F00"),name="Classification Agreement", labels=c("Different", "Same"))+
+#   xlab("Attribute Profiles") + 
+#   ylab("Number of Examinees") + 
+#   theme(legend.position="bottom")+ 
+#   scale_x_discrete(labels=c("0000" ,"0001" ,"0010" ,"0011", "0100", "0101" ,"0110" ,"0111", "1000", "1001", "1010", "1011", "1100", "1101" ,"1110", "1111"))
+# 
+# p
+# 
+# ggsave("RRDM_RSDM_profile_overlap.png",plot = p,width = 6, height = 6, dpi = 500, units = "in", device='png')
 
 
 #RRDM and NRDM 
