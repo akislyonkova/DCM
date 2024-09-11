@@ -1,7 +1,7 @@
 # Simulate datasets 
 
 set.seed(2024)
-N <- 901 # number of people
+N <- 900 # number of people
 i <- 40  # number of items
 
 t <- matrix(NA, i, 5) # empty t matrix 
