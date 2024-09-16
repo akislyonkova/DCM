@@ -1,8 +1,9 @@
 # Simulate datasets 
 
 set.seed(2024)
-N <- 900 # number of people
-i <- 40  # number of items
+N <- 700 # number of people
+i <- 30  # number of items
+
 
 # function to generate data
 responses <- list() # creates an empty list for holding responses 
@@ -58,15 +59,15 @@ gendata_rrdm <- function (n_dataset, step, item, alpha, Q) {
 t <- matrix(NA, i, 5) # empty t matrix 
 r <- matrix(NA, N, i) # empty response matrix
 #define Q
-Q=matrix(c(rep(c(1,0,0,0),10),rep(c(0,1,0,0),10),
-           rep(c(0,0,1,0),10),rep(c(0,0,0,1),10)), 40, 4, byrow = T) # 40 questions and 4 attributes
-colnames(Q) <- c('A1','A2', 'A3', 'A4')
+Q=matrix(c(rep(c(1,0,0),10),rep(c(0,1,0),10),
+           rep(c(0,0,1),10)), 30, 3, byrow = T) # 30 questions and 3 attributes
+colnames(Q) <- c('A1','A2', 'A3')
 n_attr<-dim(Q)[2]
 
 #define alpha pattern
 alpha.patt<-(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) # profile set
 AP <- nrow(alpha.patt) # extracts the number of profiles
-x <- runif(16, min = 0, max = 1) # generate 16 random values between 1 and 0
+x <- runif(2^n_attr, min = 0, max = 1) # generate 8 random values between 1 and 0
 alpha.prob <- x/sum(x) # normalize this vector so that the sum is equal to 1
 ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind, ] # simulated pattern ("truth") for all attributes for each person
@@ -82,13 +83,13 @@ alpha <- alpha.patt[ind, ] # simulated pattern ("truth") for all attributes for 
 
 ###  With generated parameters 
 
-step <- matrix(runif(16, min = -1, max = 1), 4, 4, byrow = T) # generates 16 random step values from a uniform distribution
+step <- matrix(runif(2^n_attr, min = -1, max = 1), 4, n_attr, byrow = T) # generates 16 random step values from a uniform distribution
 step <- round(step[rep(seq_len(nrow(step)), each = 10), ],4) # rounds to the 4 decimal point, repeats each step within a dimension 
-item_i <- matrix(runif(40, min = -1, max = 1), 40, 1, byrow = T) # generates 40 random intercepts 
+item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) # generates 40 random intercepts 
 
 ### With large main effects
 
-item_m <- matrix(runif(40, min = -3, max = 3), 40, 1, byrow = T) # generates 40 random  main effects
+item_m <- matrix(runif(i, min = -3, max = 3), i, 1, byrow = T) # generates 40 random  main effects
 item <- cbind(item_i, item_m)
 item <- round(item,4)
 
@@ -96,7 +97,7 @@ cell1 <- gendata_rrdm(n_dataset = 20, alpha = alpha, item = item, step = step)
 
 
 ### With small  main effects
-item_m <- matrix(runif(40, min = -1, max = 1), 40, 1, byrow = T)
+item_m <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T)
 item <- cbind(item_i, item_m)
 item <- round(item,4)
 
