@@ -76,13 +76,21 @@ item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T)
 
 item_m <- matrix(runif(i, min = 0.9, max = 3), i, 1, byrow = T) 
 item <- cbind(item_i, item_m)
-item <- round(item,4)
+item <- as.data.frame(round(item,4))
 colnames(item) <- c('I', 'M')
 #write.table(item, file = 'item_cell1.txt')
 
+
+#saving the parameters used for generating the data
+item_unlist <- as.data.frame(unlist(item, use.names = T))
+step_param <- step[c(1,11,21),]
+step_unlist <- as.data.frame(unlist(step_param, use.names = T))
+colnames(item_unlist) <- 'V1'
+colnames(step_unlist) <- 'V1'
+cell1_param <- rbind(item_unlist, step_unlist)
+write.table(cell1_param, file = 'cell1_param.txt')
+
 cell1 <- gendata_rrdm(n_dataset = 20, alpha = alpha, item = item, step = step)
-step_param <- unlist(step[c(1, 11, 21),])
-item_param <- unlist(as.data.frame(item))
 
 
 ### With small  main effects
