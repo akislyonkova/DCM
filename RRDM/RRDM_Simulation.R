@@ -63,6 +63,42 @@ alpha.prob <- x/sum(x) # normalize this vector so that the sum is equal to 1
 ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind, ] # simulated pattern ("truth") for all attributes for each person
 
+###  With generated parameters 
+step <- matrix(runif(n_attr*s, min = 0, max = 1), n_attr, s, byrow = F) # generates n_attr*s random step values from a uniform distribution
+step <- as.data.frame(round(step[rep(seq_len(nrow(step)), each = 10), ],4)) # rounds to the 4 decimal point, repeats each step within a dimension 
+colnames(step) <- c('step1', 'step2', 'step3', 'step4')
+item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) 
+#write.table(step, file = 'step_cell1.txt')
+
+
+
+### With large main effects
+
+item_m <- matrix(runif(i, min = 0.9, max = 3), i, 1, byrow = T) 
+item <- cbind(item_i, item_m)
+item <- round(item,4)
+colnames(item) <- c('I', 'M')
+#write.table(item, file = 'item_cell1.txt')
+
+cell1 <- gendata_rrdm(n_dataset = 20, alpha = alpha, item = item, step = step)
+step_param <- unlist(step[c(1, 11, 21),])
+item_param <- unlist(as.data.frame(item))
+
+
+### With small  main effects
+item_m <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T)
+item <- cbind(item_i, item_m)
+item <- round(item,4)
+colnames(item) <- c('I', 'M')
+
+cell2 <- gendata_rrdm(n_dataset = 20, alpha = alpha, item = item, step = step)
+
+### Saving the results 
+save(cell1, file = 'rrdm_cell1.rda') # saves generated datasets 
+
+
+ 
+
 ### With existing parameters 
 
 # library(rio)
@@ -71,33 +107,4 @@ alpha <- alpha.patt[ind, ] # simulated pattern ("truth") for all attributes for 
 # step <- round(steps[rep(seq_len(nrow(steps)), each = 10), ], 4)
 # item <- round(item,4)
 
-
-###  With generated parameters 
-step <- matrix(runif(n_attr*s, min = 0, max = 1), n_attr, s, byrow = F) # generates n_attr*s random step values from a uniform distribution
-step <- round(step[rep(seq_len(nrow(step)), each = 10), ],4) # rounds to the 4 decimal point, repeats each step within a dimension 
-item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) # generates 40 random intercepts 
-write.table(step, file = 'step_cell1.txt')
-
-
-### With large main effects
-
-item_m <- matrix(runif(i, min = 0.9, max = 3), i, 1, byrow = T) # generates 40 random  main effects
-item <- cbind(item_i, item_m)
-item <- round(item,4)
-write.table(item, file = 'item_cell1.txt')
-
-cell1 <- gendata_rrdm(n_dataset = 20, alpha = alpha, item = item, step = step)
-
-
-### With small  main effects
-item_m <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T)
-item <- cbind(item_i, item_m)
-item <- round(item,4)
-
-cell2 <- gendata_rrdm(n_dataset = 20, alpha = alpha, item = item, step = step)
-
-### Saving the results 
-save(cell1, file = 'rrdm_cell1.rda') # saves generated datasets 
-#load(file='rrdm_cell1.rda') # loads the responses file 
-#simdata_9 <- cell1[[9]] # extracts a single dataset  
 
