@@ -1,8 +1,8 @@
 # Simulate datasets 
 
 set.seed(2024)
-N <- 700 # number of people
-i <- 30  # number of items
+N <- 700 
+i <- 30  
 s <- 4
 
 
@@ -41,16 +41,6 @@ gendata_rrdm <- function (n_dataset, step, item, alpha, Q) {
         ppp=rmultinom(n=1, size=1, prob=t[i,])
         r[k,i]=which(ppp == 1, arr.ind=TRUE)[1]
       }
-      # for(i in 31:40) { # questions 31 through 40 (4th attribute)
-      #   t1=exp(1*(item[i,1]+item[i,2]*alpha[k,4]) + step[i,1])
-      #   t2=exp(2*(item[i,1]+item[i,2]*alpha[k,4]) + step[i,1] + step[i,2])
-      #   t3=exp(3*(item[i,1]+item[i,2]*alpha[k,4]) + step[i,1] + step[i,2] + step[i,3])
-      #   t4=exp(4*(item[i,1]+item[i,2]*alpha[k,4]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
-      #   sum=1+t1+t2+t3+t4
-      #   t[i,]=c(1/sum,t1/sum,t2/sum,t3/sum, t4/sum)
-      #   ppp=rmultinom(n=1, size=1, prob=t[i,])
-      #   r[k,i]=which(ppp == 1, arr.ind=TRUE)[1]
-      # }
     }
     responses[[length(responses)+1]] = as.data.frame(r)
   }
@@ -66,7 +56,7 @@ colnames(Q) <- c('A1','A2', 'A3')
 n_attr<-dim(Q)[2]
 
 #define alpha pattern
-alpha.patt<-(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) # profile set
+alpha.patt <- expand.grid(replicate(n_attr, 0:1, simplify = FALSE)) # profile set
 AP <- nrow(alpha.patt) # extracts the number of profiles
 x <- runif(2^n_attr, min = 0, max = 1) # generate 8 random values between 1 and 0
 alpha.prob <- x/sum(x) # normalize this vector so that the sum is equal to 1
@@ -83,7 +73,7 @@ alpha <- alpha.patt[ind, ] # simulated pattern ("truth") for all attributes for 
 
 
 ###  With generated parameters 
-step <- matrix(runif(s, min = 0, max = 1), n_attr, s, byrow = F) # generates 8 random step values from a uniform distribution
+step <- matrix(runif(n_attr*s, min = 0, max = 1), n_attr, s, byrow = F) # generates n_attr*s random step values from a uniform distribution
 step <- round(step[rep(seq_len(nrow(step)), each = 10), ],4) # rounds to the 4 decimal point, repeats each step within a dimension 
 item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) # generates 40 random intercepts 
 write.table(step, file = 'step_cell1.txt')
