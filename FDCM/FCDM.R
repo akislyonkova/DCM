@@ -12,7 +12,7 @@ inilist2<-list(Vc=c(rep(0.33,3)))
 
 fdcm_model<-stan_model("FDCM.stan") 
 
-# suggested code to estimate a model
+          # suggested code to estimate a model
 estimated_fdcm<-sampling(rrdm_model_simp, 
                          data=list(Y=respMatrix, 
                          Ns=5, 
