@@ -13,14 +13,14 @@ inilist2<-list(Vc=c(rep(0.33,3)))
 fdcm_model<-stan_model("FDCM.stan") 
 
           # suggested code to estimate a model
-estimated_fdcm<-sampling(rrdm_model_simp, 
+estimated_fdcm<-sampling(fdcm_model, 
                          data=list(Y=respMatrix, 
                          Ns=5, 
                          Np=nrow(respMatrix), 
                          Ni=ncol(respMatrix), 
                          init=list(inilist1, inilist2), 
                          Nc=8), 
-                         iter=1, chains=2)  
+                         iter=1, chains=1)  
 
 FDCM<-summary(estimated_fdcm)$summary  
 save(estimated_fdcm, file = "FDCMest.rda") 
