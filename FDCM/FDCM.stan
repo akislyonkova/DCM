@@ -1284,7 +1284,7 @@ generated quantities {
   for (iterp in 1:Np){
     for (iterc in 1:Nc){
       for (iteri in 1:Ni){
-        contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
+        contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]|softmax(((PImat[iteri,iterc]))));
       }
       contributionsPC[iterp,iterc]=prod(exp(contributionsI));
     }
