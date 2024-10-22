@@ -168,6 +168,14 @@ for (i in 1:n_i){
 
 # For RSDM computing item probabilities
 
+#RSDM diagnostics 
+library("bayesplot")
+lp_cp <- log_posterior(rsdm)
+head(lp_cp)
+
+mcmc_hist(posterior, pars = c("X1", "X2")) # distributions of the parameters
+mcmc_trace(posterior, pars = c("X1", "X2")) # trace plots 
+
 # RSDM <- summary(estimated_rsdm)$summary
 # 
 # #rsdm <- read.csv("RSDMest_12Dec2023.csv") faster upload without row names 
