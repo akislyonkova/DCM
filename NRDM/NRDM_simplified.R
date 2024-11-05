@@ -1,29 +1,36 @@
 library("rstan")
 options(mc.cores = parallel::detectCores() / 2)
 
-library("rio")
-respMatrix<-import("ordmdat.csv")
-Q<-as.matrix(import("Q.xlsx"))
-n_attr<-dim(Q)[2]
-PS<-t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) # profile set 
-PfbyI<-Q %*% PS # profile by item matrix, weight matrix 
+respMatrix <- read.csv("discdat.csv")
+
+n_attr <- dim(Q)[2]
+PS <- t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE)))
+PfbyI <- Q %*% PS 
 
 inilist1<-list(Vc=c(rep(0.25,4)))
 inilist2<-list(Vc=c(rep(0.25,4)))
 
-# compiling a model
-nrdm_model_simp <- stan_model("NRDM_simplified.stan") # compiles a model into a formal class stanmodel
+nrdm_model <- stan_model("NRDM.stan") 
 
 # suggested code to estimate a model
-estimated_nrdm_ordmdat<-sampling(nrdm_model_simp, # specifies the model
-                                 data = list(Y=respMatrix, Ns=5, Np=nrow(respMatrix), Ni=ncol(respMatrix), init=  list(inilist1,inilist2), Nc=16, W=PfbyI, Nstep=4), # specifies the data
-                                 iter = 100,chains=1) # specifies the number of chains and iterations
+date <- Sys.Date()
 
+start.time <- Sys.time()
+nrdm <- sampling(nrdm_model,
+               data = list(Y=respMatrix, 
+                           Ns=5, 
+                           Np=nrow(respMatrix), 
+                           Ni=ncol(respMatrix), 
+                           init=list(inilist1,inilist2), 
+                           Nc=16, 
+                           W=PfbyI, 
+                           Nstep=4), 
+                       iter = 6000, chains=2) 
+time.taken <- end.time - start.time
 
-NRDM_ordmdat<-summary(estimated_nrdm_ordmdat)$summary # extracts model estimates and saves them into a data set 
-save(estimated_nrdm_ordmdat, file = "RSDMest_ordmdat.rda") # saves the results into a stanfit object
-export(NRDM_ordmdat,"RRDMest_ordmdat.xlsx") # exports the dataset 
+save(nrdm, file =  paste('nrdm_', date, '.rda', sep=''))  
+NRDM <- as.data.frame(summary(nrdm)$summary) 
+write.table(NRDM, file =  paste('NRDM', date,'.txt',sep='')) 
 
-
-#testing
+converged <- sum(na.omit(NRDM$Rhat) > 1.1)
 

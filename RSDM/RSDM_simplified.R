@@ -1,33 +1,36 @@
-library("rstan") # library for stan
+library("rstan")
 options(mc.cores = parallel::detectCores() / 2)
-library("rio") #library for function 'import' 
 
-respMatrix<-import("ordmdat.csv") # load the data set
-Q<-as.matrix(import("Q.csv")) # load the Q matrix 
-n_attr<-dim(Q)[2] # calculates the number of attributes based on Q matrix
-PS<-t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) # profile set 
-PfbyI<-Q %*% PS # profile by item matrix, weight matrix 
+respMatrix <- read.csv("discdat.csv")
 
-inilist1<-list(Vc=c(rep(0.25,4))) # creates the initial probabilities for 4 classes 
+n_attr <- dim(Q)[2]
+PS <- t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE)))
+PfbyI <- Q %*% PS 
+
+inilist1<-list(Vc=c(rep(0.25,4)))
 inilist2<-list(Vc=c(rep(0.25,4)))
 
-# compiling a model
-rsdm_model_simp <- stan_model("RSDM_simplified.stan") # compiles a model into a formal class stanmodel
+rsdm_model <- stan_model("RSDM.stan") 
 
 # suggested code to estimate a model
-estimated_rsdm_ordmdat<-sampling(rsdm_model_simp, # specifies the model
-                          data=list(Y=respMatrix, 
-                                    Ns=5, 
-                                    Np=nrow(respMatrix), 
-                                    Ni=ncol(respMatrix), 
-                                    init=list(inilist1,inilist2), 
-                                    Nc=16, 
-                                    W=PfbyI, 
-                                    Nstep=4), # specifies the data
-                          iter=100,chains=1) # specifies the number of chains and iterations
+date <- Sys.Date()
 
+start.time <- Sys.time()
+rsdm <- sampling(rsdm_model,
+                 data = list(Y=respMatrix, 
+                             Ns=5, 
+                             Np=nrow(respMatrix), 
+                             Ni=ncol(respMatrix), 
+                             init=list(inilist1,inilist2), 
+                             Nc=16, 
+                             W=PfbyI, 
+                             Nstep=4), 
+                 iter = 6000, chains=2) 
+time.taken <- end.time - start.time
 
-RSDM_ordmdat<-summary(estimated_rsdm_ordmdat)$summary # extracts model estimates and saves them into a data set 
-save(estimated_rsdm_ordmdat, file = "RSDMest_ordmdat.rda") # saves the results into a stanfit object
-export(RSDM_ordmdat,"RRDMest_ordmdat.xlsx") # exports the dataset 
+save(rsdm, file =  paste('rsdm_', date, '.rda', sep=''))  
+RSDM <- as.data.frame(summary(rsdm)$summary) 
+write.table(RSDM, file =  paste('RSDM', date,'.txt',sep='')) 
+
+converged <- sum(na.omit(RSDM$Rhat) > 1.1)
 

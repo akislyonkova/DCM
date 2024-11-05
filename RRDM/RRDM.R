@@ -25,7 +25,7 @@ rrdm<-sampling(rrdm_model,
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 
-save(rrdm, file =  paste('rrdm', n,'_', date, sep=''))  
+save(rrdm, file =  paste('rrdm', n,'_', date, '.rda', sep=''))  
 RRDM<-as.data.frame(summary(rrdm)$summary) 
 
 write.table(RRDM, file =  paste('RRDMsim', n,'.txt',sep='')) 
