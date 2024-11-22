@@ -40,8 +40,8 @@ FDCM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="FDCM"){
       for(loopc in 1:nclass){
         Reparm[loopi,loopc,1]<-paste('  PImat[',loopi,',',loopc,'][1]=0;\n',sep='')
         Reparm[loopi,loopc,loops+1]<-paste('  PImat[',loopi,',',loopc,'][',loops+1,']=', loops, '*(',li_0[loopi],
-                                           '+', li_1[loopi], '*', PfbyI[loopi,loopc], '+(', nstep+1, '-', loops, ')*', d[loopi], 
-                                           ');\n',sep='')
+                                           '+', li_1[loopi], '*', PfbyI[loopi,loopc], ')+(', nstep+1, '-', loops, ')*', d[loopi], 
+                                           ';\n',sep='')
       }
       
     }
