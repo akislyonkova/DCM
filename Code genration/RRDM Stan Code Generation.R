@@ -27,10 +27,10 @@ RRDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RRDM"){
   #loop for filling the step intercepts 
   for (s in 1:nstep){
     ls_0[,s] <- paste("step",s, "_I", sep='')
-    ls_0[1:9, s] <- paste(ls_0[1:9, s], "D1", sep='') # 10 step parameters for dimension 1
-    ls_0[10:18, s] <- paste(ls_0[10:18, s], "D2", sep='')
-    ls_0[19:27, s] <- paste(ls_0[19:27, s], "D3", sep='')
-    #ls_0[31:40, s] <- paste(ls_0[31:40, s], "D4", sep='')
+    ls_0[1:10, s] <- paste(ls_0[1:10, s], "D1", sep='') # 10 step parameters for dimension 1
+    ls_0[11:20, s] <- paste(ls_0[11:20, s], "D2", sep='')
+    ls_0[21:30, s] <- paste(ls_0[21:30, s], "D3", sep='')
+    ls_0[31:40, s] <- paste(ls_0[31:40, s], "D4", sep='')
   }
   #creating a cumulative matrix with a sum of "-" step intercepts 
   ls_0_cumul <- ls_0
@@ -60,12 +60,12 @@ RRDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RRDM"){
   
   # build a Frankenstein 
   
-  Modelcontainer<-paste('   vector[Nc] contributionsC;\n','    vector[Ni] contributionsI;\n\n',sep='')
-  Parmprior<-paste(c(paste('   //Prior\n'),
-                     paste( li_0,'~normal(0,2)',';\n'),
-                     paste( li_1,'~normal(0,2)', ';\n'),
-                     paste(ls_0_unique,'~normal(0,2)', ';\n'),
-                     paste('   Vc~dirichlet(rep_vector(2.0, Nc));',sep='')))
+  Modelcontainer<-paste('vector[Nc] contributionsC;\n','    vector[Ni] contributionsI;\n\n',sep='')
+  Parmprior<-paste(c(paste('//Prior\n'),
+                     paste(li_0,'~normal(0,20)',';\n'),
+                     paste(li_1,'~normal(0,20)', ';\n'),
+                     paste(ls_0_unique,'~normal(0,20)', ';\n'),
+                     paste('Vc~dirichlet(rep_vector(2.0, Nc));',sep='')))
   
   #Likelihood Stan code
   Likelihood<-'
@@ -146,10 +146,15 @@ sink(NULL)
 
 
 
-Q=matrix(c(rep(c(1,0,0),9),rep(c(0,1,0),9),rep(c(0,0,1),9)), 27, 3, byrow = T) # 27 questions and 3 attributes
+Q=matrix(c(rep(c(1,0,0,0),10),
+           rep(c(0,1,0,0),10),
+           rep(c(0,0,1,0),10),
+           rep(c(0,0,0,1),10)), 
+           40, 4, byrow = T) # 27 questions and 3 attributes
 RRDM(Q,5)
 
-
+#Qmatrix <- Q
+#scale.num <- 5
 # n_attr<-dim(Q)[2]
 # PS<-t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE)))  
 # PfbyI<-Q %*% PS  
