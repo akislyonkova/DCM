@@ -8,10 +8,10 @@ s <- 4
 
 # function to generate data
 responses <- list() # creates an empty list for holding responses 
-gendata_rrdm <- function (n_dataset, step, item, alpha, Q) {
+gendata_fdcm <- function (n_dataset, step, item, alpha, Q) {
   for (n in 1:n_dataset){     # n - number of datasets 
     for(k in 1:nrow(alpha)) { # k = N 
-      for(i in 1:9) {        # i - item, questions 1 through 9 (1st attribute) 
+      for(i in 1:9) {        # i - item, questions 1 through 10 (1st attribute) 
         t1=exp(1*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1])
         t2=exp(2*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2])
         t3=exp(3*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3])
@@ -21,7 +21,7 @@ gendata_rrdm <- function (n_dataset, step, item, alpha, Q) {
         ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
         r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] #which() function returns the position/index of the value
       }
-      for(i in 10:18) { # questions 10 through 18 (2nd attribute)
+      for(i in 10:18) { # questions 11 through 20 (2nd attribute)
         t1=exp(1*(item[i,1]+item[i,2]*alpha[k,2]) + step[i,1])
         t2=exp(2*(item[i,1]+item[i,2]*alpha[k,2]) + step[i,1] + step[i,2])
         t3=exp(3*(item[i,1]+item[i,2]*alpha[k,2]) + step[i,1] + step[i,2] + step[i,3])
@@ -50,8 +50,8 @@ gendata_rrdm <- function (n_dataset, step, item, alpha, Q) {
 t <- matrix(NA, i, s+1) # empty t matrix 
 r <- matrix(NA, N, i) # empty response matrix
 #define Q
-Q=matrix(c(rep(c(1,0,0),9),rep(c(0,1,0),9),
-           rep(c(0,0,1),9)), 27, 3, byrow = T) # 27 questions and 3 attributes
+Q=matrix(c(rep(c(1,0,0),10),rep(c(0,1,0),10),
+           rep(c(0,0,1),10)), 30, 3, byrow = T) # 30 questions and 3 attributes
 colnames(Q) <- c('A1','A2', 'A3')
 n_attr<-dim(Q)[2]
 
@@ -65,7 +65,7 @@ alpha <- alpha.patt[ind, ] # simulated pattern ("truth") for all attributes for 
 
 ###  With generated parameters 
 step <- matrix(runif(n_attr*s, min = 0, max = 1), n_attr, s, byrow = F) # generates n_attr*s random step values from a uniform distribution
-step <- as.data.frame(round(step[rep(seq_len(nrow(step)), each = 9), ],4)) # rounds to the 4 decimal point, repeats each step within a dimension 
+step <- as.data.frame(round(step[rep(seq_len(nrow(step)), each = 10), ],4)) # rounds to the 4 decimal point, repeats each step within a dimension 
 colnames(step) <- c('step1', 'step2', 'step3', 'step4')
 item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) 
 #write.table(step, file = 'step_cell1.txt')
@@ -90,7 +90,7 @@ colnames(step_unlist) <- 'V1'
 cell1_param <- rbind(item_unlist, step_unlist)
 write.table(cell1_param, file = 'cell1_param.txt')
 
-cell1 <- gendata_rrdm(n_dataset = 20, alpha = alpha, item = item, step = step)
+cell1 <- gendata_fdcm(n_dataset = 20, alpha = alpha, item = item, step = step)
 
 
 ### With small  main effects
@@ -99,10 +99,10 @@ item <- cbind(item_i, item_m)
 item <- round(item,4)
 colnames(item) <- c('I', 'M')
 
-cell2 <- gendata_rrdm(n_dataset = 20, alpha = alpha, item = item, step = step)
+cell2 <- gendata_fdcm(n_dataset = 20, alpha = alpha, item = item, step = step)
 
 ### Saving the results 
-save(cell1, file = 'rrdm_cell1.rda') # saves generated datasets 
+save(cell1, file = 'fdcm_cell1.rda') # saves generated datasets 
 
 
  
@@ -112,7 +112,7 @@ save(cell1, file = 'rrdm_cell1.rda') # saves generated datasets
 # library(rio)
 # steps <- import("step.xlsx")
 # item <- import("item.xlsx")
-# step <- round(steps[rep(seq_len(nrow(steps)), each = 9), ], 4)
+# step <- round(steps[rep(seq_len(nrow(steps)), each = 10), ], 4)
 # item <- round(item,4)
 
 
