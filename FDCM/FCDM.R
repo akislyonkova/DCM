@@ -21,9 +21,9 @@ FDCM<-summary(estimated_fdcm)$summary
 save(estimated_fdcm, file = "FDCMest.rda") 
 
 
-
+#data https://openpsychometrics.org/
 # dark3 <- read.csv("sd3_data.csv", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-# dark3 <- dark3[sample(nrow(dark3), 1000), ]
-# respMatrix <- dark3[,-c(28:29)]
-# respMatrix[respMatrix=="0"]<-1
-# write.table(respMatrix, "dark3.txt")
+# dark3_clean <- dark3[!apply(dark3 == 0, 1, any), ]     # delete any rows that contain "0" (no such value in codebook)
+# dark3_clean <- dark3_clean[,-c(28:29)]                 # delete the last two rows containing other info
+# respMatrix <- dark3_clean[sample(nrow(dark3), 1000), ] # from this clean data select 1000 participants
+# write.table(respMatrix, "dark3.txt")                   # save the result
