@@ -1,7 +1,7 @@
 # Simulate datasets 
 
 set.seed(2025)
-N <- 700 
+N <- 1000 
 i <- 27  
 s <- 4
 
@@ -68,7 +68,9 @@ item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T)
 
 
 ###  Generating the dispersion parameters
-d <- matrix(runif(i, min = 0, max = 1), i, 1, byrow = T) 
+d <- matrix(runif(i, min = 0, max = 1), i, 1, byrow = T)
+d <- round(d,4)
+colnames(d) <- 'd'
 
 
 ### Generating the main effects
@@ -94,7 +96,7 @@ cell1 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item,  d = d)
 
 
 ### Generating small  main effects
-item_m <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T)
+item_m <- matrix(runif(i, min = 0.1, max = 0.9), i, 1, byrow = T)
 item <- cbind(item_i, item_m)
 item <- round(item,4)
 colnames(item) <- c('I', 'M')
