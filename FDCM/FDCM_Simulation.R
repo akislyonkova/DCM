@@ -53,7 +53,7 @@ r <- matrix(NA, N, i) # empty response matrix
 Q=matrix(c(rep(c(1,0,0),9),rep(c(0,1,0),9),
            rep(c(0,0,1),9)), 27, 3, byrow = T) # 27 questions and 3 attributes
 colnames(Q) <- c('A1','A2', 'A3')
-n_attr<-dim(Q)[2]
+n_attr <- dim(Q)[2]
 
 #define alpha pattern
 alpha.patt <- expand.grid(replicate(n_attr, 0:1, simplify = F)) # profile set
@@ -66,54 +66,68 @@ alpha <- alpha.patt[ind, ] # simulated pattern ("truth") for all attributes for 
 ###  Generating the intercepts parameters
 item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) 
 
+###########################################################################################################
 
-###  Generating the dispersion parameters
-d <- matrix(runif(i, min = 0, max = 1), i, 1, byrow = T)
-d <- round(d,4)
-colnames(d) <- 'd'
+### Generating cell 1 large main effects and large dispersion 
 
+### Large main effects: min = 0.9, max = 3
 
-### Generating the main effects
-### Large: min = 0.9, max = 3
+item_m_large <- matrix(runif(i, min = 0.9, max = 3), i, 1, byrow = T) 
+item_large <- cbind(item_i, item_m_large)
+item_large <- as.data.frame(round(item_large,4))
+colnames(item_large) <- c('I', 'M')
 
-item_m <- matrix(runif(i, min = 0.9, max = 3), i, 1, byrow = T) 
-item <- cbind(item_i, item_m)
-item <- as.data.frame(round(item,4))
-colnames(item) <- c('I', 'M')
-#write.table(item, file = 'item_cell1.txt')
-
+###  Generating the dispersion parameters: min = 0.9, max = 2
+d_large <- matrix(runif(i, min = 0.9, max = 2), i, 1, byrow = T)
+d_large <- round(d_large,4)
+colnames(d_large) <- 'd'
 
 # Saving the parameters used for generating the data
-item_unlist <- as.data.frame(unlist(item, use.names = T))
-d_param <- as.data.frame(unlist(d, use.names = T))
-d_unlist <- as.data.frame(unlist(d_param, use.names = T))
-colnames(item_unlist) <- 'V1'
-colnames(d_unlist) <- 'V1'
-cell1_param <- rbind(item_unlist, d_unlist)
-write.table(cell1_param, file = 'cell1_param.txt')
+item_unlist_large <- as.data.frame(unlist(item_large, use.names = T))
+d_param_large <- as.data.frame(unlist(d_large, use.names = T))
+d_unlist_large <- as.data.frame(unlist(d_param_large, use.names = T))
+colnames(item_unlist_large) <- 'V1'
+colnames(d_unlist_large) <- 'V1'
+cell1_param <- rbind(item_unlist_large, d_unlist_large)
 
-cell1 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item,  d = d)
+write.table(cell1_param, file = 'cell1_param.txt') # save cell 1 params
+
+cell1 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item_large,  d = d_large) # generate data
+save(cell1, file = 'fdcm_cell1.rda') # saves generated cell 1 
+
+##########################################################################################################
+
+### Generating cell 2: large main effects and small  dispersion 
+
+d
+item[,2]
+
+###  Generating the dispersion parameters: min = 0.1, max = 0.9
+d_small <- matrix(runif(i, min = 0.1, max = 0.9), i, 1, byrow = T)
+d_small <- round(d_small,4)
+colnames(d) <- 'd'
+d_param_small <- as.data.frame(unlist(d_small, use.names = T))
+d_unlist_small <- as.data.frame(unlist(d_param_small, use.names = T))
+colnames(d_unlist_small) <- 'V1'
+cell2_param <- rbind(item_unlist_large, d_unlist_small)
+
+write.table(cell2_param, file = 'cell2_param.txt') 
+
+cell2 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item_large,  d = d_small) 
+save(cell2, file = 'fdcm_cell2.rda') 
+
+##########################################################################################################
+
+### Generating cell 3: small main effects and  large dispersion 
 
 
-### Generating small  main effects
-item_m <- matrix(runif(i, min = 0.1, max = 0.9), i, 1, byrow = T)
-item <- cbind(item_i, item_m)
-item <- round(item,4)
-colnames(item) <- c('I', 'M')
 
-cell2 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item, d = d)
+##########################################################################################################
 
-### Saving the results 
-save(cell1, file = 'fdcm_cell1.rda') # saves generated datasets 
+### Generating cell 4: small main effects and  small dispersion 
 
 
- 
-
-### With existing parameters 
-
-# library(rio)
-# d <- import("d.xlsx")
-# item <- import("item.xlsx")
-# item <- round(item,4)
 
 
+
+i
