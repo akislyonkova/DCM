@@ -99,13 +99,13 @@ save(cell1, file = 'fdcm_cell1.rda') # saves generated cell 1
 
 ### Generating cell 2: large main effects and small  dispersion 
 
-d
-item[,2]
+d_large
+item_large[,2]
 
 ###  Generating the dispersion parameters: min = 0.1, max = 0.9
 d_small <- matrix(runif(i, min = 0.1, max = 0.9), i, 1, byrow = T)
 d_small <- round(d_small,4)
-colnames(d) <- 'd'
+colnames(d_small) <- 'd'
 d_param_small <- as.data.frame(unlist(d_small, use.names = T))
 d_unlist_small <- as.data.frame(unlist(d_param_small, use.names = T))
 colnames(d_unlist_small) <- 'V1'
@@ -119,14 +119,38 @@ save(cell2, file = 'fdcm_cell2.rda')
 ##########################################################################################################
 
 ### Generating cell 3: small main effects and  large dispersion 
+item_large[,2]
 
+item_m_small <- matrix(runif(i, min = 0.1, max = 0.9), i, 1, byrow = T) 
+item_small <- cbind(item_i, item_m_small)
+item_small <- as.data.frame(round(item_small,4))
+colnames(item_small) <- c('I', 'M')
 
+item_unlist_small <- as.data.frame(unlist(item_small, use.names = T))
+colnames(item_unlist_small) <- 'V1'
+cell3_param <- rbind(item_unlist_small, d_unlist_large)
+
+write.table(cell3_param, file = 'cell3_param.txt') 
+
+item_small[,2]
+d_large[,]
+
+cell3 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item_small,  d = d_large)
+save(cell3, file = 'fdcm_cell3.rda') 
 
 ##########################################################################################################
 
 ### Generating cell 4: small main effects and  small dispersion 
 
+cell4_param <- rbind(item_unlist_small, d_unlist_small)
 
+write.table(cell4_param, file = 'cell4_param.txt') 
+
+item_small[,2]
+d_small[,]
+
+cell4 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item_small,  d = d_small)
+save(cell4, file = 'fdcm_cell3.rda') 
 
 
 
