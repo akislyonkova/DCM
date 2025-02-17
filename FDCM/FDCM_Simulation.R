@@ -92,7 +92,7 @@ cell1_param <- rbind(item_unlist_large, d_unlist_large)
 
 write.table(cell1_param, file = 'cell1_param.txt') # save cell 1 params
 
-cell1 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item_large,  d = d_large) # generate data
+cell1 <- gendata_fdcm(n_dataset = 20, alpha = alpha, item = item_large,  d = d_large) # generate data
 save(cell1, file = 'fdcm_cell1.rda') # saves generated cell 1 
 
 ##########################################################################################################
@@ -113,7 +113,7 @@ cell2_param <- rbind(item_unlist_large, d_unlist_small)
 
 write.table(cell2_param, file = 'cell2_param.txt') 
 
-cell2 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item_large,  d = d_small) 
+cell2 <- gendata_fdcm(n_dataset = 20, alpha = alpha, item = item_large,  d = d_small) 
 save(cell2, file = 'fdcm_cell2.rda') 
 
 ##########################################################################################################
@@ -135,7 +135,7 @@ write.table(cell3_param, file = 'cell3_param.txt')
 item_small[,2]
 d_large[,]
 
-cell3 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item_small,  d = d_large)
+cell3 <- gendata_fdcm(n_dataset = 20, alpha = alpha, item = item_small,  d = d_large)
 save(cell3, file = 'fdcm_cell3.rda') 
 
 ##########################################################################################################
@@ -149,9 +149,14 @@ write.table(cell4_param, file = 'cell4_param.txt')
 item_small[,2]
 d_small[,]
 
-cell4 <- gendata_fdcm(n_dataset = 1, alpha = alpha, item = item_small,  d = d_small)
-save(cell4, file = 'fdcm_cell3.rda') 
+cell4 <- gendata_fdcm(n_dataset = 20, alpha = alpha, item = item_small,  d = d_small)
+save(cell4, file = 'fdcm_cell4.rda') 
 
 
+# Extraction of the datasets 
 
-i
+for (i in 1:20) {
+  sim <- cell1[[i]]  
+  file_name <- paste("sim", i, ".txt")  
+  write.table(sim, file_name)  
+}
