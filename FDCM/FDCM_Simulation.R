@@ -157,6 +157,6 @@ save(cell4, file = 'fdcm_cell4.rda')
 
 for (i in 1:20) {
   sim <- cell1[[i]]  
-  file_name <- paste("sim", i, ".txt")  
+  file_name <- paste("sim", i, ".txt", sep = '')  
   write.table(sim, file_name)  
 }
