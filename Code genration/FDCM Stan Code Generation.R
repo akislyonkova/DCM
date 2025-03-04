@@ -1,13 +1,12 @@
 library(stringr)
-library(readxl)
 
-FDCM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="FDCM"){
-  nstep=scale.num-1
-  n_attr  <- ncol(Qmatrix)
-  n_items <- nrow(Qmatrix)
+FDCM <- function(Q,scale.num,save.path=getwd(),save.name="FDCM"){
+  nstep <- scale.num-1
+  n_attr  <- ncol(Q)
+  n_items <- nrow(Q)
   PS <- t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) # profile set 
-  PfbyI <- Q %*% PS # profile by item matrix, weight matrix 
-  nclass <- ncol(PfbyI) # number of profiles 
+  PfbyI <- Q %*% PS 
+  nclass <- ncol(PfbyI) 
   
   
   #li_0 - item intercept, list with nitems length 
@@ -134,15 +133,14 @@ FDCM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="FDCM"){
 }
   
   
-Q <- as.matrix(read_excel("Q.xlsx"))
-FDCM(Q,5)
+Q <- matrix(c(rep(c(1,0,0,0),14),
+                rep(c(0,1,0,0),14),
+                rep(c(0,0,1,0),14),
+                rep(c(0,0,0,1),14)),
+              56,4, byrow=T)
+FDCM(Q,4)
 
 
-
-# After generation needs to:
-# 1. change the priors of main effects to 1.5,2
-# 2. Change int Y[Np, Ni];
-# 3. change generated quantities
 
 
 # Extract class definition
