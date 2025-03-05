@@ -28,7 +28,7 @@ end.time <- Sys.time()
 time.taken <- end.time - start.time
 print(time.taken)
 
-save(fdcm, file =  paste('fdcm_sim', n, date, '.rda', sep='')) 
+save(fdcm, file =  paste('fdcm_sim', n, '.rda', sep='')) 
 FDCM <- as.data.frame(summary(fdcm)$summary) 
 write.table(FDCM,file = paste('FDCM_sim', n, '.txt', sep='')) 
 

@@ -77,7 +77,7 @@ item_large <- cbind(item_i, item_m_large)
 item_large <- as.data.frame(round(item_large,4))
 colnames(item_large) <- c('I', 'M')
 
-###  Generating the dispersion parameters: min = 0.9, max = 2
+###  Large dispersion parameters: min = 0.9, max = 2
 d_large <- matrix(runif(i, min = 0.9, max = 2), i, 1, byrow = T)
 d_large <- round(d_large,4)
 colnames(d_large) <- 'd'
