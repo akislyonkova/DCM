@@ -4,9 +4,9 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   nstep=scale.num-1
   n_attr  <- ncol(Qmatrix)
   n_items <- nrow(Qmatrix)
-  PS <- t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) # profile set 
-  PfbyI <- Q %*% PS # profile by item matrix, weight matrix 
-  nclass <- ncol(PfbyI) # number of profiles 
+  PS <- t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) 
+  PfbyI <- Q %*% PS 
+  nclass <- ncol(PfbyI) 
   
   
   #li_0 - item intercept, list with nitems length 
@@ -23,35 +23,41 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   }
   #ls_0 - step intercepts, matrix with nitems by nsteps dimensions
   ls_0 <- matrix("NA", n_items,nstep)
+  
   #loop for filling the step intercepts 
   for (s in 1:nstep){
     ls_0[,s] <- paste("step",s, "_I", sep='')
-    ls_0[1:9, s] <- paste(ls_0[1:9, s], "D1", sep='')
-    ls_0[10:18, s] <- paste(ls_0[10:18, s], "D2", sep='')
-    ls_0[19:27, s] <- paste(ls_0[19:27, s], "D3", sep='')
-    #ls_0[31:40, s] <- paste(ls_0[31:40, s], "D4", sep='')
+    ls_0[1:14, s] <- paste(ls_0[1:14, s], "D1", sep='')
+    ls_0[15:28, s] <- paste(ls_0[15:28, s], "D2", sep='')
+    ls_0[29:42, s] <- paste(ls_0[29:42, s], "D3", sep='')
+    ls_0[43:56, s] <- paste(ls_0[43:56, s], "D4", sep='')
   }
   #creating a cumulative matrix with a sum of "-" step intercepts 
   ls_0_cumul <- ls_0
   ls_0_cumul[,2] <- paste(ls_0[,1],'-',ls_0[,2],sep='')
   ls_0_cumul[,3] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],sep='')
-  ls_0_cumul[,4] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],sep='')
+  # ls_0_cumul[,4] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],sep='')
+  # ls_0_cumul[,5] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],'-',ls_0[,5],sep='')
+  # ls_0_cumul[,6] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],'-',ls_0[,5],'-',ls_0[,6],sep='')
   
   #ls_1 - step main effects , matrix with nitems by nsteps dimensions
   ls_1 <- matrix("NA", n_items,nstep)
+  
   #loop for filling the step main effects 
   for (s in 1:nstep){
     ls_1[,s] <- paste("step",s, "_M", sep='')
-    ls_1[1:9, s] <- paste(ls_1[1:9, s], "D1", sep='')
-    ls_1[10:18, s] <- paste(ls_1[10:18, s], "D2", sep='')
-    ls_1[19:27, s] <- paste(ls_1[19:27, s], "D3", sep='')
-    #ls_1[31:40, s] <- paste(ls_1[31:40, s], "D4", sep='')
+    ls_1[1:14, s] <- paste(ls_1[1:14, s], "D1", sep='')
+    ls_1[15:28, s] <- paste(ls_1[15:28, s], "D2", sep='')
+    ls_1[29:42, s] <- paste(ls_1[29:42, s], "D3", sep='')
+    ls_1[43:56, s] <- paste(ls_1[43:56, s], "D4", sep='')
   }
   #creating a cumulative matrix with a sum of "+" step main effects  
   ls_1_cumul <- ls_1
   ls_1_cumul[,2] <- paste(ls_1[,1],'+',ls_1[,2],sep='')
   ls_1_cumul[,3] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],sep='')
-  ls_1_cumul[,4] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],sep='')
+  # ls_1_cumul[,4] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],sep='')
+  # ls_1_cumul[,5] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],'+',ls_1[,5],sep='')
+  # ls_1_cumul[,6] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],'+',ls_1[,5],'+',ls_1[,6],sep='')
   
   
   ##################################################################################################################################  
@@ -61,7 +67,7 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   
   
   
-  Reparm<-array(rep(0,n_items*nclass*(scale.num)),dim = c(n_items,nclass,(scale.num))) # placeholder for the loop results 
+  Reparm<-array(rep(0,n_items*nclass*(scale.num)),dim = c(n_items,nclass,(scale.num))) 
   
   
   for (loops in 1:nstep){
@@ -166,6 +172,10 @@ sink(NULL)
 
 
 
-Q=matrix(c(rep(c(1,0,0),9),rep(c(0,1,0),9),rep(c(0,0,1),9)), 27, 3, byrow = T) # 27 questions and 3 attributes
-RSDM(Q,5)
+Q <- matrix(c(rep(c(1,0,0,0),14),
+              rep(c(0,1,0,0),14),
+              rep(c(0,0,1,0),14),
+              rep(c(0,0,0,1),14)),
+            56,4, byrow=T)
+RSDM(Q,4)
 
