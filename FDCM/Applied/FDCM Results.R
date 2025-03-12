@@ -23,7 +23,7 @@ nrdm@model_pars
 loglik1 <- extract(fdcm, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
 r_eff1 <- relative_eff(exp(loglik1)) 
 loo1 <- loo(loglik1, r_eff = r_eff1)
-print(loo_1)
+print(loo1)
 
 
 loglik2 <- extract(nrdm, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
@@ -35,6 +35,7 @@ print(loo2)
 loglik3 <- extract(rsdm, "contributionsI", permuted = F, inc_warmup = F,include = T)
 r_eff3 <- relative_eff(exp(loglik3)) 
 loo3 <- loo(loglik3, r_eff = r_eff3)
+print(loo3)
 
 lpd_point <- cbind(
   loo1$pointwise[,'elpd_loo'],
@@ -93,7 +94,8 @@ fdcm.t[,3:7] <- sapply(fdcm.t[,3:7],as.numeric)
 summary(fdcm.t)
 
 
-dfm_f <- melt(fdcm.t, id.vars=c("item", "class"),measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
+dfm_f <- melt(fdcm.t, id.vars=c("item", "class"),
+              measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 # save the plots for every item
 path <- file.path(getwd(), 'plots/')
 dir.create(path)
@@ -117,7 +119,6 @@ intercepts <- data.frame(lapply(list(9:35, 36:62, 63:89, 90:116), function(i) nr
 maineff <- data.frame(lapply(list(117:143, 144:170, 171:197, 198:224), function(i) nrdm_table[i, 1]))
 colnames(maineff) <- c("M_step1", "M_step2", "M_step3", "M_step4") 
 colnames(intercepts) <- c("I_step1", "I_step2", "I_step3", "I_step4") 
-rm(s)
 
 
 t <- matrix(NA,n_i,n_r)
@@ -187,8 +188,8 @@ A_FDCM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC1[x,])}))
 contributionsPC2<-matrix(get_posterior_mean(nrdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_NRDM=unlist(lapply(1:n_p,function(x){which.max(abs(contributionsPC2[x,]))}))
 
-contributionsPC2<-matrix(get_posterior_mean(rsdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
-A_RSDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC2[x,])}))
+contributionsPC3<-matrix(get_posterior_mean(rsdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
+A_RSDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC3[x,])}))
 
 
 #FDCM and NRDM 
@@ -200,10 +201,10 @@ sum(A_FDCM==A_NRDM)/n_p
 
 # Overlap plots for NRDM and FDCM
 t <- (as.factor(A_FDCM)==as.factor(A_NRDM))*1
-t <- as.data.frame(cbind(as.factor(A_NRDM),t)) 
+t <- as.data.frame(cbind(as.factor(A_NRDM),t))
 t <- transform(t, V1 = as.factor(V1))
 
-da <- cbind(A_NRDM,A_FDCM)
+da <- as.data.frame(cbind(A_NRDM,A_FDCM))
 #Overlap in form of table
 overlap <- table(da$A_NRDM, da$A_FDCM)
 print(overlap)
@@ -256,14 +257,15 @@ p2
 #RSDM and FDCM 
 sum(A_RSDM==A_FDCM)/n_p
 
-t = (as.factor(A_FDCM)==as.factor(A_RSDM))*1
-t = as.data.frame(cbind(as.factor(A_RSDM),t)) 
-t = transform(t, V1 = as.factor(V1))
+t <- (as.factor(A_FDCM)==as.factor(A_RSDM))*1
+t <- as.data.frame(cbind(as.factor(A_RSDM),t))
+t <- transform(t, V1 = as.factor(V1))
 
-da = cbind(A_RSDM,A_FDCM)
-with(da, table(A_RSDM,A_FDCM)) 
+da <- as.data.frame(cbind(A_RSDM,A_FDCM))
+overlap <- table(da$A_RSDM, da$A_FDCM)
+print(overlap)
 
-t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) # profile set 
+#t(expand.grid(replicate(3, 0:1, simplify = FALSE))) # profile set 
 
 p1 <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
   geom_bar(stat="count") +
