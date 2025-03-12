@@ -43,9 +43,10 @@ lpd_point <- cbind(
   loo3$pointwise[,'elpd_loo']
 )
 
-
+###############################################################################################################
 # Item Plots 
 
+# FDCM Plots
 # extracted parameters for FDCM 
 item <- data.frame(cbind(fdcm_table[c(9:35),1],fdcm_table[c(36:62),1]))
 d <- data.frame(fdcm_table[c(63:89),1])
@@ -80,9 +81,6 @@ for(i in 1:n_i) {
 t0 <- t
 fdcm.t <- rbind(t0,t1)
 
-
-
-# FDCM Plots
 fdcm.t <- round(fdcm.t,4)
 gr <- c(rep("No attribute",n_i),rep("Attribute",n_i),rep("o0",n_i),rep("o1",n_i))
 id <- c(rep(c(1:n_i),4))
@@ -181,6 +179,80 @@ for (i in 1:n_i){
   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
 }
 
+# RSDM Plots
+# extracted parameters for RSDM 
+
+items <- data.frame(lapply(list(9:35, 36:62), function(i) rsdm_table[i, 1]))
+steps_i <- data.frame(lapply(list(63:65, 66:68, 69:71, 72:74), function(i) rsdm_table[i, 1]))
+steps_m <- data.frame(lapply(list(75:77, 78:80, 81:83, 84:86), function(i) rsdm_table[i, 1]))
+
+steps_i <- steps_i[rep(seq_len(nrow(steps_i)), each = 9), ]
+steps_m <- steps_m[rep(seq_len(nrow(steps_m)), each = 9), ]
+
+colnames(items) <- c("I","M")
+colnames(steps_i) <- c("I_step1", "I_step2", "I_step3", "I_step4")
+colnames(steps_m) <- c("M_step1", "M_step2", "M_step3", "M_step4")
+
+
+t <- matrix(NA,n_i,n_r)  
+k <- 1 
+
+for(i in 1:n_i) {
+  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
+  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
+  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
+  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
+  t6 <- 1+t2+t3+t4+t5
+  t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+}
+
+t1 <- t 
+t <- matrix(NA,n_i,n_r) 
+k <- 0 
+for(i in 1:n_i) {
+  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
+  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
+  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
+  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
+  t6 <- 1+t2+t3+t4+t5
+  t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+}
+t0 <- t 
+rsdm.t <- rbind(t0,t1) 
+
+# RSDM Plots
+rsdm.t <- round(rsdm.t,4)
+gr <- c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
+id <- c(rep(c(1:n_i),4))
+rsdm.t <- data.frame(cbind(id,gr,rsdm.t))
+colnames(rsdm.t) <- c("item","class", "Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")
+rsdm.t[,3:7] <- sapply(rsdm.t[,3:7],as.numeric) 
+summary(rsdm.t)
+
+dfm <- melt(rsdm.t, id.vars=c("item", "class"),
+            measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
+
+path = file.path(getwd(), 'plots/')
+dir.create(path)
+# save the plots for every item
+for (i in 1:n_i){
+  item <- subset(dfm,item==i)
+  p <- ggplot(item, aes(x=variable,y=value,group=class)) +
+    geom_line(aes(color=class))+
+    geom_point(aes(color=class))+
+    theme_light()+
+    ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle
+    xlab("Response options")+
+    ylab("Probability")
+  filename <- paste("item_", i, ".png", sep = "") # creates the file name for each plot
+  filepath = file.path(path, filename) # creates the path for each plot
+  ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
+}
+
+
+
+
+################################################################################################################
 # Profile Overlap 
 contributionsPC1<-matrix(get_posterior_mean(fdcm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_FDCM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC1[x,])}))
