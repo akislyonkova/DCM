@@ -4,7 +4,11 @@ library(reshape2)
 library(loo)
 library(dplyr)
 
-fdcm  <- summary(fdcm)$summary
+#######################################################################################################
+# Short dark triad 
+
+fdcm_table  <- summary(fdcm)$summary
+nrdm_table  <- summary(nrdm)$summary
 
 n_i <- 27  # number of items 
 n_p <- 700 # number of people
@@ -13,8 +17,8 @@ n_c <- 8  # number of profiles
 
 
 # extracted parameters
-item <- data.frame(cbind(fdcm[c(9:35),1],fdcm[c(36:62),1]))
-d <- data.frame(fdcm[c(63:89),1])
+item <- data.frame(cbind(fdcm_table[c(9:35),1],fdcm_table[c(36:62),1]))
+d <- data.frame(fdcm_table[c(63:89),1])
 colnames(item) <- c("li_I","li_M")
 colnames(d) <- c("d")
 
@@ -84,10 +88,27 @@ for (i in 1:n_i){
 
 # LOOIC
 fdcm@model_pars
+nrdm@model_pars
 
-log_lik_1 <- extract(fdcm, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
-r_eff1 <- relative_eff(exp(log_lik_1)) 
-loo_1 <- loo(log_lik_1, r_eff = r_eff1)
-waic(log_lik_1)
+loglik1 <- extract(fdcm, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
+r_eff1 <- relative_eff(exp(loglik1)) 
+loo1 <- loo(loglik1, r_eff = r_eff1)
 print(loo_1)
+
+
+loglik2 <- extract(nrdm, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
+r_eff2 <- relative_eff(exp(loglik2)) 
+loo2 <- loo(loglik2, r_eff = r_eff2)
+print(loo2)
+
+
+loglik3 <- extract(rsdm, "contributionsI", permuted = F, inc_warmup = F,include = T)
+r_eff3 <- relative_eff(exp(loglik3)) 
+loo3 <- loo(loglik3, r_eff = r_eff3)
+
+lpd_point <- cbind(
+  loo1$pointwise[,'elpd_loo'],
+  loo2$pointwise[,'elpd_loo'],
+  loo3$pointwise[,'elpd_loo']
+)
 
