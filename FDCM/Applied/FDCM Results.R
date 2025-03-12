@@ -376,3 +376,58 @@ p2 <- ggplot(prf, aes(x=rsdm, y=fdcm))+
   xlab('RSDM classification')
 p2
 #ggsave("RRDM_NRDM_diff.png",plot = p2,width = 10, height = 9, dpi = 500, units = "in", device='png')
+
+#RSDM and NRDM 
+sum(A_RSDM==A_NRDM)/n_p
+
+t <- (as.factor(A_RSDM)==as.factor(A_NRDM))*1
+t <- as.data.frame(cbind(as.factor(A_NRDM),t))
+t <- transform(t, V1 = as.factor(V1))
+
+da <- as.data.frame(cbind(A_NRDM,A_RSDM))
+#Overlap in form of table
+overlap <- table(da$A_NRDM, da$A_RSDM)
+print(overlap)
+
+
+p1 <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
+  geom_bar(stat="count") +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
+  scale_fill_manual(values=c("black", "grey59"),
+                    name="Classification Agreement", 
+                    labels=c("Different", "Same"))+
+  xlab("Attribute Profiles") + 
+  ylab("Number of Examinees") + 
+  theme(legend.position="bottom")+ 
+  scale_x_discrete(labels=c("0000", "0001",
+                            "0010", "0011", 
+                            "0100", "0101",
+                            "0110", "0111", 
+                            "1000", "1001", 
+                            "1010", "1011", 
+                            "1100", "1101",
+                            "1110", "1111"))+
+  theme_light()
+p1
+
+# profile differences 
+plot(A_NRDM, A_RSDM)
+A_NRDM <- as.matrix(A_NRDM)
+A_RSDM <- as.matrix(A_RSDM)
+prf <- as.data.frame(cbind(A_NRDM,A_RSDM))
+colnames(prf) <- c("nrdm", "rsdm")
+p2 <- ggplot(prf, aes(x=nrdm, y=rsdm))+ 
+  geom_count(color='black')+
+  theme_light()+
+  scale_y_continuous(breaks = seq(1, 8, by = 1), labels=c("000", "100",
+                                                          "010", "110", 
+                                                          "001", "101",
+                                                          "011", "111"))+
+  scale_x_continuous(breaks = seq(1, 8, by = 1), labels=c("000", "100",
+                                                          "010", "110", 
+                                                          "001", "101",
+                                                          "011", "111"))+
+  ggtitle('Profile differences between NRDM and FDCM')+
+  ylab('RSDM classification')+
+  xlab('NRDM classification')
+p2
