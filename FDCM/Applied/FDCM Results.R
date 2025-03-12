@@ -37,11 +37,6 @@ r_eff3 <- relative_eff(exp(loglik3))
 loo3 <- loo(loglik3, r_eff = r_eff3)
 print(loo3)
 
-lpd_point <- cbind(
-  loo1$pointwise[,'elpd_loo'],
-  loo2$pointwise[,'elpd_loo'],
-  loo3$pointwise[,'elpd_loo']
-)
 
 ###############################################################################################################
 # Item Plots 
@@ -198,22 +193,23 @@ t <- matrix(NA,n_i,n_r)
 k <- 1 
 
 for(i in 1:n_i) {
-  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
-  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
-  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
-  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
+  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]-steps_i[i,1])
+  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,1]-steps_i[i,1]-steps_i[i,2])
+  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3])
+  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]-steps_i[i,4])
   t6 <- 1+t2+t3+t4+t5
   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
+
 
 t1 <- t 
 t <- matrix(NA,n_i,n_r) 
 k <- 0 
 for(i in 1:n_i) {
-  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]+steps_i[i,1])
-  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,2]+steps_i[i,1]+steps_i[i,2])
-  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3])
-  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]+steps_i[i,1]+steps_i[i,2]+steps_i[i,3]+steps_i[i,4])
+  t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]-steps_i[i,1])
+  t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,1]-steps_i[i,1]-steps_i[i,2])
+  t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3])
+  t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]-steps_i[i,4])
   t6 <- 1+t2+t3+t4+t5
   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
