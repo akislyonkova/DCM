@@ -13,24 +13,24 @@ n_r <- 5       # number of response options
 n_t <- n_r - 1 # number of thresholds
 n_c <- 8       # number of profiles  
 
-
 # FTI 
 n_i <- 56      # number of items 
 n_r <- 4       # number of response options
 n_t <- n_r - 1 # number of thresholds
 n_c <- 16      # number of profiles  
 
-# HEXACO 
+# HEXACO (Humility dimension only)
 n_i <- 40      # number of items 
 n_r <- 7       # number of response options
 n_t <- n_r - 1 # number of thresholds
 n_c <- 16      # number of profiles  
 
-#####################################################################################################
+######################################################################################################
 #Descriptive stats
 
 d3 <- read.table('dark3.txt') # Short dark triad 
 fti <- read.table('FTI.txt') # FTI
+H <- read.table('H.txt') # HEXACO
 
 path <- file.path(getwd(), 'Item distributions/')
 dir.create(path)
@@ -79,23 +79,47 @@ rsdm_table  <- summary(rsdm)$summary
 
 # FDCM Plots
 # extracted parameters for FDCM 
-item <- data.frame(cbind(fdcm_table[c(9:35),1],fdcm_table[c(36:62),1]))
-d <- data.frame(fdcm_table[c(63:89),1])
-colnames(item) <- c("li_I","li_M")
-colnames(d) <- c("d")
+
+n_params <- 3 # 1)intercepts, 2) main effects, and 3) dispersion for each item
+start_idx <- seq(from = n_c + 1, by = n_i, length.out = 3)
+end_idx <- start_idx + n_i - 1
+
+item <- data.frame(
+  cbind(
+    fdcm_table[
+      start_idx[1]:end_idx[1], 1]),
+  cbind(
+    fdcm_table[
+      start_idx[2]:end_idx[2], 1]),
+  cbind(
+    fdcm_table[
+      start_idx[3]:end_idx[3], 1])
+)
+colnames(item) <- c("li_I","li_M", "d")
 
 # For FDCM computing item probabilities
 t <- matrix(NA,n_i,n_r)
-k <- 1 
+k <- 1
 for(i in 1:n_i) {
-  t2 <- exp(1*(item[i,1] + item[i,2]*k) + (5-1)*d[i,])
-  t3 <- exp(2*(item[i,1] + item[i,2]*k) + (5-2)*d[i,])
-  t4 <- exp(3*(item[i,1] + item[i,2]*k) + (5-3)*d[i,])
-  t5 <- exp(4*(item[i,1] + item[i,2]*k) + (5-4)*d[i,])
+  t2 <- exp(1*(item[i,1] + item[i,2]*k) + (n_r-1)*d[i,])
+  t3 <- exp(2*(item[i,1] + item[i,2]*k) + (n_r-2)*d[i,])
+  t4 <- exp(3*(item[i,1] + item[i,2]*k) + (n_r-3)*d[i,])
+  t5 <- exp(4*(item[i,1] + item[i,2]*k) + (n_r-4)*d[i,])
   sum <- 1 + t2 + t3 + t4 + t5
   t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
 }
 t1 <- t
+
+seq <- seq(1, n_t)
+item_sum <- item[,1] + item[,2]*k
+t_first <- outer(seq, item_sum, "*")
+t_second <- outer(n_r - seq, d[,1], "*")
+t <- exp(t_first + t_second)
+t <- t(t)
+
+summ <- 1 + apply(t_first_part, 2, sum)
+t_with_1 <- cbind(rep(1, n_i), t) 
+result <- t_with_1 / summ
 
 i<- 25
 t2 <- exp(1*(item[i,1] + item[i,2]*k) + (5-1)*d[i,])
@@ -291,7 +315,7 @@ for (i in 1:n_i){
   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
 }
 
-### Exploring malfunctioning items 
+### Exploring malfunctioning items in RSDM
 
 i <- 23
 t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]-steps_i[i,1])
