@@ -99,56 +99,49 @@ colnames(item) <- c("li_I","li_M", "d")
 
 # For FDCM computing item probabilities
 t <- matrix(NA,n_i,n_r)
+
+# For Short Dark Triad 
 k <- 1
 for(i in 1:n_i) {
-  t2 <- exp(1*(item[i,1] + item[i,2]*k) + (n_r-1)*d[i,])
-  t3 <- exp(2*(item[i,1] + item[i,2]*k) + (n_r-2)*d[i,])
-  t4 <- exp(3*(item[i,1] + item[i,2]*k) + (n_r-3)*d[i,])
-  t5 <- exp(4*(item[i,1] + item[i,2]*k) + (n_r-4)*d[i,])
+  t2 <- exp(1*(item[i,1] + item[i,2]*k) + (n_r-1)*item[i,3])
+  t3 <- exp(2*(item[i,1] + item[i,2]*k) + (n_r-2)*item[i,3])
+  t4 <- exp(3*(item[i,1] + item[i,2]*k) + (n_r-3)*item[i,3])
+  t5 <- exp(4*(item[i,1] + item[i,2]*k) + (n_r-4)*item[i,3])
   sum <- 1 + t2 + t3 + t4 + t5
   t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
 }
 t1 <- t
-
-seq <- seq(1, n_t)
-item_sum <- item[,1] + item[,2]*k
-t_first <- outer(seq, item_sum, "*")
-t_second <- outer(n_r - seq, d[,1], "*")
-t <- exp(t_first + t_second)
-t <- t(t)
-
-summ <- 1 + apply(t_first_part, 2, sum)
-t_with_1 <- cbind(rep(1, n_i), t) 
-result <- t_with_1 / summ
-
-i<- 25
-t2 <- exp(1*(item[i,1] + item[i,2]*k) + (5-1)*d[i,])
-t3 <- exp(2*(item[i,1] + item[i,2]*k) + (5-2)*d[i,])
-t4 <- exp(3*(item[i,1] + item[i,2]*k) + (5-3)*d[i,])
-t5 <- exp(4*(item[i,1] + item[i,2]*k) + (5-4)*d[i,])
-sum <- 1 + t2 + t3 + t4 + t5
-t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
-
-# clearing the t matrix to avoid an accidental mix up
-# change the k to 0, no latent attribute 
-t <- matrix(NA,n_i,n_r)
-k <- 0
-for(i in 1:n_i) {
-  t2 <- exp(1*(item[i,1] + item[i,2]*k) + (5-1)*d[i,])
-  t3 <- exp(2*(item[i,1] + item[i,2]*k) + (5-2)*d[i,])
-  t4 <- exp(3*(item[i,1] + item[i,2]*k) + (5-3)*d[i,])
-  t5 <- exp(4*(item[i,1] + item[i,2]*k) + (5-4)*d[i,])
-  sum <- 1 + t2 + t3 + t4 + t5
-  t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
-}
 t0 <- t
 fdcm.t <- rbind(t0,t1)
+
+# For FTI
+k <- 1
+for(i in 1:n_i) {
+  t2 <- exp(1*(item[i,1] + item[i,2]*k) + (n_r-1)*item[i,3])
+  t3 <- exp(2*(item[i,1] + item[i,2]*k) + (n_r-2)*item[i,3])
+  t4 <- exp(3*(item[i,1] + item[i,2]*k) + (n_r-3)*item[i,3])
+  sum <- 1 + t2 + t3 + t4 
+  t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum)
+}
+t1 <- t
+t0 <- t
+fdcm.t <- rbind(t0,t1)
+
+
+# seq <- seq(1, n_t)
+# item_sum <- item[,1] + item[,2]*k
+# t_try <- exp(outer(item_sum, seq, "*") + outer(item[,3],(n_r - seq), "*"))
+# 
+# summ <- 1 + apply(t_try, 1, sum)
+# t_with_1 <- cbind(rep(1, n_i), t_try)
+# result <- t_with_1 / summ
 
 fdcm.t <- round(fdcm.t,4)
 gr <- c(rep("No attribute",n_i),rep("Attribute",n_i),rep("o0",n_i),rep("o1",n_i))
 id <- c(rep(c(1:n_i),4))
 fdcm.t <- data.frame(cbind(id,gr,fdcm.t))
-colnames(fdcm.t) <- c("item","class", "Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")
+colnames(fdcm.t) <- c("item","class", "Strongly Disagree", 
+                      "Disagree", "Neutral", "Agree", "Strongly Agree")
 
 sapply(fdcm.t, class)
 fdcm.t[,3:7] <- sapply(fdcm.t[,3:7],as.numeric)
