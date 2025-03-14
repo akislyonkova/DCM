@@ -5,20 +5,53 @@ library(loo)
 library(dplyr)
 
 #######################################################################################################
+n_p <- 1000    # number of people
+
 # Short dark triad 
+n_i <- 27      # number of items 
+n_r <- 5       # number of response options
+n_t <- n_r - 1 # number of thresholds
+n_c <- 8       # number of profiles  
 
-fdcm_table  <- summary(fdcm)$summary
-nrdm_table  <- summary(nrdm)$summary
-rsdm_table  <- summary(rsdm)$summary
 
-n_i <- 27  # number of items 
-n_p <- 1000 # number of people
-n_r <- 5   # number of response options
-n_c <- 8  # number of profiles  
+# FTI 
+n_i <- 56      # number of items 
+n_r <- 4       # number of response options
+n_t <- n_r - 1 # number of thresholds
+n_c <- 16      # number of profiles  
+
+# HEXACO 
+n_i <- 40      # number of items 
+n_r <- 7       # number of response options
+n_t <- n_r - 1 # number of thresholds
+n_c <- 16      # number of profiles  
+
+#####################################################################################################
+#Descriptive stats
+
+d3 <- read.table('dark3.txt') # Short dark triad 
+fti <- read.table('FTI.txt') # FTI
+
+path <- file.path(getwd(), 'Item distributions/')
+dir.create(path)
+
+data <- fti
+for (i in 1:ncol(data)) {
+  p <- ggplot(data, aes(x = factor(data[[i]]))) +
+       geom_bar() +
+       labs(title = paste("Item", i), x = "Agreement Level", y = "Frequency") +
+       theme_minimal()
+  #print(p)
+  filename <- paste("item_", i, ".jpg", sep = "") 
+  filepath = file.path(path, filename) 
+  ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='jpg')
+}
+
 
 # LOOIC
 fdcm@model_pars
 nrdm@model_pars
+rsdm@model_pars
 
 loglik1 <- extract(fdcm, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
 r_eff1 <- relative_eff(exp(loglik1)) 
@@ -40,6 +73,9 @@ print(loo3)
 
 ###############################################################################################################
 # Item Plots 
+fdcm_table  <- summary(fdcm)$summary
+nrdm_table  <- summary(nrdm)$summary
+rsdm_table  <- summary(rsdm)$summary
 
 # FDCM Plots
 # extracted parameters for FDCM 
