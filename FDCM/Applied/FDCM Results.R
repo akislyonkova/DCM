@@ -50,7 +50,7 @@ colnames(d) <- c("d")
 
 # For FDCM computing item probabilities
 t <- matrix(NA,n_i,n_r)
-k <- 1 # the the k=1, these profiles have an attribute
+k <- 1 
 for(i in 1:n_i) {
   t2 <- exp(1*(item[i,1] + item[i,2]*k) + (5-1)*d[i,])
   t3 <- exp(2*(item[i,1] + item[i,2]*k) + (5-2)*d[i,])
@@ -60,6 +60,14 @@ for(i in 1:n_i) {
   t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
 }
 t1 <- t
+
+i<- 25
+t2 <- exp(1*(item[i,1] + item[i,2]*k) + (5-1)*d[i,])
+t3 <- exp(2*(item[i,1] + item[i,2]*k) + (5-2)*d[i,])
+t4 <- exp(3*(item[i,1] + item[i,2]*k) + (5-3)*d[i,])
+t5 <- exp(4*(item[i,1] + item[i,2]*k) + (5-4)*d[i,])
+sum <- 1 + t2 + t3 + t4 + t5
+t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
 
 # clearing the t matrix to avoid an accidental mix up
 # change the k to 0, no latent attribute 
@@ -90,7 +98,7 @@ summary(fdcm.t)
 dfm_f <- melt(fdcm.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 # save the plots for every item
-path <- file.path(getwd(), 'plots/')
+path <- file.path(getwd(), 'FDCM plots/')
 dir.create(path)
 for (i in 1:n_i){
   item <- subset(dfm_f,item==i)
@@ -201,6 +209,13 @@ for(i in 1:n_i) {
   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
 
+i <- 23
+t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]-steps_i[i,1])
+t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,1]-steps_i[i,1]-steps_i[i,2])
+t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3])
+t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]-steps_i[i,4])
+t6 <- 1+t2+t3+t4+t5
+t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 
 t1 <- t 
 t <- matrix(NA,n_i,n_r) 
