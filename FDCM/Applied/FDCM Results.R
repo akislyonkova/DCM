@@ -195,6 +195,9 @@ steps_m <- steps_m[rep(seq_len(nrow(steps_m)), each = 9), ]
 colnames(items) <- c("I","M")
 colnames(steps_i) <- c("I_step1", "I_step2", "I_step3", "I_step4")
 colnames(steps_m) <- c("M_step1", "M_step2", "M_step3", "M_step4")
+row_names <- paste0(rep(c("D1_", "D2_", "D3_"), c(8, 9, 10)), "i", seq(1, n_i))
+rownames(steps_i) <- row_names
+rownames(steps_m) <- row_names
 
 
 t <- matrix(NA,n_i,n_r)  
@@ -208,14 +211,6 @@ for(i in 1:n_i) {
   t6 <- 1+t2+t3+t4+t5
   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
-
-i <- 23
-t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]-steps_i[i,1])
-t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,1]-steps_i[i,1]-steps_i[i,2])
-t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3])
-t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]-steps_i[i,4])
-t6 <- 1+t2+t3+t4+t5
-t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 
 t1 <- t 
 t <- matrix(NA,n_i,n_r) 
@@ -260,6 +255,20 @@ for (i in 1:n_i){
   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
 }
 
+### Exploring malfunctioning items 
+
+i <- 23
+t2 <- exp((items[i,2]+steps_m[i,1])*k+items[i,1]-steps_i[i,1])
+t3 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2])*k+items[i,1]-steps_i[i,1]-steps_i[i,2])
+t4 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3])
+t5 <- exp((items[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+items[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]-steps_i[i,4])
+t6 <- 1+t2+t3+t4+t5
+t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+
+# step 2 Dimension 3 too large, exploring convergence 
+rsdm@model_pars
+traceplot(rsdm, pars = c("step2_ID1", "step2_ID2", "step2_ID3"))
+print(rsdm)
 
 
 
