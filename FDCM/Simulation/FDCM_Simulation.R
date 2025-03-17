@@ -99,7 +99,7 @@ save(cell1, file = 'fdcm_cell1.rda') # saves generated cell 1
 
 ### Generating cell 2: large main effects and small  dispersion 
 
-d_large
+d_large[,]
 item_large[,2]
 
 ###  Generating the dispersion parameters: min = 0.1, max = 0.9
@@ -156,7 +156,7 @@ save(cell4, file = 'fdcm_cell4.rda')
 # Extraction of the datasets 
 
 for (i in 1:20) {
-  sim <- cell1[[i]]  
+  sim <- cell4[[i]]  
   file_name <- paste("sim", i, ".txt", sep = '')  
   write.table(sim, file_name)  
 }
