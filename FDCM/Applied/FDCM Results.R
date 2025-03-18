@@ -47,6 +47,10 @@ for (i in 1:ncol(data)) {
   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='jpg')
 }
 
+# Stanfit object diagnostics 
+
+check_divergences(rsdm)
+
 
 # LOOIC
 fdcm@model_pars
@@ -178,10 +182,15 @@ for (i in 1:n_i){
 
 
 # For NRDM computing item probabilities
-intercepts <- data.frame(lapply(list(9:35, 36:62, 63:89, 90:116), function(i) nrdm_table[i, 1]))
-maineff <- data.frame(lapply(list(117:143, 144:170, 171:197, 198:224), function(i) nrdm_table[i, 1]))
-colnames(maineff) <- c("M_step1", "M_step2", "M_step3", "M_step4") 
-colnames(intercepts) <- c("I_step1", "I_step2", "I_step3", "I_step4") 
+start_idx <- seq(from = n_c + 1, by = n_i, length.out = 2*n_t)
+end_idx <- start_idx + n_i - 1
+
+item <- data.frame(
+  mapply(function(start, end) nrdm_table[start:end, 1], start_idx, end_idx)
+)
+
+colnames(item) <- paste0(rep(c("i", "m"), each = n_t), "_step", rep(1:n_t, 2))
+rownames(item) <- paste0("item_", seq(1, n_i))
 
 
 t <- matrix(NA,n_i,n_r)
@@ -194,41 +203,46 @@ for(i in 1:n_i) {
   t6=1+t2+t3+t4+t5
   t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
 }
-
-
 t1 <- t
-
 t <- matrix(NA,n_i,n_r)
 k <- 0
-for(i in 1:n_i) {
-  t2=exp(maineff[i,1]*k+intercepts[i,1])
-  t3=exp((maineff[i,1]+maineff[i,2])*k+intercepts[i,1]+intercepts[i,2])
-  t4=exp((maineff[i,1]+maineff[i,2]+maineff[i,3])*k+intercepts[i,1]+intercepts[i,2]+intercepts[i,3])
-  t5=exp((maineff[i,1]+maineff[i,2]+maineff[i,3]+maineff[i,4])*k+intercepts[i,1]+intercepts[i,2]+intercepts[i,3]+intercepts[i,4])
-  t6=1+t2+t3+t4+t5
-  t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
-}
 t0 <- t
 nrdm.t <- rbind(t0,t1)
 
-
+#For FTI
+t <- matrix(NA,n_i,n_r)
+k <- 1
+for(i in 1:n_i) {
+  t2=exp(item[i,4]*k+item[i,1])
+  t3=exp((item[i,4]+item[i,5])*k+item[i,1]+item[i,2])
+  t4=exp((item[i,4]+item[i,5]+item[i,6])*k+item[i,1]+item[i,2]+item[i,3])
+  t6=1+t2+t3+t4
+  t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6)
+}
+t1 <- t
+t <- matrix(NA,n_i,n_r)
+k <- 0
+t0 <- t
+nrdm.t <- rbind(t0,t1)
 
 # NRDM Item Plots
 nrdm.t <- round(nrdm.t,4)
 gr <- c(rep("No attribute",n_i),rep("Attribute",n_i),rep("o0",n_i),rep("o1",n_i))
 id <- c(rep(c(1:n_i),4))
 nrdm.t <- data.frame(cbind(id,gr,nrdm.t))
-colnames(nrdm.t) <- c("item","class", "Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")
 
+#For FTI
+colnames(nrdm.t) <- c("item","class", "Strongly Disagree", "Disagree", "Agree", "Strongly Agree")
 sapply(nrdm.t, class)
-nrdm.t[,3:7] <- sapply(nrdm.t[,3:7],as.numeric)
+nrdm.t[,3:6] <- sapply(nrdm.t[,3:6],as.numeric)
 summary(nrdm.t)
-
 
 dfm_f <- melt(nrdm.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
-
-path <- file.path(getwd(), 'plots/')
+#For FTI
+dfm_f <- melt(nrdm.t, id.vars=c("item", "class"),
+              measure.vars = c("Strongly Disagree", "Disagree", "Agree", "Strongly Agree"))
+path <- file.path(getwd(), 'NRDM plots/')
 dir.create(path)
 for (i in 1:n_i){
   item <- subset(dfm_f,item==i)
@@ -363,7 +377,7 @@ da <- as.data.frame(cbind(A_NRDM,A_FDCM))
 overlap <- table(da$A_NRDM, da$A_FDCM)
 print(overlap)
 
-
+#For FTI
 p1 <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
   geom_bar(stat="count") +
   geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
@@ -383,9 +397,9 @@ p1 <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
                             "1110", "1111"))+
   theme_light()
 p1
-#ggsave("FDCM_NRDM_profile_overlap.png",plot = p1,width = 10, height = 6, dpi = 500, units = "in", device='png')
+ggsave("FDCM_NRDM_FTI_overlap.png",plot = p1,width = 10, height = 6, dpi = 500, units = "in", device='png')
 
-# profile differences 
+# profile differences
 plot(A_NRDM, A_FDCM)
 A_NRDM <- as.matrix(A_NRDM)
 A_FDCM <- as.matrix(A_FDCM)
@@ -394,18 +408,27 @@ colnames(prf) <- c("nrdm", "fdcm")
 p2 <- ggplot(prf, aes(x=nrdm, y=fdcm))+ 
   geom_count(color='black')+
   theme_light()+
-  scale_y_continuous(breaks = seq(1, 8, by = 1), labels=c("000", "100",
-                                                          "010", "110", 
-                                                          "001", "101",
-                                                          "011", "111"))+
-  scale_x_continuous(breaks = seq(1, 8, by = 1), labels=c("000", "100",
-                                                          "010", "110", 
-                                                          "001", "101",
-                                                          "011", "111"))+
+  scale_y_continuous(breaks = seq(1, n_c, by = 1), labels=c("0000", "0001",
+                                                          "0010", "0011", 
+                                                          "0100", "0101",
+                                                          "0110", "0111", 
+                                                          "1000", "1001", 
+                                                          "1010", "1011", 
+                                                          "1100", "1101",
+                                                          "1110", "1111"))+
+  scale_x_continuous(breaks = seq(1, n_c, by = 1), labels=c("0000", "0001",
+                                                          "0010", "0011", 
+                                                          "0100", "0101",
+                                                          "0110", "0111", 
+                                                          "1000", "1001", 
+                                                          "1010", "1011", 
+                                                          "1100", "1101",
+                                                          "1110", "1111"))+
   ggtitle('Profile differences between NRDM and FDCM')+
   ylab('FDCM classification')+
   xlab('NRDM classification')
 p2
+ggsave("FDCM_NRDM_FTI_diff.png",plot = p2,width = 10, height = 6, dpi = 500, units = "in", device='png')
 
 
 #RSDM and FDCM 
