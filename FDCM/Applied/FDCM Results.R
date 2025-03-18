@@ -124,6 +124,8 @@ for(i in 1:n_i) {
   t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum)
 }
 t1 <- t
+t <- matrix(NA,n_i,n_r)
+k <- 0
 t0 <- t
 fdcm.t <- rbind(t0,t1)
 
@@ -142,15 +144,22 @@ id <- c(rep(c(1:n_i),4))
 fdcm.t <- data.frame(cbind(id,gr,fdcm.t))
 colnames(fdcm.t) <- c("item","class", "Strongly Disagree", 
                       "Disagree", "Neutral", "Agree", "Strongly Agree")
-
+# For FTI
+colnames(fdcm.t) <- c("item","class", "Strongly Disagree", 
+                      "Disagree", "Agree", "Strongly Agree")
 sapply(fdcm.t, class)
-fdcm.t[,3:7] <- sapply(fdcm.t[,3:7],as.numeric)
+# For FTI
+fdcm.t[,3:6] <- sapply(fdcm.t[,3:6],as.numeric)
 summary(fdcm.t)
 
 
 dfm_f <- melt(fdcm.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
+#For FTI 
+dfm_f <- melt(fdcm.t, id.vars=c("item", "class"),
+              measure.vars = c("Strongly Disagree", "Disagree", "Agree", "Strongly Agree"))
 # save the plots for every item
+
 path <- file.path(getwd(), 'FDCM plots/')
 dir.create(path)
 for (i in 1:n_i){
