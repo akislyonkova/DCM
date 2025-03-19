@@ -88,7 +88,7 @@ n_params <- 3 # 1)intercepts, 2) main effects, and 3) dispersion for each item
 start_idx <- seq(from = n_c + 1, by = n_i, length.out = 3)
 end_idx <- start_idx + n_i - 1
 
-item <- data.frame(
+item_f <- data.frame(
   cbind(
     fdcm_table[
       start_idx[1]:end_idx[1], 1]),
@@ -99,7 +99,7 @@ item <- data.frame(
     fdcm_table[
       start_idx[3]:end_idx[3], 1])
 )
-colnames(item) <- c("li_I","li_M", "d")
+colnames(item_f) <- c("li_I","li_M", "d")
 
 # For FDCM computing item probabilities
 t <- matrix(NA,n_i,n_r)
@@ -185,12 +185,12 @@ for (i in 1:n_i){
 start_idx <- seq(from = n_c + 1, by = n_i, length.out = 2*n_t)
 end_idx <- start_idx + n_i - 1
 
-item <- data.frame(
+item_n <- data.frame(
   mapply(function(start, end) nrdm_table[start:end, 1], start_idx, end_idx)
 )
 
-colnames(item) <- paste0(rep(c("i", "m"), each = n_t), "_step", rep(1:n_t, 2))
-rownames(item) <- paste0("item_", seq(1, n_i))
+colnames(item_n) <- paste0(rep(c("i", "m"), each = n_t), "_step", rep(1:n_t, 2))
+rownames(item_n) <- paste0("item_", seq(1, n_i))
 
 
 t <- matrix(NA,n_i,n_r)
