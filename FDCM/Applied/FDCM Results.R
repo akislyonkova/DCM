@@ -42,7 +42,7 @@ H <- read.table('H.txt') # HEXACO
 path <- file.path(getwd(), 'Item distributions/')
 dir.create(path)
 
-data <- fti
+data <- H
 for (i in 1:ncol(data)) {
   p <- ggplot(data, aes(x = factor(data[[i]]))) +
        geom_bar() +
@@ -56,7 +56,9 @@ for (i in 1:ncol(data)) {
 
 # Stanfit object diagnostics 
 
-check_divergences(rsdm)
+check_divergences(fdcm)
+traceplot(fdcm, pars = c("l32M", "l34M", "l35M"))
+
 
 
 # LOOIC
@@ -96,17 +98,13 @@ start_idx <- seq(from = n_c + 1, by = n_i, length.out = 3)
 end_idx <- start_idx + n_i - 1
 
 item_f <- data.frame(
-  cbind(
-    fdcm_table[
-      start_idx[1]:end_idx[1], 1]),
-  cbind(
-    fdcm_table[
-      start_idx[2]:end_idx[2], 1]),
-  cbind(
-    fdcm_table[
-      start_idx[3]:end_idx[3], 1])
+  fdcm_table[start_idx[1]:end_idx[1], 1],
+  fdcm_table[start_idx[2]:end_idx[2], 1],
+  fdcm_table[start_idx[3]:end_idx[3], 1]
 )
+
 colnames(item_f) <- c("i_I","i_M", "d")
+rownames(item_f) <- paste0("item_", seq(1, n_i))
 
 # For FDCM computing item probabilities
 t <- matrix(NA,n_i,n_r)
