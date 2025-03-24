@@ -56,8 +56,15 @@ for (i in 1:ncol(data)) {
 
 # Stanfit object diagnostics 
 
-check_divergences(fdcm)
+check_divergences(nrdm)
 traceplot(fdcm, pars = c("l32M", "l34M", "l35M"))
+
+traceplot(rsdm, pars = c("step2_ID1", "step2_ID2", "step2_ID3", "step2_ID4"))
+traceplot(rsdm, pars = c("step2_MD1", "step2_MD2", "step2_MD3", "step2_MD4"))
+traceplot(rsdm, pars = c("step3_ID1", "step3_ID2", "step3_ID3", "step3_ID4"))
+
+traceplot(nrdm, pars = c("l1_29step3", "l1_49step3", "l1_47step3"))
+
 
 
 
