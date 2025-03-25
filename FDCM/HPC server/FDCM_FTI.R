@@ -11,7 +11,7 @@ getwd()
 respMatrix <- read.table("FTI.txt")  
 
 inilist1 <- list(Vc = c(rep(0.25, 4)), l47M = 1, l25I = 0.1, l27I = 0.1) 
-inilist2 <- list(Vc = c(rep(0.25, 4)))
+inilist2 <- list(Vc = c(rep(0.25, 4)), l47M = 1, l25I = 0.1, l27I = 0.1)
 
 model <- stan_model("./FDCM_FTI.stan") 
 date <- Sys.Date()

@@ -17,7 +17,7 @@ inilist2 <- list(Vc = c(rep(0.25, 4)),
     l1_23step3 = 1.5, l1_24step3 = 1.5, l1_36step3 = 1.5, 
     l1_41step3 = 1.5, l1_46step3 = 1.5, l1_47step3 = 1.5) 
 
-23,24,36,41,46,47
+
 nrdm_model <- stan_model("./NRDM_FTI.stan") 
 date <- Sys.Date()
 
