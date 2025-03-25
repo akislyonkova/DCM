@@ -1,6 +1,7 @@
 
 cell <- 2
 n_sim <- 20 
+n_i <- 27
 rows_start <- 9 
 rows_end <- 89 
 
@@ -23,9 +24,10 @@ for (i in 1:n_sim) {
 
 bias <- data.frame(rowSums(sim_param_dif)/n_sim)  
 colnames(bias) <- "raw_bias" 
-
-hist(bias$raw_bias)
+rownames(bias) <- paste0("item", seq(1, n_i), "_", rep(c("i", "m", "d"), each = n_i))
 
 bias$rmse <- NA 
 bias$rmse <- sqrt((rowSums(sim_param_dif))^2/(n_sim-1)) 
+
+hist(bias$raw_bias)
 hist(bias$rmse) 
