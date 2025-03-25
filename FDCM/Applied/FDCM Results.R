@@ -56,7 +56,7 @@ for (i in 1:ncol(data)) {
 
 # Stanfit object diagnostics 
 
-check_divergences(nrdm)
+check_divergences(fdcm)
 traceplot(fdcm, pars = c("l32M", "l34M", "l35M"))
 
 traceplot(rsdm, pars = c("step2_ID1", "step2_ID2", "step2_ID3", "step2_ID4"))
@@ -128,7 +128,6 @@ for(i in 1:n_i) {
 }
 t1 <- t
 t0 <- t
-fdcm.t <- rbind(t0,t1)
 
 # For FTI
 k <- 1
@@ -143,54 +142,24 @@ t1 <- t
 t <- matrix(NA,n_i,n_r)
 k <- 0
 t0 <- t
-fdcm.t <- rbind(t0,t1)
 
-
-# seq <- seq(1, n_t)
-# item_sum <- item[,1] + item[,2]*k
-# t_try <- exp(outer(item_sum, seq, "*") + outer(item[,3],(n_r - seq), "*"))
-# 
-# summ <- 1 + apply(t_try, 1, sum)
-# t_with_1 <- cbind(rep(1, n_i), t_try)
-# result <- t_with_1 / summ
-
-fdcm.t <- round(fdcm.t,4)
-gr <- c(rep("No attribute",n_i),rep("Attribute",n_i),rep("o0",n_i),rep("o1",n_i))
-id <- c(rep(c(1:n_i),4))
-fdcm.t <- data.frame(cbind(id,gr,fdcm.t))
-colnames(fdcm.t) <- c("item","class", "Strongly Disagree", 
-                      "Disagree", "Neutral", "Agree", "Strongly Agree")
-# For FTI
-colnames(fdcm.t) <- c("item","class", "Strongly Disagree", 
-                      "Disagree", "Agree", "Strongly Agree")
-sapply(fdcm.t, class)
-# For FTI
-fdcm.t[,3:6] <- sapply(fdcm.t[,3:6],as.numeric)
-summary(fdcm.t)
-
-
-dfm_f <- melt(fdcm.t, id.vars=c("item", "class"),
-              measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
-#For FTI 
-dfm_f <- melt(fdcm.t, id.vars=c("item", "class"),
-              measure.vars = c("Strongly Disagree", "Disagree", "Agree", "Strongly Agree"))
-# save the plots for every item
-
-path <- file.path(getwd(), 'FDCM plots/')
-dir.create(path)
-for (i in 1:n_i){
-  item <- subset(dfm_f,item==i)
-  p <- ggplot(item, aes(x=variable,y=value,group=class)) +
-    geom_line(aes(color=class))+
-    geom_point(aes(color=class))+
-    theme_light()+
-    ggtitle(paste("Probability to select a response option, item", i))+ 
-    xlab("Response options")+
-    ylab("Probability")
-  filename <- paste("item_", i, ".png", sep = "") 
-  filepath = file.path(path, filename) 
-  ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
+# For H
+k <- 1
+for(i in 1:n_i) {
+  t2 <- exp(1*(item_f[i,1] + item_f[i,2]*k) + (n_r-1)*item_f[i,3])
+  t3 <- exp(2*(item_f[i,1] + item_f[i,2]*k) + (n_r-2)*item_f[i,3])
+  t4 <- exp(3*(item_f[i,1] + item_f[i,2]*k) + (n_r-3)*item_f[i,3])
+  t5 <- exp(4*(item_f[i,1] + item_f[i,2]*k) + (n_r-4)*item_f[i,3])
+  t6 <- exp(5*(item_f[i,1] + item_f[i,2]*k) + (n_r-5)*item_f[i,3])
+  t7 <- exp(6*(item_f[i,1] + item_f[i,2]*k) + (n_r-6)*item_f[i,3])
+  sum <- 1 + t2 + t3 + t4 + t5 + t6 + t7 
+  t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum, t6/sum, t7/sum)
 }
+t1 <- t
+t <- matrix(NA,n_i,n_r)
+k <- 0
+t0 <- t
+model.t <- rbind(t0,t1)
 
 
 # For NRDM computing item probabilities
@@ -225,11 +194,11 @@ nrdm.t <- rbind(t0,t1)
 t <- matrix(NA,n_i,n_r)
 k <- 1
 for(i in 1:n_i) {
-  t2=exp(item_n[i,4]*k+item_n[i,1])
-  t3=exp((item_n[i,4]+item_n[i,5])*k+item_n[i,1]+item_n[i,2])
-  t4=exp((item_n[i,4]+item_n[i,5]+item_n[i,6])*k+item_n[i,1]+item_n[i,2]+item_n[i,3])
-  t6=1+t2+t3+t4
-  t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6)
+  t2 <- exp(item_n[i,4]*k+item_n[i,1])
+  t3 <- exp((item_n[i,4]+item_n[i,5])*k+item_n[i,1]+item_n[i,2])
+  t4 <- exp((item_n[i,4]+item_n[i,5]+item_n[i,6])*k+item_n[i,1]+item_n[i,2]+item_n[i,3])
+  sum <- 1 + t2 + t3 + t4 
+  t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum)
 }
 t1 <- t
 t <- matrix(NA,n_i,n_r)
@@ -237,38 +206,26 @@ k <- 0
 t0 <- t
 nrdm.t <- rbind(t0,t1)
 
-# NRDM Item Plots
-nrdm.t <- round(nrdm.t,4)
-gr <- c(rep("No attribute",n_i),rep("Attribute",n_i),rep("o0",n_i),rep("o1",n_i))
-id <- c(rep(c(1:n_i),4))
-nrdm.t <- data.frame(cbind(id,gr,nrdm.t))
-
-#For FTI
-colnames(nrdm.t) <- c("item","class", "Strongly Disagree", "Disagree", "Agree", "Strongly Agree")
-sapply(nrdm.t, class)
-nrdm.t[,3:6] <- sapply(nrdm.t[,3:6],as.numeric)
-summary(nrdm.t)
-
-dfm_f <- melt(nrdm.t, id.vars=c("item", "class"),
-              measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
-#For FTI
-dfm_f <- melt(nrdm.t, id.vars=c("item", "class"),
-              measure.vars = c("Strongly Disagree", "Disagree", "Agree", "Strongly Agree"))
-path <- file.path(getwd(), 'NRDM plots/')
-dir.create(path)
-for (i in 1:n_i){
-  item <- subset(dfm_f,item==i)
-  p <- ggplot(item, aes(x=variable,y=value,group=class)) +
-    geom_line(aes(color=class))+
-    geom_point(aes(color=class))+
-    theme_light()+
-    ggtitle(paste("Probability to select a response option, item", i))+ 
-    xlab("Response options")+
-    ylab("Probability")
-  filename <- paste("item_", i, ".png", sep = "") 
-  filepath = file.path(path, filename) 
-  ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
+#For H
+t <- matrix(NA,n_i,n_r)
+k <- 1
+for(i in 1:n_i) {
+  t2 <- exp(item_n[i,7]*k+item_n[i,1])
+  t3 <- exp((item_n[i,7]+item_n[i,8])*k+item_n[i,1]+item_n[i,2])
+  t4 <- exp((item_n[i,7]+item_n[i,8]+item_n[i,9])*k+item_n[i,1]+item_n[i,2]+item_n[i,3])
+  t5 <- exp((item_n[i,7]+item_n[i,8]+item_n[i,9]+item_n[i,10])*k+item_n[i,1]+item_n[i,2]+item_n[i,3]+item_n[i,4])
+  t6 <- exp((item_n[i,7]+item_n[i,8]+item_n[i,9]+item_n[i,10]+item_n[i,11])*k+item_n[i,1]+item_n[i,2]+item_n[i,3]+item_n[i,4]+item_n[i,5])
+  t7 <- exp((item_n[i,7]+item_n[i,5]+item_n[i,9]+item_n[i,10]+item_n[i,11]+item_n[i,12])*k+item_n[i,1]+item_n[i,2]+item_n[i,3]+item_n[i,4]+item_n[i,5]+item_n[i,6])
+  sum <- 1 + t2 + t3 + t4 + t5 + t6 + t7
+  t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum, t6/sum, t7/sum)
 }
+t1 <- t
+t <- matrix(NA,n_i,n_r)
+k <- 0
+t0 <- t
+model.t <- rbind(t0,t1)
+
+
 
 # RSDM Plots
 # extracted parameters for RSDM 
@@ -320,48 +277,89 @@ t1 <- t
 t <- matrix(NA,n_i,n_r) 
 k <- 0 
 t0 <- t 
-rsdm.t <- rbind(t0,t1) 
+model.t <- rbind(t0,t1)
+
+#For H
+for(i in 1:n_i) {
+  t2 <- exp((item_r[i,2]+step_r[i,7])*k+item_r[i,1]-step_r[i,1])
+  t3 <- exp((item_r[i,2]+step_r[i,7]+step_r[i,8])*k+item_r[i,1]-step_r[i,1]-step_r[i,2])
+  t4 <- exp((item_r[i,2]+step_r[i,7]+step_r[i,8]+step_r[i,9])*k+item_r[i,1]-step_r[i,1]-step_r[i,2]-step_r[i,3])
+  t5 <- exp((item_r[i,2]+step_r[i,7]+step_r[i,8]+step_r[i,9]+step_r[i,10])*k+item_r[i,1]-step_r[i,1]-step_r[i,2]-step_r[i,3]-step_r[i,4])
+  t6 <- exp((item_r[i,2]+step_r[i,7]+step_r[i,8]+step_r[i,9]+step_r[i,10]+step_r[i,11])*k+item_r[i,1]-step_r[i,1]-step_r[i,2]-step_r[i,3]-step_r[i,4]-step_r[i,5])
+  t7 <- exp((item_r[i,2]+step_r[i,7]+step_r[i,8]+step_r[i,9]+step_r[i,10]+step_r[i,11]+step_r[i,12])*k+item_r[i,1]-step_r[i,1]-step_r[i,2]-step_r[i,3]-step_r[i,4]-step_r[i,5]-step_r[i,6])
+  sum <- 1 + t2 + t3 + t4 + t5 + t6 + t7
+  t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum, t6/sum, t7/sum)
+}
+k <- 1 
+t1 <- t 
+t <- matrix(NA,n_i,n_r) 
+k <- 0 
+t0 <- t 
+model.t <- rbind(t0,t1)
 
 
+# Model Item Plots
 
-
-
-
-# RSDM Plots
-rsdm.t <- round(rsdm.t,4)
-gr <- c(rep("no attribute",n_i),rep("attribute",n_i),rep("o0",n_i),rep("o1",n_i))
+model.t <- round(model.t,4)
+gr <- c(rep("No attribute",n_i),rep("Attribute",n_i),rep("o0",n_i),rep("o1",n_i))
 id <- c(rep(c(1:n_i),4))
-rsdm.t <- data.frame(cbind(id,gr,rsdm.t))
+model.t <- data.frame(cbind(id,gr,model.t))
+# For Short D3
+colnames(model.t) <- c("item","class", "Strongly Disagree", 
+                       "Disagree", "Neutral", "Agree", "Strongly Agree")
+# For FTI
+colnames(model.t) <- c("item","class", "Strongly Disagree", 
+                       "Disagree", "Agree", "Strongly Agree")
+# For H
+colnames(model.t) <- c("item","class", "Strongly Disagree", 
+                       "Disagree", "Slightly Disagree", "Neutral", "Slightly Agree", 
+                       "Agree", "Strongly Agree")
+sapply(model.t, class)
+# For FTI
+model.t[,3:6] <- sapply(model.t[,3:6],as.numeric)
+# For H
+model.t[,3:9] <- sapply(model.t[,3:9],as.numeric)
+summary(model.t)
 
-#For Dark Triad
-colnames(rsdm.t) <- c("item","class", "Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")
-rsdm.t[,3:7] <- sapply(rsdm.t[,3:7],as.numeric) 
-dfm <- melt(rsdm.t, id.vars=c("item", "class"),
-            measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 
-#For FTI
-colnames(rsdm.t) <- c("item","class", "Strongly Disagree", "Disagree", "Agree", "Strongly Agree")
-rsdm.t[,3:6] <- sapply(rsdm.t[,3:6],as.numeric) 
-dfm <- melt(rsdm.t, id.vars=c("item", "class"),
-            measure.vars = c("Strongly Disagree", "Disagree", "Agree", "Strongly Agree"))
-
+dfm <- melt(model.t, id.vars=c("item", "class"),
+              measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
+#For FTI 
+dfm <- melt(model.t, id.vars=c("item", "class"),
+              measure.vars = c("Strongly Disagree", "Disagree", "Agree", "Strongly Agree"))
+#For H
+dfm <- melt(model.t, id.vars=c("item", "class"),
+              measure.vars = c("Strongly Disagree", 
+                               "Disagree", "Slightly Disagree", "Neutral", "Slightly Agree", 
+                               "Agree", "Strongly Agree"))
+# save the plots for every item
 
 path <- file.path(getwd(), 'RSDM plots/')
 dir.create(path)
-# save the plots for every item
 for (i in 1:n_i){
   item <- subset(dfm,item==i)
   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
     geom_line(aes(color=class))+
     geom_point(aes(color=class))+
     theme_light()+
-    ggtitle(paste("Probability to select a response option, item", i))+ # use paste for ggtitle
+    ggtitle(paste("Probability to select a response option, item", i))+ 
     xlab("Response options")+
     ylab("Probability")
-  filename <- paste("item_", i, ".png", sep = "") # creates the file name for each plot
-  filepath = file.path(path, filename) # creates the path for each plot
+  filename <- paste("item_", i, ".png", sep = "") 
+  filepath = file.path(path, filename) 
   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
 }
+
+
+
+
+
+
+
+
+
+
+
 
 ### Exploring malfunctioning items in RSDM
 
@@ -572,3 +570,14 @@ p2 <- ggplot(prf, aes(x=nrdm, y=rsdm))+
   ylab('RSDM classification')+
   xlab('NRDM classification')
 p2
+
+
+####### Item grpahs optimization 
+
+# seq <- seq(1, n_t)
+# item_sum <- item[,1] + item[,2]*k
+# t_try <- exp(outer(item_sum, seq, "*") + outer(item[,3],(n_r - seq), "*"))
+# 
+# summ <- 1 + apply(t_try, 1, sum)
+# t_with_1 <- cbind(rep(1, n_i), t_try)
+# result <- t_with_1 / summ
