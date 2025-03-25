@@ -56,7 +56,7 @@ for (i in 1:ncol(data)) {
 
 # Stanfit object diagnostics 
 
-check_divergences(fdcm)
+check_divergences(rsdm)
 traceplot(fdcm, pars = c("l32M", "l34M", "l35M"))
 
 traceplot(rsdm, pars = c("step2_ID1", "step2_ID2", "step2_ID3", "step2_ID4"))
@@ -119,14 +119,16 @@ t <- matrix(NA,n_i,n_r)
 # For Short Dark Triad 
 k <- 1
 for(i in 1:n_i) {
-  t2 <- exp(1*(item[i,1] + item[i,2]*k) + (n_r-1)*item[i,3])
-  t3 <- exp(2*(item[i,1] + item[i,2]*k) + (n_r-2)*item[i,3])
-  t4 <- exp(3*(item[i,1] + item[i,2]*k) + (n_r-3)*item[i,3])
-  t5 <- exp(4*(item[i,1] + item[i,2]*k) + (n_r-4)*item[i,3])
+  t2 <- exp(1*(item_f[i,1] + item_f[i,2]*k) + (n_r-1)*item_f[i,3])
+  t3 <- exp(2*(item_f[i,1] + item_f[i,2]*k) + (n_r-2)*item_f[i,3])
+  t4 <- exp(3*(item_f[i,1] + item_f[i,2]*k) + (n_r-3)*item_f[i,3])
+  t5 <- exp(4*(item_f[i,1] + item_f[i,2]*k) + (n_r-4)*item_f[i,3])
   sum <- 1 + t2 + t3 + t4 + t5
   t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
 }
 t1 <- t
+t <- matrix(NA,n_i,n_r)
+k <- 0
 t0 <- t
 
 # For FTI
@@ -159,6 +161,8 @@ t1 <- t
 t <- matrix(NA,n_i,n_r)
 k <- 0
 t0 <- t
+
+
 model.t <- rbind(t0,t1)
 
 
@@ -173,22 +177,22 @@ item_n <- data.frame(
 colnames(item_n) <- paste0(rep(c("i", "m"), each = n_t), "_step", rep(1:n_t, 2))
 rownames(item_n) <- paste0("item_", seq(1, n_i))
 
-
+#For Dark Triad
 t <- matrix(NA,n_i,n_r)
 k <- 1
 for(i in 1:n_i) {
-  t2=exp(maineff[i,1]*k+intercepts[i,1])
-  t3=exp((maineff[i,1]+maineff[i,2])*k+intercepts[i,1]+intercepts[i,2])
-  t4=exp((maineff[i,1]+maineff[i,2]+maineff[i,3])*k+intercepts[i,1]+intercepts[i,2]+intercepts[i,3])
-  t5=exp((maineff[i,1]+maineff[i,2]+maineff[i,3]+maineff[i,4])*k+intercepts[i,1]+intercepts[i,2]+intercepts[i,3]+intercepts[i,4])
-  t6=1+t2+t3+t4+t5
-  t[i,]=c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+  t2 <- exp(item_n[i,5]*k+item_n[i,1])
+  t3 <- exp((item_n[i,5]+item_n[i,6])*k+item_n[i,1]+item_n[i,2])
+  t4 <- exp((item_n[i,5]+item_n[i,6]+item_n[i,7])*k+item_n[i,1]+item_n[i,2]+item_n[i,3])
+  t5 <- exp((item_n[i,5]+item_n[i,6]+item_n[i,7]+item_n[i,8])*k+item_n[i,1]+item_n[i,2]+item_n[i,3]+item_n[i,4])
+  sum <- 1 + t2 + t3 + t4 +t5
+  t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
 }
 t1 <- t
 t <- matrix(NA,n_i,n_r)
 k <- 0
 t0 <- t
-nrdm.t <- rbind(t0,t1)
+model.t <- rbind(t0,t1)
 
 #For FTI
 t <- matrix(NA,n_i,n_r)
@@ -204,7 +208,7 @@ t1 <- t
 t <- matrix(NA,n_i,n_r)
 k <- 0
 t0 <- t
-nrdm.t <- rbind(t0,t1)
+model.t <- rbind(t0,t1)
 
 #For H
 t <- matrix(NA,n_i,n_r)
@@ -254,14 +258,20 @@ rownames(step_r) <- paste("item", rep(1:n_i, 1), "_D", rep(1:n_d, each = n_id), 
 
 t <- matrix(NA,n_i,n_r)  
 #For Dark Triad
+k <- 1 
 for(i in 1:n_i) {
-  t2 <- exp((item_r[i,2]+steps_m[i,1])*k+item_r[i,1]-steps_i[i,1])
-  t3 <- exp((item_r[i,2]+steps_m[i,1]+steps_m[i,2])*k+item_r[i,1]-steps_i[i,1]-steps_i[i,2])
-  t4 <- exp((item_r[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3])*k+item_r[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3])
-  t5 <- exp((item_r[i,2]+steps_m[i,1]+steps_m[i,2]+steps_m[i,3]+steps_m[i,4])*k+item_r[i,1]-steps_i[i,1]-steps_i[i,2]-steps_i[i,3]-steps_i[i,4])
-  t6 <- 1+t2+t3+t4+t5
-  t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6,t5/t6)
+  t2 <- exp((item_r[i,2]+step_r[i,5])*k+item_r[i,1]-step_r[i,1])
+  t3 <- exp((item_r[i,2]+step_r[i,5]+step_r[i,6])*k+item_r[i,1]-step_r[i,1]-step_r[i,2])
+  t4 <- exp((item_r[i,2]+step_r[i,5]+step_r[i,6]+step_r[i,7])*k+item_r[i,1]-step_r[i,1]-step_r[i,2]-step_r[i,3])
+  t5 <- exp((item_r[i,2]+step_r[i,5]+step_r[i,6]+step_r[i,7]+step_r[i,8])*k+item_r[i,1]-step_r[i,1]-step_r[i,2]-step_r[i,3]-step_r[i,4])
+  sum <- 1 + t2 + t3 + t4 +t5
+  t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum, t5/sum)
 }
+t1 <- t 
+t <- matrix(NA,n_i,n_r) 
+k <- 0 
+t0 <- t 
+model.t <- rbind(t0,t1)
 
 #For FTI
 for(i in 1:n_i) {
@@ -315,13 +325,15 @@ colnames(model.t) <- c("item","class", "Strongly Disagree",
                        "Disagree", "Slightly Disagree", "Neutral", "Slightly Agree", 
                        "Agree", "Strongly Agree")
 sapply(model.t, class)
+# For  Short D3
+model.t[,3:7] <- sapply(model.t[,3:7],as.numeric)
 # For FTI
 model.t[,3:6] <- sapply(model.t[,3:6],as.numeric)
 # For H
 model.t[,3:9] <- sapply(model.t[,3:9],as.numeric)
 summary(model.t)
 
-
+# For  Short D3
 dfm <- melt(model.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 #For FTI 
