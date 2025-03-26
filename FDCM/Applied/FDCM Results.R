@@ -59,7 +59,7 @@ for (i in 1:ncol(data)) {
 fdcm@date #version control
 
 check_divergences(fdcm)
-traceplot(fdcm, pars = c("l32M", "l34M", "l35M"))
+traceplot(fdcm, pars = c("l47M", "l46M", "l45M"))
 
 traceplot(rsdm, pars = c("step2_ID1", "step2_ID2", "step2_ID3", "step2_ID4"))
 traceplot(rsdm, pars = c("step2_MD1", "step2_MD2", "step2_MD3", "step2_MD4"))
