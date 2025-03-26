@@ -56,7 +56,9 @@ for (i in 1:ncol(data)) {
 
 # Stanfit object diagnostics 
 
-check_divergences(rsdm)
+fdcm@date #version control
+
+check_divergences(fdcm)
 traceplot(fdcm, pars = c("l32M", "l34M", "l35M"))
 
 traceplot(rsdm, pars = c("step2_ID1", "step2_ID2", "step2_ID3", "step2_ID4"))
@@ -134,9 +136,9 @@ t0 <- t
 # For FTI
 k <- 1
 for(i in 1:n_i) {
-  t2 <- exp(1*(item[i,1] + item[i,2]*k) + (n_r-1)*item[i,3])
-  t3 <- exp(2*(item[i,1] + item[i,2]*k) + (n_r-2)*item[i,3])
-  t4 <- exp(3*(item[i,1] + item[i,2]*k) + (n_r-3)*item[i,3])
+  t2 <- exp(1*(item_f[i,1] + item_f[i,2]*k) + (n_r-1)*item_f[i,3])
+  t3 <- exp(2*(item_f[i,1] + item_f[i,2]*k) + (n_r-2)*item_f[i,3])
+  t4 <- exp(3*(item_f[i,1] + item_f[i,2]*k) + (n_r-3)*item_f[i,3])
   sum <- 1 + t2 + t3 + t4 
   t[i,] <- c(1/sum, t2/sum, t3/sum, t4/sum)
 }
@@ -346,7 +348,7 @@ dfm <- melt(model.t, id.vars=c("item", "class"),
                                "Agree", "Strongly Agree"))
 # save the plots for every item
 
-path <- file.path(getwd(), 'RSDM plots/')
+path <- file.path(getwd(), 'FDCM plots/')
 dir.create(path)
 for (i in 1:n_i){
   item <- subset(dfm,item==i)
