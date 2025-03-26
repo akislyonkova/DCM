@@ -128,16 +128,14 @@ model {
 
 
 generated quantities {
-  vector[Ni] contributionsI;
-  matrix[Np,Nc] contributionsPC;
-  //Posterior
-  for (iterp in 1:Np){
-    for (iterc in 1:Nc){
-      for (iteri in 1:Ni){
-        contributionsI[iteri]= categorical_lpmf(Y[iterp,iteri]| softmax(((PImat[iteri,iterc]))));
-      }
-      contributionsPC[iterp,iterc]=prod(exp(contributionsI));
+  matrix[Np, Nc] contributionsPC;
+  
+  for (iterc in 1:Nc) {
+    vector[Np] sum_log_probs = rep_vector(0, Np);
+    for (iteri in 1:Ni) {
+      sum_log_probs += categorical_lpmf(Y[, iteri] | softmax(PImat[iteri, iterc]));
     }
+    contributionsPC[, iterc] = exp(sum_log_probs);
   }
 }
 

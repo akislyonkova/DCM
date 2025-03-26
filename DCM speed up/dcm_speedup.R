@@ -23,10 +23,10 @@ time.taken <- end.time - start.time
 print(time.taken)
 
 ################################################################################################
-model <- stan_model("dcm_speedup2.stan") 
+model_try <- stan_model("dcm_speedup2.stan") 
 
 start.time <- Sys.time()
-fdcm <- sampling(model,  
+fdcm <- sampling(model_try,  
                  data = list(Y=respMatrix, 
                              Ns = 4, 
                              Np = nrow(respMatrix), 
