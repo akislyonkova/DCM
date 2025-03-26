@@ -1,5 +1,5 @@
 
-cell <- 2
+cell <- 4
 n_sim <- 20 
 n_i <- 27
 rows_start <- 9 
@@ -7,7 +7,6 @@ rows_end <- 89
 
 file_name <- paste("cell", cell, "_param.txt", sep="")
 fdcm_param <- read.table(file_name)
-rm(fdcm_param)
 
 
 sim_param <- NULL

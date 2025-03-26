@@ -38,9 +38,9 @@ FDCM <- function(Q,scale.num,save.path=getwd(),save.name="FDCM"){
     for(loopi in 1:n_items){
       for(loopc in 1:nclass){
         Reparm[loopi,loopc,1]<-paste('  PImat[',loopi,',',loopc,'][1]=0;\n',sep='')
-        Reparm[loopi,loopc,loops+1]<-paste('  PImat[',loopi,',',loopc,'][',loops+1,']=', loops, '*(',li_0[loopi],
-                                           '+', li_1[loopi], '*', PfbyI[loopi,loopc], ')+(', nstep+1, '-', loops, ')*', d[loopi], 
-                                           ';\n',sep='')
+        Reparm[loopi,loopc,loops+1]<-paste('  PImat[',loopi,',',loopc,'][',loops+1,'] = log(exp(', loops, '*(',li_0[loopi],
+                                           ' + ', li_1[loopi], '*', PfbyI[loopi,loopc], ') + (', nstep+1, ' - ', loops, ')*', d[loopi], 
+                                           '));\n',sep='')
       }
       
     }
@@ -51,9 +51,9 @@ FDCM <- function(Q,scale.num,save.path=getwd(),save.name="FDCM"){
   
   Modelcontainer<-paste('vector[Nc] contributionsC;\n','vector[Ni] contributionsI;\n\n',sep='')
   Parmprior<-paste(c(paste('//Prior\n'),
-                     paste(li_0,'~normal(0,2)',';\n'),
-                     paste(li_1,'~normal(0,2)', ';\n'),
-                     paste(d,'~normal(0,2)', ';\n'),
+                     paste(li_0,'~normal(0,2)',';\n', sep=''),
+                     paste(li_1,'~normal(0,2)', ';\n', sep=''),
+                     paste(d,'~normal(0,2)', ';\n', sep=''),
                      paste('Vc~dirichlet(rep_vector(2.0, Nc));',sep='')))
   
   #Likelihood Stan code
@@ -82,9 +82,9 @@ FDCM <- function(Q,scale.num,save.path=getwd(),save.name="FDCM"){
   #Parameter Specification
   parm.spec<-paste(c('parameters{
                      simplex[Nc] Vc;\n ',
-                     paste('real',li_0,';\n '),
-                     paste('real<lower=0>',li_1,';\n '),
-                     paste('real<lower=0>',d,';\n '),
+                     paste('real ',li_0,';\n ',sep=''),
+                     paste('real<lower=0> ',li_1,';\n ', sep=''),
+                     paste('real<lower=0> ',d,';\n ', sep=''),
                      '}\n')
                    ,collapse='')
   
