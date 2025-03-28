@@ -2,7 +2,7 @@ library(ggplot2)
 library(reshape2)
 
 
-cell <- 2       # cell number 
+cell <- 2        # cell number 
 n_sim <- 20      # number of replications 
 n_i <- 27        # number of items 
 rows_start <- 9  # first parameter 
