@@ -32,9 +32,9 @@ check  <- function(items, A) {
 check(items_A3, A3)
 
 
-reverse_items <- c(11, 15, 17, 20, 24, 25)
+#reverse_items <- c(11, 15, 17, 20, 24, 25)
 d3_copy <- d3
-d3[, reverse_items] <- 6 - d3[, reverse_items]
+d3[, 24] <- 6 - d3[, 24]
 d3 == d3_copy
 d3 <- d3[,-c(28:30)]
 write.table(d3, "dark3.txt")
