@@ -56,10 +56,14 @@ for (i in 1:ncol(data)) {
 
 # Stanfit object diagnostics 
 
+fdcm@model_pars
+nrdm@model_pars
+rsdm@model_pars
+
 fdcm@date #version control
 
 check_divergences(fdcm)
-traceplot(fdcm, pars = c("l47M", "l46M", "l45M"))
+traceplot(fdcm, pars = c("l38M", "l39M", "l40M"))
 
 traceplot(rsdm, pars = c("step2_ID1", "step2_ID2", "step2_ID3", "step2_ID4"))
 traceplot(rsdm, pars = c("step2_MD1", "step2_MD2", "step2_MD3", "step2_MD4"))
@@ -71,9 +75,6 @@ traceplot(nrdm, pars = c("l1_29step3", "l1_49step3", "l1_47step3"))
 
 
 # LOOIC
-fdcm@model_pars
-nrdm@model_pars
-rsdm@model_pars
 
 loglik1 <- extract(fdcm, "contributionsI", permuted = F, inc_warmup = FALSE,include = TRUE)
 r_eff1 <- relative_eff(exp(loglik1)) 
