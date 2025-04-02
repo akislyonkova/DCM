@@ -19,18 +19,22 @@ for (i in 1:n_sim) {
   sim_param <- cbind(sim_param,read.table(sim_name)[c(rows_start:rows_end),1])
 }
 
-fdcm_param_n <- data.frame(rep(fdcm_param, n_sim)) 
+
+fdcm_param_n <- data.frame(rep(fdcm_param, n_sim))
 sim_param_dif <- (sim_param - fdcm_param_n)  
 for (i in 1:n_sim) {
   colnames(sim_param_dif)[i] <- paste("sim", i, sep='') 
 }
 
-bias <- data.frame(rowSums(sim_param_dif)/n_sim)  
+bias <- data.frame(rowSums(sim_param_dif)/n_sim)
+
+
 colnames(bias) <- "raw_bias" 
 rownames(bias) <- paste0("item", seq(1, n_i), "_", rep(c("i", "m", "d"), each = n_i))
 
 bias$rmse <- NA 
 bias$rmse <- sqrt((rowSums(sim_param_dif))^2/(n_sim-1)) 
+
 
 #Overview
 hist(bias$raw_bias)
@@ -83,3 +87,5 @@ ggsave(title_p,
        units = "in", 
        device='png', 
        bg = "white")
+
+mean(fdcm_param[c(28:54),])
