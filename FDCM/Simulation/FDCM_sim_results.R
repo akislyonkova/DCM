@@ -2,7 +2,7 @@ library(ggplot2)
 library(reshape2)
 
 
-cell <- 2        # cell number 
+cell <- 4        # cell number 
 n_sim <- 20      # number of replications 
 n_i <- 27        # number of items 
 rows_start <- 9  # first parameter 
@@ -18,7 +18,6 @@ for (i in 1:n_sim) {
   sim_name <- sprintf("FDCM_sim%i.txt", i)
   sim_param <- cbind(sim_param,read.table(sim_name)[c(rows_start:rows_end),1])
 }
-
 
 fdcm_param_n <- data.frame(rep(fdcm_param, n_sim))
 sim_param_dif <- (sim_param - fdcm_param_n)  
@@ -88,4 +87,16 @@ ggsave(title_p,
        device='png', 
        bg = "white")
 
-mean(fdcm_param[c(28:54),])
+mean(fdcm_param[c(28:54),]) #average for the population main effects
+avg_bias <- c(0.03165, 0.12639, 0.17220, 0.190047, 0.07911, 0.06241, 0.31551, 0.23146, 0.26034)
+mean(avg_bias)
+
+fdcm_param[c(1:27),]
+fdcm_param[c(28:54),]
+fdcm_param[c(55:81),]
+
+bias[c(1:27),]
+bias[c(28:54),]
+bias[c(55:81),]
+
+
