@@ -62,16 +62,27 @@ rsdm@model_pars
 
 fdcm@date #version control
 
-check_divergences(fdcm)
-traceplot(fdcm, pars = c("l38M", "l39M", "l40M"))
+check_divergences(rsdm)
 
-traceplot(rsdm, pars = c("step2_ID1", "step2_ID2", "step2_ID3", "step2_ID4"))
-traceplot(rsdm, pars = c("step2_MD1", "step2_MD2", "step2_MD3", "step2_MD4"))
-traceplot(rsdm, pars = c("step3_ID1", "step3_ID2", "step3_ID3", "step3_ID4"))
+# Dark triad
+rsdm_parameters <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I", 
+                "l10I", "l11I", "l12I", "l13I", "l14I", "l15I", "l16I", "l17I", 
+                "l18I", "l19I", "l20I", "l21I", "l22I", "l23I", "l24I", "l25I", 
+                "l26I", "l27I", "l1M", "l2M", "l3M", "l4M", "l5M", "l6M", "l7M", 
+                "l8M", "l9M", "l10M", "l11M", "l12M", "l13M", "l14M", "l15M", 
+                "l16M", "l17M", "l18M", "l19M", "l20M", "l21M", "l22M", "l23M", 
+                "l24M", "l25M", "l26M", "l27M", "step1_ID1", "step1_ID2", "step1_ID3", 
+                "step2_ID1", "step2_ID2", "step2_ID3", "step3_ID1", "step3_ID2", 
+                "step3_ID3", "step4_ID1", "step4_ID2", "step4_ID3", "step1_MD1", 
+                "step1_MD2", "step1_MD3", "step2_MD1", "step2_MD2", "step2_MD3", 
+                "step3_MD1", "step3_MD2", "step3_MD3", "step4_MD1", "step4_MD2", 
+                "step4_MD3")
 
-traceplot(nrdm, pars = c("l1_29step3", "l1_49step3", "l1_47step3"))
 
 
+for (p in rsdm_parameters){
+  print(traceplot(rsdm, pars = p))
+}
 
 
 # LOOIC

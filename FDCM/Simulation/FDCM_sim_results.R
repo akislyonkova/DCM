@@ -2,7 +2,7 @@ library(ggplot2)
 library(reshape2)
 
 
-cell <- 4        # cell number 
+cell <- 3        # cell number 
 n_sim <- 20      # number of replications 
 n_i <- 27        # number of items 
 rows_start <- 9  # first parameter 
@@ -88,8 +88,7 @@ ggsave(title_p,
        bg = "white")
 
 mean(fdcm_param[c(28:54),]) #average for the population main effects
-avg_bias <- c(0.03165, 0.12639, 0.17220, 0.190047, 0.07911, 0.06241, 0.31551, 0.23146, 0.26034)
-mean(avg_bias)
+
 
 fdcm_param[c(1:27),]
 fdcm_param[c(28:54),]
