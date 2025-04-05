@@ -9,6 +9,6 @@ summary(df_items)
 
 
 
-FTI <- df_items[sample(nrow(df_items), 1000), ] 
+FTI <- df_items[sample(nrow(df_items), 2000), ] 
 write.table(FTI,'FTI.txt')
 

@@ -520,6 +520,7 @@ A_RSDM <- as.matrix(A_RSDM)
 prf <- as.data.frame(cbind(A_NRDM,A_RSDM))
 colnames(prf) <- c("nrdm", "rsdm")
 
+
 ####### Item grpahs optimization 
 
 # seq <- seq(1, n_t)
