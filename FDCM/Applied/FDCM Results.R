@@ -6,9 +6,9 @@ library(dplyr)
 library(gridExtra)
 
 #######################################################################################################
-n_p <- 1000    # number of people
 
 # Short dark triad 
+n_p <- 1000    # number of people
 n_i <- 27      # number of items 
 n_r <- 5       # number of response options
 n_t <- n_r - 1 # number of thresholds
@@ -17,6 +17,7 @@ n_c <- 2^n_d   # number of profiles
 n_id <- 9      # number of items per dimension 
 
 # FTI 
+n_p <- 2000    # number of people
 n_i <- 56      # number of items 
 n_r <- 4       # number of response options
 n_t <- n_r - 1 # number of thresholds
@@ -26,6 +27,7 @@ n_id <- 14     # number of items per dimension
  
 
 # HEXACO (Humility dimension only)
+n_p <- 2000    # number of people
 n_i <- 40      # number of items 
 n_r <- 7       # number of response options
 n_t <- n_r - 1 # number of thresholds
@@ -366,7 +368,7 @@ summary(model.t)
 
 # For  Short D3
 # choose from dfm_f, dfm_n, or dfm_r
-dfm_n <- melt(model.t, id.vars=c("item", "class"),
+dfm_f <- melt(model.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 #For FTI 
 dfm <- melt(model.t, id.vars=c("item", "class"),
@@ -438,15 +440,14 @@ sum(A_FDCM==A_RSDM)/n_p
 sum(A_NRDM==A_RSDM)/n_p
 
 # Overlap plots for NRDM and FDCM
-rm(p)
 p <- (as.factor(A_FDCM)==as.factor(A_NRDM))*1
 p <- as.data.frame(cbind(as.factor(A_NRDM), as.factor(A_FDCM), p))
-#p <- transform(p, V1 = as.factor(V1))
+p <- transform(p, V2 = as.factor(V2))
 
 rm(p)
 p <- (as.factor(A_FDCM)==as.factor(A_RSDM))*1
 p <- as.data.frame(cbind(as.factor(A_RSDM), as.factor(A_FDCM), p))
-#p <- transform(p, V1 = as.factor(V1))
+p <- transform(p, V2 = as.factor(V2))
 
 rm(p)
 p <- (as.factor(A_NRDM)==as.factor(A_RSDM))*1
@@ -475,11 +476,11 @@ labels <-  c("0000", "0001",
     "1110", "1111")
 
 model1 <- "FDCM"
-model2 <- "RSDM"
+model2 <- "NRDM"
 models <- paste(model1,'.', model2, sep="")
-#data <- " (Dark Triad)"
+data_name <- "d3"
 
-p_title <- paste("overlap_", models,".png", sep="")
+p_title <- paste(data_name,"_overlap_", models,".png", sep="")
 title <- paste("Classification agreement for ", model1, " and ", model2, sep="")
   
 p1 <- ggplot(p, aes(x=V2, fill=as.factor(p))) +
@@ -495,43 +496,20 @@ p1 <- ggplot(p, aes(x=V2, fill=as.factor(p))) +
   scale_x_discrete(labels=labels)+
   theme_light()
 p1
-ggsave(p_title, plot = p1,width = 10, height = 6, dpi = 500, units = "in", device='png')
+ggsave(p_title, plot = p1, width = 13, height = 9, dpi = 500, units = "in", device='png')
 
 
 
 # profile differences
+
+#NRDM and FDCM 
 plot(A_NRDM, A_FDCM)
 A_NRDM <- as.matrix(A_NRDM)
 A_FDCM <- as.matrix(A_FDCM)
 prf <- as.data.frame(cbind(A_NRDM,A_FDCM))
 colnames(prf) <- c("nrdm", "fdcm")
 
-p_title2 <- paste("diff_", models,".png", sep="")
-title2 <- paste("Profile differences between ", model1, " and ", model2, data, sep="")
-
-p2 <- ggplot(prf, aes(x=nrdm, y=fdcm))+ 
-  geom_count(color='black')+
-  theme_light()+
-  scale_y_continuous(breaks = seq(1, n_c, by = 1), labels=labels)+
-  scale_x_continuous(breaks = seq(1, n_c, by = 1), labels=labels)+
-  ggtitle(title2)+
-  ylab(model1)+
-  xlab(model2)
-p2
-ggsave(p_title2, plot = p2, width = 10, height = 6, dpi = 500, units = "in", device='png')
-
-
 #RSDM and FDCM 
-sum(A_RSDM==A_FDCM)/n_p
-
-t <- (as.factor(A_FDCM)==as.factor(A_RSDM))*1
-t <- as.data.frame(cbind(as.factor(A_RSDM),t))
-t <- transform(t, V1 = as.factor(V1))
-
-da <- as.data.frame(cbind(A_RSDM,A_FDCM))
-overlap <- table(da$A_RSDM, da$A_FDCM)
-print(overlap)
-
 plot(A_RSDM, A_FDCM)
 A_RSDM <- as.matrix(A_RSDM)
 A_FDCM <- as.matrix(A_FDCM)
@@ -541,11 +519,6 @@ colnames(prf) <- c("rsdm", "fdcm")
 #RSDM and NRDM 
 sum(A_RSDM==A_NRDM)/n_p
 
-t <- (as.factor(A_RSDM)==as.factor(A_NRDM))*1
-t <- as.data.frame(cbind(as.factor(A_NRDM),t))
-t <- transform(t, V1 = as.factor(V1))
-da <- as.data.frame(cbind(A_NRDM,A_RSDM))
-
 overlap <- table(da$A_NRDM, da$A_RSDM)
 print(overlap)
 
@@ -554,8 +527,6 @@ A_NRDM <- as.matrix(A_NRDM)
 A_RSDM <- as.matrix(A_RSDM)
 prf <- as.data.frame(cbind(A_NRDM,A_RSDM))
 colnames(prf) <- c("nrdm", "rsdm")
-
-
 
 ##############################################################################################
 # Visuals for paper
@@ -611,10 +582,19 @@ grid.arrange(p1, p2, p3, ncol = 3)
 ggsave("d3_diff_i1.png", grid.arrange(p1, p2, p3, ncol = 3), width = 11, height = 5)
 
 
+p_title2 <- paste(data_name, "_diff_", models,".png", sep="")
+title2 <- paste("Classification differences between ", model1, " and ", model2, sep="")
 
-
-
-
+p_dif <- ggplot(prf, aes(x=nrdm, y=fdcm))+ 
+  geom_count(color='black')+
+  theme_light()+
+  scale_y_continuous(breaks = seq(1, n_c, by = 1), labels=labels)+
+  scale_x_continuous(breaks = seq(1, n_c, by = 1), labels=labels)+
+  ggtitle(title2)+
+  ylab(model1)+
+  xlab(model2)
+p_dif
+ggsave(p_title2, plot = p_dif, width = 12, height = 8, dpi = 500, units = "in", device='png')
 
 
 
