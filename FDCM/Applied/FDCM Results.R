@@ -3,6 +3,7 @@ library(ggplot2)
 library(reshape2) 
 library(loo)
 library(dplyr)
+library(gridExtra)
 
 #######################################################################################################
 n_p <- 1000    # number of people
@@ -42,17 +43,22 @@ H <- read.table('H.txt') # HEXACO
 path <- file.path(getwd(), 'Item distributions/')
 dir.create(path)
 
-data <- H
+data <- d3
 for (i in 1:ncol(data)) {
   p <- ggplot(data, aes(x = factor(data[[i]]))) +
        geom_bar() +
        labs(title = paste("Item", i), x = "Agreement Level", y = "Frequency") +
        theme_minimal()
-  #print(p)
   filename <- paste("item_", i, ".jpg", sep = "") 
   filepath = file.path(path, filename) 
   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='jpg')
 }
+
+#Subscales sum, max 5*9=45 point in each subscale
+data$A1_Sum <- rowSums(data[, 1:9])   
+data$A2_Sum <- rowSums(data[, 10:18]) 
+data$A3_Sum <- rowSums(data[, 19:27]) 
+
 
 # Stanfit object diagnostics 
 
@@ -78,10 +84,21 @@ rsdm_parameters <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9
                 "step3_MD1", "step3_MD2", "step3_MD3", "step4_MD1", "step4_MD2", 
                 "step4_MD3")
 
-
+fdcm_parameters <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I", "l10I", 
+                     "l11I", "l12I", "l13I", "l14I", "l15I", "l16I", "l17I", "l18I", "l19I", 
+                     "l20I", "l21I", "l22I", "l23I", "l24I", "l25I", "l26I", "l27I", "l1M", 
+                     "l2M", "l3M", "l4M", "l5M", "l6M", "l7M", "l8M", "l9M", "l10M", "l11M", 
+                     "l12M", "l13M", "l14M", "l15M", "l16M", "l17M", "l18M", "l19M", "l20M", 
+                     "l21M", "l22M", "l23M", "l24M", "l25M", "l26M", "l27M", "d1", "d2", "d3", 
+                     "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "d13", "d14", 
+                     "d15", "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23", "d24", 
+                     "d25", "d26", "d27")
 
 for (p in rsdm_parameters){
   print(traceplot(rsdm, pars = p))
+}
+for (p in fdcm_parameters){
+  print(traceplot(fdcm, pars = p))
 }
 
 
@@ -206,8 +223,6 @@ t1 <- t
 t <- matrix(NA,n_i,n_r)
 k <- 0
 t0 <- t
-model.t <- rbind(t0,t1)
-
 
 #For FTI
 t <- matrix(NA,n_i,n_r)
@@ -223,7 +238,6 @@ t1 <- t
 t <- matrix(NA,n_i,n_r)
 k <- 0
 t0 <- t
-model.t <- rbind(t0,t1)
 
 #For H
 t <- matrix(NA,n_i,n_r)
@@ -242,6 +256,8 @@ t1 <- t
 t <- matrix(NA,n_i,n_r)
 k <- 0
 t0 <- t
+
+
 model.t <- rbind(t0,t1)
 
 
@@ -349,7 +365,8 @@ model.t[,3:9] <- sapply(model.t[,3:9],as.numeric)
 summary(model.t)
 
 # For  Short D3
-dfm <- melt(model.t, id.vars=c("item", "class"),
+# choose from dfm_f, dfm_n, or dfm_r
+dfm_n <- melt(model.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 #For FTI 
 dfm <- melt(model.t, id.vars=c("item", "class"),
@@ -362,16 +379,17 @@ dfm <- melt(model.t, id.vars=c("item", "class"),
 # save the plots for every item
 
 path <- file.path(getwd(), 'FDCM plots/')
-dir.create(path)
+#dir.create(path)
 for (i in 1:n_i){
   item <- subset(dfm,item==i)
   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
     geom_line(aes(color=class))+
     geom_point(aes(color=class))+
     theme_light()+
-    ggtitle(paste("Probability to select a response option, item", i))+ 
+    ggtitle(paste("FDCM: probability to select a response option on item", i))+ 
     xlab("Response options")+
     ylab("Probability")
+  #p
   filename <- paste("item_", i, ".png", sep = "") 
   filepath = file.path(path, filename) 
   ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='png')
@@ -399,13 +417,13 @@ print(rsdm)
 
 ################################################################################################################
 # Person level - classification agreement 
-contributionsPC1<-matrix(get_posterior_mean(fdcm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
+contributionsPC1 <- matrix(get_posterior_mean(fdcm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_FDCM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC1[x,])}))
 
-contributionsPC2<-matrix(get_posterior_mean(nrdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
+contributionsPC2 <- matrix(get_posterior_mean(nrdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_NRDM=unlist(lapply(1:n_p,function(x){which.max(abs(contributionsPC2[x,]))}))
 
-contributionsPC3<-matrix(get_posterior_mean(rsdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
+contributionsPC3 <- matrix(get_posterior_mean(rsdm,pars = c("contributionsPC"))[,3],n_p,n_c,byrow = T)
 A_RSDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC3[x,])}))
 
 
@@ -414,12 +432,27 @@ A_RSDM=unlist(lapply(1:n_p,function(x){which.max(contributionsPC3[x,])}))
 # Quick look at the results 
 summary(as.factor(A_FDCM))
 summary(as.factor(A_NRDM))
+summary(as.factor(A_RSDM))
 sum(A_FDCM==A_NRDM)/n_p
+sum(A_FDCM==A_RSDM)/n_p
+sum(A_NRDM==A_RSDM)/n_p
 
 # Overlap plots for NRDM and FDCM
-t <- (as.factor(A_FDCM)==as.factor(A_NRDM))*1
-t <- as.data.frame(cbind(as.factor(A_NRDM),t))
-t <- transform(t, V1 = as.factor(V1))
+rm(p)
+p <- (as.factor(A_FDCM)==as.factor(A_NRDM))*1
+p <- as.data.frame(cbind(as.factor(A_NRDM), as.factor(A_FDCM), p))
+#p <- transform(p, V1 = as.factor(V1))
+
+rm(p)
+p <- (as.factor(A_FDCM)==as.factor(A_RSDM))*1
+p <- as.data.frame(cbind(as.factor(A_RSDM), as.factor(A_FDCM), p))
+#p <- transform(p, V1 = as.factor(V1))
+
+rm(p)
+p <- (as.factor(A_NRDM)==as.factor(A_RSDM))*1
+p <- as.data.frame(cbind(as.factor(A_RSDM), as.factor(A_NRDM), p))
+#p <- transform(p, V1 = as.factor(V1))
+
 
 da <- as.data.frame(cbind(A_NRDM,A_FDCM))
 #Overlap in form of table
@@ -442,14 +475,14 @@ labels <-  c("0000", "0001",
     "1110", "1111")
 
 model1 <- "FDCM"
-model2 <- "NRDM"
-models <- paste(model1, model2, sep="")
-data <- " (Dark Triad)"
+model2 <- "RSDM"
+models <- paste(model1,'.', model2, sep="")
+#data <- " (Dark Triad)"
 
 p_title <- paste("overlap_", models,".png", sep="")
-title <- paste("Classification agreement for ", model1, " and ", model2, data, sep="")
+title <- paste("Classification agreement for ", model1, " and ", model2, sep="")
   
-p1 <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
+p1 <- ggplot(p, aes(x=V2, fill=as.factor(p))) +
   geom_bar(stat="count") +
   geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..])) +
   scale_fill_manual(values=c("black", "grey59"),
@@ -463,6 +496,8 @@ p1 <- ggplot(t, aes(x=V1, fill=as.factor(t))) +
   theme_light()
 p1
 ggsave(p_title, plot = p1,width = 10, height = 6, dpi = 500, units = "in", device='png')
+
+
 
 # profile differences
 plot(A_NRDM, A_FDCM)
@@ -519,6 +554,82 @@ A_NRDM <- as.matrix(A_NRDM)
 A_RSDM <- as.matrix(A_RSDM)
 prf <- as.data.frame(cbind(A_NRDM,A_RSDM))
 colnames(prf) <- c("nrdm", "rsdm")
+
+
+
+##############################################################################################
+# Visuals for paper
+path <- "C:/Users/kisle/OneDrive/Рабочий стол/D3"
+p <- ggplot(data, aes(x = factor(data[[10]]))) +
+  geom_bar() +
+  labs(title = "Item 10: People see me as a natural leader" , x = "Agreement Level", y = "Frequency") +
+  theme_minimal()
+p
+filename <- paste("d3_item_10", ".jpg", sep = "") 
+filepath = file.path(path, filename) 
+ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='jpg')
+
+i <- 1
+item_f <- subset(dfm_f,item==i)
+item_r <- subset(dfm_r,item==i)
+item_n <- subset(dfm_n,item==i)
+p1 <- ggplot(item_f, aes(x=variable,y=value,group=class)) +
+  geom_line(aes(linetype = class))+
+  geom_point(aes())+
+  theme_light()+
+  ggtitle(paste("FDCM"))+ 
+  xlab("Response options")+
+  ylab("Probability")+
+  theme(legend.position = "none")+
+  scale_x_discrete(guide = guide_axis(angle = 45))
+p1
+
+p2 <- ggplot(item_n, aes(x=variable,y=value,group=class)) +
+  geom_line(aes(linetype = class))+
+  geom_point(aes())+
+  theme_light()+
+  ggtitle(paste("NRDM"))+  
+  xlab("Response options")+
+  ylab("Probability")+
+  theme(legend.position = "none")+
+  scale_x_discrete(guide = guide_axis(angle = 45))
+p2
+
+p3 <- ggplot(item_r, aes(x=variable,y=value,group=class)) +
+  geom_line(aes(linetype = class))+
+  geom_point(aes())+
+  theme_light()+
+  ggtitle(paste("RSDM"))+ 
+  xlab("Response options")+
+  ylab("Probability")+
+  theme(legend.position = "none")+
+  scale_x_discrete(guide = guide_axis(angle = 45))
+p3
+
+grid.arrange(p1, p2, p3, ncol = 3)
+
+ggsave("d3_diff_i1.png", grid.arrange(p1, p2, p3, ncol = 3), width = 11, height = 5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ####### Item grpahs optimization 
