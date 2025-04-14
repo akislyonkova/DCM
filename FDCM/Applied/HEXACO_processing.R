@@ -22,3 +22,33 @@ mode <- HEXACO[,c(31:40)]
  
 H <- HEXACO[,c(1:40)]
 write.table(H,'Honesty-Humility.txt')
+
+H <- read.table("H.txt")
+
+
+for (i in 1:4) {
+  H[[paste0("total_scoreA", i)]] <- rowSums(H[, (10 * (i - 1) + 1):(10 * i)])
+}
+
+items_A1 <- H[, 1:10] 
+A1 <- H$total_scoreA1
+items_A2 <- H[, 11:20] 
+A2 <- H$total_scoreA2
+items_A3 <- H[, 21:30] 
+A3 <- H$total_scoreA3
+items_A4 <- H[, 31:40] 
+A4 <- H$total_scoreA4
+
+check  <- function(items, A) {
+  correlation <- cor(items, A)
+  return(correlation < 0)  
+}
+check(items_A1, A1)
+
+H_rev <- H[,-c(41:44)]
+rev_items <- c(1, 12, 13, 14, 15, 26, 27, 28, 29, 30, 31, 32, 33, 34)
+H_rev[, rev_items] <- 8 - H_rev[, rev_items]
+
+write.table(H_rev,'H_rev.txt')
+
+

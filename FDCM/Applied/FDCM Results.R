@@ -27,7 +27,7 @@ n_id <- 14     # number of items per dimension
  
 
 # HEXACO (Humility dimension only)
-n_p <- 2000    # number of people
+n_p <- 1000    # number of people
 n_i <- 40      # number of items 
 n_r <- 7       # number of response options
 n_t <- n_r - 1 # number of thresholds
@@ -40,12 +40,12 @@ n_id <- 10     # number of items per dimension
 
 d3 <- read.table('dark3.txt') # Short dark triad 
 fti <- read.table('FTI.txt') # FTI
-H <- read.table('H.txt') # HEXACO
+H <- read.table('HEXA.txt') # HEXACO
 
 path <- file.path(getwd(), 'Item distributions/')
 dir.create(path)
 
-data <- d3
+data <- fti
 for (i in 1:ncol(data)) {
   p <- ggplot(data, aes(x = factor(data[[i]]))) +
        geom_bar() +
@@ -61,6 +61,14 @@ data$A1_Sum <- rowSums(data[, 1:9])
 data$A2_Sum <- rowSums(data[, 10:18]) 
 data$A3_Sum <- rowSums(data[, 19:27]) 
 
+#Subscale difficulty 
+item_difficulty <- colMeans(data)
+A1_diff <-  mean(item_difficulty[c(1:14)])
+A2_diff <-  mean(item_difficulty[c(15:28)])
+A3_diff <-  mean(item_difficulty[c(29:42)])
+A4_diff <-  mean(item_difficulty[c(43:56)])
+
+
 
 # Stanfit object diagnostics 
 
@@ -68,12 +76,12 @@ fdcm@model_pars
 nrdm@model_pars
 rsdm@model_pars
 
-fdcm@date #version control
+nrdm@date #version control
 
-check_divergences(rsdm)
+check_divergences(nrdm)
 
 # Dark triad
-rsdm_parameters <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I", 
+rsdm_param <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I", 
                 "l10I", "l11I", "l12I", "l13I", "l14I", "l15I", "l16I", "l17I", 
                 "l18I", "l19I", "l20I", "l21I", "l22I", "l23I", "l24I", "l25I", 
                 "l26I", "l27I", "l1M", "l2M", "l3M", "l4M", "l5M", "l6M", "l7M", 
@@ -86,7 +94,7 @@ rsdm_parameters <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9
                 "step3_MD1", "step3_MD2", "step3_MD3", "step4_MD1", "step4_MD2", 
                 "step4_MD3")
 
-fdcm_parameters <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I", "l10I", 
+fdcm_param <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I", "l10I", 
                      "l11I", "l12I", "l13I", "l14I", "l15I", "l16I", "l17I", "l18I", "l19I", 
                      "l20I", "l21I", "l22I", "l23I", "l24I", "l25I", "l26I", "l27I", "l1M", 
                      "l2M", "l3M", "l4M", "l5M", "l6M", "l7M", "l8M", "l9M", "l10M", "l11M", 
@@ -96,12 +104,36 @@ fdcm_parameters <- c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9
                      "d15", "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23", "d24", 
                      "d25", "d26", "d27")
 
-for (p in rsdm_parameters){
+# FTI
+
+rsdm_param <-c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I",
+                    "l10I", "l11I", "l12I", "l13I", "l14I", "l15I", "l16I", "l17I", 
+                    "l18I", "l19I", "l20I", "l21I", "l22I", "l23I", "l24I", "l25I", 
+                    "l26I", "l27I", "l28I", "l29I", "l30I", "l31I", "l32I", "l33I", 
+                    "l34I", "l35I", "l36I", "l37I", "l38I", "l39I", "l40I", "l41I", 
+                    "l42I", "l43I", "l44I", "l45I", "l46I", "l47I", "l48I", "l49I", 
+                    "l50I", "l51I", "l52I", "l53I", "l54I", "l55I", "l56I", "l1M", 
+                    "l2M", "l3M", "l4M", "l5M", "l6M", "l7M", "l8M", "l9M", "l10M", 
+                    "l11M", "l12M", "l13M", "l14M", "l15M", "l16M", "l17M", "l18M", 
+                    "l19M", "l20M", "l21M", "l22M", "l23M", "l24M", "l25M", "l26M", 
+                    "l27M", "l28M", "l29M", "l30M", "l31M", "l32M", "l33M", "l34M", 
+                    "l35M", "l36M", "l37M", "l38M", "l39M", "l40M", "l41M", "l42M", 
+                    "l43M", "l44M", "l45M", "l46M", "l47M", "l48M", "l49M", "l50M", 
+                    "l51M", "l52M", "l53M", "l54M", "l55M", "l56M", "step1_ID1", 
+                    "step1_ID2", "step1_ID3", "step1_ID4", "step2_ID1", "step2_ID2", 
+                    "step2_ID3", "step2_ID4", "step3_ID1", "step3_ID2", "step3_ID3", 
+                    "step3_ID4", "step1_MD1", "step1_MD2", "step1_MD3", "step1_MD4", 
+                    "step2_MD1", "step2_MD2", "step2_MD3", "step2_MD4", "step3_MD1", 
+                    "step3_MD2", "step3_MD3", "step3_MD4")
+
+
+for (p in rsdm_param){
   print(traceplot(rsdm, pars = p))
 }
-for (p in fdcm_parameters){
+for (p in fdcm_param){
   print(traceplot(fdcm, pars = p))
 }
+
 
 
 # LOOIC
@@ -133,7 +165,7 @@ rsdm_table  <- summary(rsdm)$summary
 # FDCM Plots
 
 # extract the  parameters for FDCM 
-n_params <- 3 # 1)intercepts, 2) main effects, and 3) dispersion for each item
+#n_params <- 3 # 1)intercepts, 2) main effects, and 3) dispersion for each item
 start_idx <- seq(from = n_c + 1, by = n_i, length.out = 3)
 end_idx <- start_idx + n_i - 1
 
@@ -280,6 +312,7 @@ end_idx <- start_idx + n_d - 1
 step_r <- data.frame(
   mapply(function(start, end) rsdm_table[start:end, 1], start_idx, end_idx)
 )
+step_r[4,] <- c(0.2170600, 0.310343507, 1.1467742, 0.35386807, 1.0937769, 0.08396823)
 step_r <- step_r[rep(seq_len(nrow(step_r)), each = n_id), ]
 
 colnames(item_r) <- c("i_I","i_M")
@@ -307,6 +340,7 @@ t0 <- t
 model.t <- rbind(t0,t1)
 
 #For FTI
+k <- 1 
 for(i in 1:n_i) {
   t2 <- exp((item_r[i,2]+step_r[i,4])*k+item_r[i,1]-step_r[i,1])
   t3 <- exp((item_r[i,2]+step_r[i,4]+step_r[i,5])*k+item_r[i,1]-step_r[i,1]-step_r[i,2])
@@ -314,8 +348,6 @@ for(i in 1:n_i) {
   t6 <- 1+t2+t3+t4
   t[i,] <- c(1/t6,t2/t6,t3/t6,t4/t6)
 }
-
-k <- 1 
 t1 <- t 
 t <- matrix(NA,n_i,n_r) 
 k <- 0 
@@ -371,19 +403,19 @@ summary(model.t)
 dfm_f <- melt(model.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
 #For FTI 
-dfm <- melt(model.t, id.vars=c("item", "class"),
+dfm_r <- melt(model.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Agree", "Strongly Agree"))
 #For H
-dfm <- melt(model.t, id.vars=c("item", "class"),
+dfm_n <- melt(model.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", 
                                "Disagree", "Slightly Disagree", "Neutral", "Slightly Agree", 
                                "Agree", "Strongly Agree"))
 # save the plots for every item
 
-path <- file.path(getwd(), 'FDCM plots/')
+path <- file.path(getwd(), 'NRDM plots/')
 #dir.create(path)
 for (i in 1:n_i){
-  item <- subset(dfm,item==i)
+  item <- subset(dfm_n,item==i)
   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
     geom_line(aes(color=class))+
     geom_point(aes(color=class))+
@@ -448,6 +480,7 @@ rm(p)
 p <- (as.factor(A_FDCM)==as.factor(A_RSDM))*1
 p <- as.data.frame(cbind(as.factor(A_RSDM), as.factor(A_FDCM), p))
 p <- transform(p, V2 = as.factor(V2))
+p <- transform(p, V1 = as.factor(V1))
 
 rm(p)
 p <- (as.factor(A_NRDM)==as.factor(A_RSDM))*1
@@ -476,9 +509,9 @@ labels <-  c("0000", "0001",
     "1110", "1111")
 
 model1 <- "FDCM"
-model2 <- "NRDM"
+model2 <- "RSDM"
 models <- paste(model1,'.', model2, sep="")
-data_name <- "d3"
+data_name <- "fti"
 
 p_title <- paste(data_name,"_overlap_", models,".png", sep="")
 title <- paste("Classification agreement for ", model1, " and ", model2, sep="")
@@ -490,10 +523,10 @@ p1 <- ggplot(p, aes(x=V2, fill=as.factor(p))) +
                     name="Agreement", 
                     labels=c("Different", "Same")) +
   xlab("Attribute Profiles") + 
-  ylab("Number of Examinees") + 
+  ylab("Number of participants") + 
   theme(legend.position="bottom") + 
   ggtitle(title) +
-  scale_x_discrete(labels=labels)+
+  scale_x_discrete(labels=labels, guide = guide_axis(angle = 45))+
   theme_light()
 p1
 ggsave(p_title, plot = p1, width = 13, height = 9, dpi = 500, units = "in", device='png')
@@ -504,16 +537,16 @@ ggsave(p_title, plot = p1, width = 13, height = 9, dpi = 500, units = "in", devi
 
 #NRDM and FDCM 
 plot(A_NRDM, A_FDCM)
-A_NRDM <- as.matrix(A_NRDM)
-A_FDCM <- as.matrix(A_FDCM)
-prf <- as.data.frame(cbind(A_NRDM,A_FDCM))
+A1_NRDM <- as.matrix(A_NRDM)
+A1_FDCM <- as.matrix(A_FDCM)
+prf <- as.data.frame(cbind(A1_NRDM,A1_FDCM))
 colnames(prf) <- c("nrdm", "fdcm")
 
 #RSDM and FDCM 
 plot(A_RSDM, A_FDCM)
-A_RSDM <- as.matrix(A_RSDM)
-A_FDCM <- as.matrix(A_FDCM)
-prf <- as.data.frame(cbind(A_RSDM,A_FDCM))
+A1_RSDM <- as.matrix(A_RSDM)
+A1_FDCM <- as.matrix(A_FDCM)
+prf <- as.data.frame(cbind(A1_RSDM,A1_FDCM))
 colnames(prf) <- c("rsdm", "fdcm")
 
 #RSDM and NRDM 
@@ -530,17 +563,17 @@ colnames(prf) <- c("nrdm", "rsdm")
 
 ##############################################################################################
 # Visuals for paper
-path <- "C:/Users/kisle/OneDrive/Рабочий стол/D3"
-p <- ggplot(data, aes(x = factor(data[[10]]))) +
+path <- "C:/Users/kisle/OneDrive/Рабочий стол/FTI"
+p <- ggplot(data, aes(x = factor(data[[52]]))) +
   geom_bar() +
-  labs(title = "Item 10: People see me as a natural leader" , x = "Agreement Level", y = "Frequency") +
+  labs(title = "Item 52: I feel emotions more deeply than most people." , x = "Agreement Level", y = "Frequency") +
   theme_minimal()
 p
-filename <- paste("d3_item_10", ".jpg", sep = "") 
+filename <- paste("fti_item_52", ".jpg", sep = "") 
 filepath = file.path(path, filename) 
 ggsave(filepath, plot = p, width = 7, height = 6, dpi = 500, units = "in", device='jpg')
 
-i <- 1
+i <- 52
 item_f <- subset(dfm_f,item==i)
 item_r <- subset(dfm_r,item==i)
 item_n <- subset(dfm_n,item==i)
@@ -579,17 +612,17 @@ p3
 
 grid.arrange(p1, p2, p3, ncol = 3)
 
-ggsave("d3_diff_i1.png", grid.arrange(p1, p2, p3, ncol = 3), width = 11, height = 5)
+ggsave("fti_diff_i52.png", grid.arrange(p1, p2, p3, ncol = 3), width = 11, height = 5)
 
 
 p_title2 <- paste(data_name, "_diff_", models,".png", sep="")
 title2 <- paste("Classification differences between ", model1, " and ", model2, sep="")
 
-p_dif <- ggplot(prf, aes(x=nrdm, y=fdcm))+ 
+p_dif <- ggplot(prf, aes(x=rsdm, y=fdcm))+ 
   geom_count(color='black')+
   theme_light()+
   scale_y_continuous(breaks = seq(1, n_c, by = 1), labels=labels)+
-  scale_x_continuous(breaks = seq(1, n_c, by = 1), labels=labels)+
+  scale_x_continuous(breaks = seq(1, n_c, by = 1), labels=labels, guide = guide_axis(angle = 45))+
   ggtitle(title2)+
   ylab(model1)+
   xlab(model2)
@@ -608,7 +641,7 @@ ggsave(p_title2, plot = p_dif, width = 12, height = 8, dpi = 500, units = "in", 
 
 
 
-
+print(A4_diff)
 
 
 

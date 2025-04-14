@@ -23,7 +23,7 @@ A1 <- d3$total_scoreA1
 items_A2 <- d3[, 10:18] 
 A2 <- d3$total_scoreA2
 items_A3 <- d3[, 19:27] 
-A3 <- d3$total_scoreA2
+A3 <- d3$total_scoreA3
 
 check  <- function(items, A) {
   correlation <- cor(items, A)
