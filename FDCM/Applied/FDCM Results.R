@@ -27,7 +27,7 @@ n_id <- 14     # number of items per dimension
  
 
 # HEXACO (Humility dimension only)
-n_p <- 1000    # number of people
+n_p <- 2000    # number of people
 n_i <- 40      # number of items 
 n_r <- 7       # number of response options
 n_t <- n_r - 1 # number of thresholds
@@ -40,7 +40,7 @@ n_id <- 10     # number of items per dimension
 
 d3 <- read.table('dark3.txt') # Short dark triad 
 fti <- read.table('FTI.txt') # FTI
-H <- read.table('HEXA.txt') # HEXACO
+H <- read.table('H_rev.txt') # HEXACO
 
 path <- file.path(getwd(), 'Item distributions/')
 dir.create(path)
@@ -125,6 +125,9 @@ rsdm_param <-c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I",
                     "step3_ID4", "step1_MD1", "step1_MD2", "step1_MD3", "step1_MD4", 
                     "step2_MD1", "step2_MD2", "step2_MD3", "step2_MD4", "step3_MD1", 
                     "step3_MD2", "step3_MD3", "step3_MD4")
+l0 <- paste0("l0_", rep(1:n_i, times = n_t), "step", rep(1:n_t, each = n_i))
+l1 <- paste0("l1_", rep(1:n_i, times = n_t), "step", rep(1:n_t, each = n_i))
+nrdm_param <- c("Vc", l0, l1)
 
 
 for (p in rsdm_param){
@@ -132,6 +135,9 @@ for (p in rsdm_param){
 }
 for (p in fdcm_param){
   print(traceplot(fdcm, pars = p))
+}
+for (p in nrdm_param){
+  print(traceplot(nrdm, pars = p))
 }
 
 
@@ -406,14 +412,14 @@ dfm_f <- melt(model.t, id.vars=c("item", "class"),
 dfm_r <- melt(model.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", "Disagree", "Agree", "Strongly Agree"))
 #For H
-dfm_n <- melt(model.t, id.vars=c("item", "class"),
+dfm_f <- melt(model.t, id.vars=c("item", "class"),
               measure.vars = c("Strongly Disagree", 
                                "Disagree", "Slightly Disagree", "Neutral", "Slightly Agree", 
                                "Agree", "Strongly Agree"))
 # save the plots for every item
 
-path <- file.path(getwd(), 'NRDM plots/')
-#dir.create(path)
+path <- file.path(getwd(), 'FDCM plots/')
+dir.create(path)
 for (i in 1:n_i){
   item <- subset(dfm_n,item==i)
   p <- ggplot(item, aes(x=variable,y=value,group=class)) +
@@ -509,9 +515,9 @@ labels <-  c("0000", "0001",
     "1110", "1111")
 
 model1 <- "FDCM"
-model2 <- "RSDM"
+model2 <- "NRDM"
 models <- paste(model1,'.', model2, sep="")
-data_name <- "fti"
+data_name <- "H"
 
 p_title <- paste(data_name,"_overlap_", models,".png", sep="")
 title <- paste("Classification agreement for ", model1, " and ", model2, sep="")
