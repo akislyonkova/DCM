@@ -125,6 +125,7 @@ rsdm_param <-c("l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I",
                     "step3_ID4", "step1_MD1", "step1_MD2", "step1_MD3", "step1_MD4", 
                     "step2_MD1", "step2_MD2", "step2_MD3", "step2_MD4", "step3_MD1", 
                     "step3_MD2", "step3_MD3", "step3_MD4")
+
 l0 <- paste0("l0_", rep(1:n_i, times = n_t), "step", rep(1:n_t, each = n_i))
 l1 <- paste0("l1_", rep(1:n_i, times = n_t), "step", rep(1:n_t, each = n_i))
 nrdm_param <- c("Vc", l0, l1)
