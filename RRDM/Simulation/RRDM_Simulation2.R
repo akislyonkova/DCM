@@ -3,18 +3,9 @@
 set.seed(2025)
 s <- 4
 
-
-###########################################################################################################
-
-### Generating cell 1 large sample, short test
-
-N <- 1000      # sample size
-i <- 20        #number of items 
-n_id <- 10     # number of items per dimension 
-
 # function to generate data
 responses <- list() 
-gendata_rrdm <- function (n_dataset, alpha, Q, item, step) {
+gendata_rrdm <- function (n_dataset, alpha, item, step) {
   for (n in 1:n_dataset){     # n - number of datasets 
     for(k in 1:nrow(alpha)) { # k = N 
       for(i in 1:i) {         # i - item
@@ -25,13 +16,21 @@ gendata_rrdm <- function (n_dataset, alpha, Q, item, step) {
         sum=1+t1+t2+t3+t4
         t[i,] = c(1/sum, t1/sum,t2/sum,t3/sum, t4/sum)
         ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
-        r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] #which() function returns the position/index of the value
+        r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] # which() function returns the position/index of the value
       }
     }
     responses[[length(responses)+1]] = as.data.frame(r)
   }
   responses
 }
+
+###########################################################################################################
+
+### Generating cell 1 large sample, short test
+
+N <- 1000      # sample size
+i <- 20        # number of items 
+n_id <- 10     # number of items per dimension 
 
 t <- matrix(NA, i, s+1)
 r <- matrix(NA, N, i) 
@@ -73,7 +72,7 @@ cell1_param <- rbind(item_unlist, step_selected)
 write.table(cell1_param, file = 'RRDM_cell1_param.txt') # save cell 1 params
 
 ###  Genarate and save datasets for cell 1 
-cell1 <- gendata_rrdm(n_dataset = 25, alpha = alpha, item = item,  step = step, Q=Q) # generate data
+cell1 <- gendata_rrdm(n_dataset = 25, alpha = alpha, item = item,  step = step) # generate data
 save(cell1, file = 'rrdm_cell1.rda') # saves generated cell 1 
 
 ##########################################################################################################
