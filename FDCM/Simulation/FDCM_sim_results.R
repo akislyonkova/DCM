@@ -99,13 +99,14 @@ bias[c(28:54),]
 bias[c(55:81),]
 
 # Model diagnostics
+library(rstan)
 fdcm@model_pars
 check_divergences(fdcm)
 
 n_i <- 27
 l0 <- paste0("l", rep(1:n_i), "I")
 l1 <- paste0("l", rep(1:n_i), "M")
-l1 <- paste0("d", rep(1:n_i))
+d <- paste0("d", rep(1:n_i))
 fdcm_param <- c("Vc", l0, l1, d)
 
 for (p in fdcm_param){
