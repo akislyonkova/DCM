@@ -112,4 +112,3 @@ fdcm_param <- c("Vc", l0, l1, d)
 for (p in fdcm_param){
   print(traceplot(fdcm, pars = p))
 }
-
