@@ -29,13 +29,13 @@ gendata_rrdm <- function (n_dataset, alpha, item, step) {
 ### Generating cell 1: large sample, short test
 
 N <- 1000      # sample size
-i <- 20        # number of items 
-n_id <- 10     # number of items per dimension 
+i <- 10        # number of items 
+n_id <- 5     # number of items per dimension 
 
 t <- matrix(NA, i, s+1)
 r <- matrix(NA, N, i) 
 
-Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # 20 items and 2 attributes
+Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # i items and 2 attributes
 colnames(Q) <- c('A1','A2')
 n_attr <- dim(Q)[2]
 
@@ -48,8 +48,8 @@ ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind, ]                                      # simulated pattern ("truth") for all attributes for each person
 
 ###  Generating the intercepts, main effects and steps
-item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) 
-item_m <- matrix(runif(i, min = 0.9, max = 2.5), i, 1, byrow = T) 
+item_i <- matrix(runif(i, min = -2.2, max = -0.9), i, 1, byrow = T) 
+item_m <- matrix(runif(i, min = 0.9, max = 2.2), i, 1, byrow = T) 
 item <- cbind(item_i, item_m)
 item <- as.data.frame(round(item,4))
 colnames(item) <- c('I', 'M')
@@ -80,8 +80,8 @@ save(cell1, file = 'rrdm_cell1.rda') # saves generated cell 1
 ### Generating cell 2: short test, small sample 
 
 N <- 500      
-i <- 20        
-n_id <- 10     
+i <- 10        
+n_id <- 5     
 
 t <- matrix(NA, i, s+1)
 r <- matrix(NA, N, i) 
@@ -99,8 +99,8 @@ ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind, ]                                      
 
 ###  Generating the intercepts, main effects and steps
-item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) 
-item_m <- matrix(runif(i, min = 0.9, max = 2.5), i, 1, byrow = T) 
+item_i <- matrix(runif(i, min = -2.2, max = -0.9), i, 1, byrow = T) 
+item_m <- matrix(runif(i, min = 0.9, max = 2.2), i, 1, byrow = T) 
 item <- cbind(item_i, item_m)
 item <- as.data.frame(round(item,4))
 colnames(item) <- c('I', 'M')
@@ -133,13 +133,13 @@ save(cell2, file = 'rrdm_cell2.rda')
 ### Generating cell 3: long test, large sample 
 
 N <- 1000      
-i <- 40        
-n_id <- 20     
+i <- 20        
+n_id <- 10     
 
 t <- matrix(NA, i, s+1)
 r <- matrix(NA, N, i) 
 
-Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # 40 items and 2 attributes
+Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # i items and 2 attributes
 colnames(Q) <- c('A1','A2')
 n_attr <- dim(Q)[2]
 
@@ -152,8 +152,8 @@ ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind, ]                                      
 
 ###  Generating the intercepts, main effects and steps
-item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) 
-item_m <- matrix(runif(i, min = 0.9, max = 2.5), i, 1, byrow = T) 
+item_i <- matrix(runif(i, min = -2.2, max = -0.9), i, 1, byrow = T) 
+item_m <- matrix(runif(i, min = 0.9, max = 2.2), i, 1, byrow = T) 
 item <- cbind(item_i, item_m)
 item <- as.data.frame(round(item,4))
 colnames(item) <- c('I', 'M')
@@ -184,8 +184,8 @@ save(cell3, file = 'rrdm_cell3.rda')
 ### Generating cell 4: long test, small sample 
 
 N <- 500      
-i <- 40        
-n_id <- 20     
+i <- 20        
+n_id <- 10     
 
 t <- matrix(NA, i, s+1)
 r <- matrix(NA, N, i) 
@@ -203,8 +203,8 @@ ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind, ]                                      
 
 ###  Generating the intercepts, main effects and steps
-item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) 
-item_m <- matrix(runif(i, min = 0.9, max = 2.5), i, 1, byrow = T) 
+item_i <- matrix(runif(i, min = -2.2, max = -0.9), i, 1, byrow = T) 
+item_m <- matrix(runif(i, min = 0.9, max = 2.2), i, 1, byrow = T) 
 item <- cbind(item_i, item_m)
 item <- as.data.frame(round(item,4))
 colnames(item) <- c('I', 'M')
