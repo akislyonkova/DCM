@@ -1,7 +1,10 @@
 library(stringr)
 library(rstan)
 
-RRDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RRDM"){
+i <- 10   # number of items 
+n_id <- 5 # number of items per dimension 
+
+RRDM <- function(Qmatrix,scale.num,save.path=getwd(),save.name="RRDM"){
   nstep=scale.num-1
   n_attr  <- ncol(Qmatrix)
   n_items <- nrow(Qmatrix)
@@ -27,8 +30,8 @@ RRDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RRDM"){
   
   for (s in 1:nstep){
     ls_0[,s] <- paste("step",s, "_I", sep='')
-    ls_0[1:20, s] <- paste(ls_0[1:20, s], "D1", sep='') # step parameters for dimension 1
-    ls_0[21:40, s] <- paste(ls_0[21:40, s], "D2", sep='')
+    ls_0[1:n_id, s] <- paste(ls_0[1:n_id, s], "D1", sep='') # step parameters for dimension 1
+    ls_0[(n_id+1):i, s] <- paste(ls_0[(n_id+1):i, s], "D2", sep='')
   }
   
   ls_0_cumul <- ls_0
@@ -144,7 +147,7 @@ sink(NULL)
 
 
 
-Q <- matrix(c(rep(c(1,0),20),rep(c(0,1),20)), 40, 2, byrow = T) # 20 items and 2 attributes
+Q <- matrix(c(rep(c(1,0),n_id),rep(c(0,1),n_id)), i, 2, byrow = T) 
 RRDM(Q,5)
 
 
