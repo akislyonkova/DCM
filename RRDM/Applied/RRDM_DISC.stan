@@ -1,112 +1,112 @@
-    
-  data{
+
+data{
   int Np;
   int Ni;
   int Nc;
   int Ns;
   int Y[Np, Ni];
-  }
-   parameters{
-                     simplex[Nc] Vc;
- real l1I ;
- real l2I ;
- real l3I ;
- real l4I ;
- real l5I ;
- real l6I ;
- real l7I ;
- real l8I ;
- real l9I ;
- real l10I ;
- real l11I ;
- real l12I ;
- real l13I ;
- real l14I ;
- real l15I ;
- real l16I ;
- real l17I ;
- real l18I ;
- real l19I ;
- real l20I ;
- real l21I ;
- real l22I ;
- real l23I ;
- real l24I ;
- real l25I ;
- real l26I ;
- real l27I ;
- real l28I ;
- real l29I ;
- real l30I ;
- real l31I ;
- real l32I ;
- real l33I ;
- real l34I ;
- real l35I ;
- real l36I ;
- real l37I ;
- real l38I ;
- real l39I ;
- real l40I ;
- real<lower=0> l1M ;
- real<lower=0> l2M ;
- real<lower=0> l3M ;
- real<lower=0> l4M ;
- real<lower=0> l5M ;
- real<lower=0> l6M ;
- real<lower=0> l7M ;
- real<lower=0> l8M ;
- real<lower=0> l9M ;
- real<lower=0> l10M ;
- real<lower=0> l11M ;
- real<lower=0> l12M ;
- real<lower=0> l13M ;
- real<lower=0> l14M ;
- real<lower=0> l15M ;
- real<lower=0> l16M ;
- real<lower=0> l17M ;
- real<lower=0> l18M ;
- real<lower=0> l19M ;
- real<lower=0> l20M ;
- real<lower=0> l21M ;
- real<lower=0> l22M ;
- real<lower=0> l23M ;
- real<lower=0> l24M ;
- real<lower=0> l25M ;
- real<lower=0> l26M ;
- real<lower=0> l27M ;
- real<lower=0> l28M ;
- real<lower=0> l29M ;
- real<lower=0> l30M ;
- real<lower=0> l31M ;
- real<lower=0> l32M ;
- real<lower=0> l33M ;
- real<lower=0> l34M ;
- real<lower=0> l35M ;
- real<lower=0> l36M ;
- real<lower=0> l37M ;
- real<lower=0> l38M ;
- real<lower=0> l39M ;
- real<lower=0> l40M ;
- real<lower=0> step1_ID1 ;
- real<lower=0> step1_ID2 ;
- real<lower=0> step1_ID3 ;
- real<lower=0> step1_ID4 ;
- real<lower=0> step2_ID1 ;
- real<lower=0> step2_ID2 ;
- real<lower=0> step2_ID3 ;
- real<lower=0> step2_ID4 ;
- real<lower=0> step3_ID1 ;
- real<lower=0> step3_ID2 ;
- real<lower=0> step3_ID3 ;
- real<lower=0> step3_ID4 ;
- real<lower=0> step4_ID1 ;
- real<lower=0> step4_ID2 ;
- real<lower=0> step4_ID3 ;
- real<lower=0> step4_ID4 ;
- }
- transformed parameters{
-                          vector[Ns] PImat[Ni, Nc];
+}
+parameters{
+  simplex[Nc] Vc;
+  real l1I ;
+  real l2I ;
+  real l3I ;
+  real l4I ;
+  real l5I ;
+  real l6I ;
+  real l7I ;
+  real l8I ;
+  real l9I ;
+  real l10I ;
+  real l11I ;
+  real l12I ;
+  real l13I ;
+  real l14I ;
+  real l15I ;
+  real l16I ;
+  real l17I ;
+  real l18I ;
+  real l19I ;
+  real l20I ;
+  real l21I ;
+  real l22I ;
+  real l23I ;
+  real l24I ;
+  real l25I ;
+  real l26I ;
+  real l27I ;
+  real l28I ;
+  real l29I ;
+  real l30I ;
+  real l31I ;
+  real l32I ;
+  real l33I ;
+  real l34I ;
+  real l35I ;
+  real l36I ;
+  real l37I ;
+  real l38I ;
+  real l39I ;
+  real l40I ;
+  real<lower=0> l1M ;
+  real<lower=0> l2M ;
+  real<lower=0> l3M ;
+  real<lower=0> l4M ;
+  real<lower=0> l5M ;
+  real<lower=0> l6M ;
+  real<lower=0> l7M ;
+  real<lower=0> l8M ;
+  real<lower=0> l9M ;
+  real<lower=0> l10M ;
+  real<lower=0> l11M ;
+  real<lower=0> l12M ;
+  real<lower=0> l13M ;
+  real<lower=0> l14M ;
+  real<lower=0> l15M ;
+  real<lower=0> l16M ;
+  real<lower=0> l17M ;
+  real<lower=0> l18M ;
+  real<lower=0> l19M ;
+  real<lower=0> l20M ;
+  real<lower=0> l21M ;
+  real<lower=0> l22M ;
+  real<lower=0> l23M ;
+  real<lower=0> l24M ;
+  real<lower=0> l25M ;
+  real<lower=0> l26M ;
+  real<lower=0> l27M ;
+  real<lower=0> l28M ;
+  real<lower=0> l29M ;
+  real<lower=0> l30M ;
+  real<lower=0> l31M ;
+  real<lower=0> l32M ;
+  real<lower=0> l33M ;
+  real<lower=0> l34M ;
+  real<lower=0> l35M ;
+  real<lower=0> l36M ;
+  real<lower=0> l37M ;
+  real<lower=0> l38M ;
+  real<lower=0> l39M ;
+  real<lower=0> l40M ;
+  real<lower=0> step1_ID1 ;
+  real<lower=0> step1_ID2 ;
+  real<lower=0> step1_ID3 ;
+  real<lower=0> step1_ID4 ;
+  real<lower=0> step2_ID1 ;
+  real<lower=0> step2_ID2 ;
+  real<lower=0> step2_ID3 ;
+  real<lower=0> step2_ID4 ;
+  real<lower=0> step3_ID1 ;
+  real<lower=0> step3_ID2 ;
+  real<lower=0> step3_ID3 ;
+  real<lower=0> step3_ID4 ;
+  real<lower=0> step4_ID1 ;
+  real<lower=0> step4_ID2 ;
+  real<lower=0> step4_ID3 ;
+  real<lower=0> step4_ID4 ;
+}
+transformed parameters{
+  vector[Ns] PImat[Ni, Nc];
   PImat[1,1][1]=0;
   PImat[2,1][1]=0;
   PImat[3,1][1]=0;
@@ -3308,111 +3308,111 @@
   PImat[39,16][5]=4*(l39I+l39M*1)+step1_ID4+step2_ID4+step3_ID4+step4_ID4;
   PImat[40,16][5]=4*(l40I+l40M*1)+step1_ID4+step2_ID4+step3_ID4+step4_ID4;
 }
- 
+
 model {
- vector[Nc] contributionsC;
-    vector[Ni] contributionsI;
-
- //Prior
- l1I ~normal(0,20) ;
- l2I ~normal(0,20) ;
- l3I ~normal(0,20) ;
- l4I ~normal(0,20) ;
- l5I ~normal(0,20) ;
- l6I ~normal(0,20) ;
- l7I ~normal(0,20) ;
- l8I ~normal(0,20) ;
- l9I ~normal(0,20) ;
- l10I ~normal(0,20) ;
- l11I ~normal(0,20) ;
- l12I ~normal(0,20) ;
- l13I ~normal(0,20) ;
- l14I ~normal(0,20) ;
- l15I ~normal(0,20) ;
- l16I ~normal(0,20) ;
- l17I ~normal(0,20) ;
- l18I ~normal(0,20) ;
- l19I ~normal(0,20) ;
- l20I ~normal(0,20) ;
- l21I ~normal(0,20) ;
- l22I ~normal(0,20) ;
- l23I ~normal(0,20) ;
- l24I ~normal(0,20) ;
- l25I ~normal(0,20) ;
- l26I ~normal(0,20) ;
- l27I ~normal(0,20) ;
- l28I ~normal(0,20) ;
- l29I ~normal(0,20) ;
- l30I ~normal(0,20) ;
- l31I ~normal(0,20) ;
- l32I ~normal(0,20) ;
- l33I ~normal(0,20) ;
- l34I ~normal(0,20) ;
- l35I ~normal(0,20) ;
- l36I ~normal(0,20) ;
- l37I ~normal(0,20) ;
- l38I ~normal(0,20) ;
- l39I ~normal(0,20) ;
- l40I ~normal(0,20) ;
- l1M ~normal(0,20) ;
- l2M ~normal(0,20) ;
- l3M ~normal(0,20) ;
- l4M ~normal(0,20) ;
- l5M ~normal(0,20) ;
- l6M ~normal(0,20) ;
- l7M ~normal(0,20) ;
- l8M ~normal(0,20) ;
- l9M ~normal(0,20) ;
- l10M ~normal(0,20) ;
- l11M ~normal(0,20) ;
- l12M ~normal(0,20) ;
- l13M ~normal(0,20) ;
- l14M ~normal(0,20) ;
- l15M ~normal(0,20) ;
- l16M ~normal(0,20) ;
- l17M ~normal(0,20) ;
- l18M ~normal(0,20) ;
- l19M ~normal(0,20) ;
- l20M ~normal(0,20) ;
- l21M ~normal(0,20) ;
- l22M ~normal(0,20) ;
- l23M ~normal(0,20) ;
- l24M ~normal(0,20) ;
- l25M ~normal(0,20) ;
- l26M ~normal(0,20) ;
- l27M ~normal(0,20) ;
- l28M ~normal(0,20) ;
- l29M ~normal(0,20) ;
- l30M ~normal(0,20) ;
- l31M ~normal(0,20) ;
- l32M ~normal(0,20) ;
- l33M ~normal(0,20) ;
- l34M ~normal(0,20) ;
- l35M ~normal(0,20) ;
- l36M ~normal(0,20) ;
- l37M ~normal(0,20) ;
- l38M ~normal(0,20) ;
- l39M ~normal(0,20) ;
- l40M ~normal(0,20) ;
- step1_ID1 ~normal(0,20) ;
- step1_ID2 ~normal(0,20) ;
- step1_ID3 ~normal(0,20) ;
- step1_ID4 ~normal(0,20) ;
- step2_ID1 ~normal(0,20) ;
- step2_ID2 ~normal(0,20) ;
- step2_ID3 ~normal(0,20) ;
- step2_ID4 ~normal(0,20) ;
- step3_ID1 ~normal(0,20) ;
- step3_ID2 ~normal(0,20) ;
- step3_ID3 ~normal(0,20) ;
- step3_ID4 ~normal(0,20) ;
- step4_ID1 ~normal(0,20) ;
- step4_ID2 ~normal(0,20) ;
- step4_ID3 ~normal(0,20) ;
- step4_ID4 ~normal(0,20) ;
- Vc~dirichlet(rep_vector(2.0, Nc)); 
+  vector[Nc] contributionsC;
+  vector[Ni] contributionsI;
   
-
+  //Prior
+  l1I ~normal(0,20) ;
+  l2I ~normal(0,20) ;
+  l3I ~normal(0,20) ;
+  l4I ~normal(0,20) ;
+  l5I ~normal(0,20) ;
+  l6I ~normal(0,20) ;
+  l7I ~normal(0,20) ;
+  l8I ~normal(0,20) ;
+  l9I ~normal(0,20) ;
+  l10I ~normal(0,20) ;
+  l11I ~normal(0,20) ;
+  l12I ~normal(0,20) ;
+  l13I ~normal(0,20) ;
+  l14I ~normal(0,20) ;
+  l15I ~normal(0,20) ;
+  l16I ~normal(0,20) ;
+  l17I ~normal(0,20) ;
+  l18I ~normal(0,20) ;
+  l19I ~normal(0,20) ;
+  l20I ~normal(0,20) ;
+  l21I ~normal(0,20) ;
+  l22I ~normal(0,20) ;
+  l23I ~normal(0,20) ;
+  l24I ~normal(0,20) ;
+  l25I ~normal(0,20) ;
+  l26I ~normal(0,20) ;
+  l27I ~normal(0,20) ;
+  l28I ~normal(0,20) ;
+  l29I ~normal(0,20) ;
+  l30I ~normal(0,20) ;
+  l31I ~normal(0,20) ;
+  l32I ~normal(0,20) ;
+  l33I ~normal(0,20) ;
+  l34I ~normal(0,20) ;
+  l35I ~normal(0,20) ;
+  l36I ~normal(0,20) ;
+  l37I ~normal(0,20) ;
+  l38I ~normal(0,20) ;
+  l39I ~normal(0,20) ;
+  l40I ~normal(0,20) ;
+  l1M ~normal(0,20) ;
+  l2M ~normal(0,20) ;
+  l3M ~normal(0,20) ;
+  l4M ~normal(0,20) ;
+  l5M ~normal(0,20) ;
+  l6M ~normal(0,20) ;
+  l7M ~normal(0,20) ;
+  l8M ~normal(0,20) ;
+  l9M ~normal(0,20) ;
+  l10M ~normal(0,20) ;
+  l11M ~normal(0,20) ;
+  l12M ~normal(0,20) ;
+  l13M ~normal(0,20) ;
+  l14M ~normal(0,20) ;
+  l15M ~normal(0,20) ;
+  l16M ~normal(0,20) ;
+  l17M ~normal(0,20) ;
+  l18M ~normal(0,20) ;
+  l19M ~normal(0,20) ;
+  l20M ~normal(0,20) ;
+  l21M ~normal(0,20) ;
+  l22M ~normal(0,20) ;
+  l23M ~normal(0,20) ;
+  l24M ~normal(0,20) ;
+  l25M ~normal(0,20) ;
+  l26M ~normal(0,20) ;
+  l27M ~normal(0,20) ;
+  l28M ~normal(0,20) ;
+  l29M ~normal(0,20) ;
+  l30M ~normal(0,20) ;
+  l31M ~normal(0,20) ;
+  l32M ~normal(0,20) ;
+  l33M ~normal(0,20) ;
+  l34M ~normal(0,20) ;
+  l35M ~normal(0,20) ;
+  l36M ~normal(0,20) ;
+  l37M ~normal(0,20) ;
+  l38M ~normal(0,20) ;
+  l39M ~normal(0,20) ;
+  l40M ~normal(0,20) ;
+  step1_ID1 ~normal(0,20) ;
+  step1_ID2 ~normal(0,20) ;
+  step1_ID3 ~normal(0,20) ;
+  step1_ID4 ~normal(0,20) ;
+  step2_ID1 ~normal(0,20) ;
+  step2_ID2 ~normal(0,20) ;
+  step2_ID3 ~normal(0,20) ;
+  step2_ID4 ~normal(0,20) ;
+  step3_ID1 ~normal(0,20) ;
+  step3_ID2 ~normal(0,20) ;
+  step3_ID3 ~normal(0,20) ;
+  step3_ID4 ~normal(0,20) ;
+  step4_ID1 ~normal(0,20) ;
+  step4_ID2 ~normal(0,20) ;
+  step4_ID3 ~normal(0,20) ;
+  step4_ID4 ~normal(0,20) ;
+  Vc~dirichlet(rep_vector(2.0, Nc)); 
+  
+  
   //Likelihood
   for (iterp in 1:Np){
     for (iterc in 1:Nc){
@@ -3423,11 +3423,11 @@ model {
     }
     target+=log_sum_exp(contributionsC);
   }
-   
-}  
   
+}  
 
-  generated quantities {
+
+generated quantities {
   vector[Ni] contributionsI;
   matrix[Np,Nc] contributionsPC;
   //Posterior
@@ -3440,5 +3440,4 @@ model {
     }
   }
 }
-  
-  
+

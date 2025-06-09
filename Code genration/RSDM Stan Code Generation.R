@@ -1,7 +1,11 @@
 library(stringr)
 
-RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
-  nstep=scale.num-1
+n_i <- 40     # number of items 
+n_id <- 10    # number of items per dimension 
+n_d <- 4      # number of dimensions 
+
+RSDM<-function(Qmatrix, scale.num, save.path=getwd(), save.name="RSDM"){
+  nstep <- scale.num-1
   n_attr  <- ncol(Qmatrix)
   n_items <- nrow(Qmatrix)
   PS <- t(expand.grid(replicate(n_attr, 0:1, simplify = FALSE))) 
@@ -16,46 +20,46 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   }
   
   item_intercepts <- li_0
-  #li_1 - item main effect, list with nitems length 
+  #li_1 - item main effect, list with n items length 
   li_1 <- rep(c("NA"), n_items)
   for (i in 1:n_items){
     li_1[i]<-paste('l',i,'M', sep='') 
   }
   #ls_0 - step intercepts, matrix with nitems by nsteps dimensions
-  ls_0 <- matrix("NA", n_items,nstep)
+  ls_0 <- matrix("NA", n_items, nstep)
   
   #loop for filling the step intercepts 
-  for (s in 1:nstep){
-    ls_0[,s] <- paste("step",s, "_I", sep='')
-    ls_0[1:14, s] <- paste(ls_0[1:14, s], "D1", sep='')
-    ls_0[15:28, s] <- paste(ls_0[15:28, s], "D2", sep='')
-    ls_0[29:42, s] <- paste(ls_0[29:42, s], "D3", sep='')
-    ls_0[43:56, s] <- paste(ls_0[43:56, s], "D4", sep='')
+  for (s in 1:nstep) {
+    ls_0[, s] <- paste("step", s, "_I", sep = '')
+    ls_0[1:n_id, s] <- paste(ls_0[1:n_id, s], "D1", sep = '')
+    ls_0[(n_id + 1):(2 * n_id), s] <- paste(ls_0[(n_id + 1):(2 * n_id), s], "D2", sep = '')
+    ls_0[(2 * n_id + 1):(3 * n_id), s] <- paste(ls_0[(2 * n_id + 1):(3 * n_id), s], "D3", sep = '')
+    ls_0[(3 * n_id + 1):(4 * n_id), s] <- paste(ls_0[(3 * n_id + 1):(4 * n_id), s], "D4", sep = '')
   }
   #creating a cumulative matrix with a sum of "-" step intercepts 
   ls_0_cumul <- ls_0
   ls_0_cumul[,2] <- paste(ls_0[,1],'-',ls_0[,2],sep='')
   ls_0_cumul[,3] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],sep='')
-  # ls_0_cumul[,4] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],sep='')
+  ls_0_cumul[,4] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],sep='')
   # ls_0_cumul[,5] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],'-',ls_0[,5],sep='')
   # ls_0_cumul[,6] <- paste(ls_0[,1],'-',ls_0[,2],'-',ls_0[,3],'-',ls_0[,4],'-',ls_0[,5],'-',ls_0[,6],sep='')
   
   #ls_1 - step main effects , matrix with nitems by nsteps dimensions
-  ls_1 <- matrix("NA", n_items,nstep)
+  ls_1 <- matrix("NA", n_items, nstep)
   
   #loop for filling the step main effects 
   for (s in 1:nstep){
     ls_1[,s] <- paste("step",s, "_M", sep='')
-    ls_1[1:14, s] <- paste(ls_1[1:14, s], "D1", sep='')
-    ls_1[15:28, s] <- paste(ls_1[15:28, s], "D2", sep='')
-    ls_1[29:42, s] <- paste(ls_1[29:42, s], "D3", sep='')
-    ls_1[43:56, s] <- paste(ls_1[43:56, s], "D4", sep='')
+    ls_1[1:n_id, s] <- paste(ls_1[1:n_id, s], "D1", sep='')
+    ls_1[(n_id + 1):(2 * n_id), s] <- paste(ls_1[(n_id + 1):(2 * n_id), s], "D2", sep = '')
+    ls_1[(2 * n_id + 1):(3 * n_id), s] <- paste(ls_1[(2 * n_id + 1):(3 * n_id), s], "D3", sep = '')
+    ls_1[(3 * n_id + 1):(4 * n_id), s] <- paste(ls_1[(3 * n_id + 1):(4 * n_id), s], "D4", sep = '')
   }
   #creating a cumulative matrix with a sum of "+" step main effects  
   ls_1_cumul <- ls_1
   ls_1_cumul[,2] <- paste(ls_1[,1],'+',ls_1[,2],sep='')
   ls_1_cumul[,3] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],sep='')
-  # ls_1_cumul[,4] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],sep='')
+  ls_1_cumul[,4] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],sep='')
   # ls_1_cumul[,5] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],'+',ls_1[,5],sep='')
   # ls_1_cumul[,6] <- paste(ls_1[,1],'+',ls_1[,2],'+',ls_1[,3],'+',ls_1[,4],'+',ls_1[,5],'+',ls_1[,6],sep='')
   
@@ -87,11 +91,11 @@ RSDM<-function(Qmatrix,scale.num,save.path=getwd(),save.name="RSDM"){
   
   Modelcontainer<-paste('   vector[Nc] contributionsC;\n','    vector[Ni] contributionsI;\n\n',sep='')
   Parmprior<-paste(c(paste('   //Prior\n'),
-                     paste( li_0,'~normal(0,2)',';\n'),
-                     paste( li_1,'~normal(0,2)', ';\n'),
-                     paste(ls_0_unique,'~normal(0,2)', ';\n'),
-                     paste( ls_1_unique,'~normal(0,2)',';\n'),
-                     paste('Vc~dirichlet(rep_vector(2.0, Nc));',sep='')))
+                     paste(li_0,'~normal(0,2)',';\n', sep=''),
+                     paste(li_1,'~normal(0,2)', ';\n', sep=''),
+                     paste(ls_0_unique,'~normal(0,2)',';\n', sep=''),
+                     paste(ls_1_unique,'~normal(0,2)',';\n', sep=''),
+                     paste('Vc~dirichlet(rep_vector(2.0, Nc));', sep='')))
   
   #Likelihood Stan code
   Likelihood<-'
@@ -172,10 +176,10 @@ sink(NULL)
 
 
 
-Q <- matrix(c(rep(c(1,0,0,0),14),
-              rep(c(0,1,0,0),14),
-              rep(c(0,0,1,0),14),
-              rep(c(0,0,0,1),14)),
-            56,4, byrow=T)
-RSDM(Q,4)
+Q <- matrix(c(rep(c(1,0,0,0),n_id),
+              rep(c(0,1,0,0),n_id),
+              rep(c(0,0,1,0),n_id),
+              rep(c(0,0,0,1),n_id)),
+            n_i,n_d, byrow=T)
+RSDM(Q,5)
 
