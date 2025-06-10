@@ -319,7 +319,6 @@ end_idx <- start_idx + n_d - 1
 step_r <- data.frame(
   mapply(function(start, end) rsdm_table[start:end, 1], start_idx, end_idx)
 )
-step_r[4,] <- c(0.2170600, 0.310343507, 1.1467742, 0.35386807, 1.0937769, 0.08396823)
 step_r <- step_r[rep(seq_len(nrow(step_r)), each = n_id), ]
 
 colnames(item_r) <- c("i_I","i_M")
