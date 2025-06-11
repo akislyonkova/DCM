@@ -1,5 +1,10 @@
 library(stringr)
 
+n_i <- 40     # number of items 
+n_id <- 10    # number of items per dimension 
+n_d <- 4      # number of dimensions 
+
+
 NRDM <- function(Q,scale.num,save.path=getwd(),save.name="NRDM"){
   nstep=scale.num-1
   n_attr  <- ncol(Q)
@@ -24,16 +29,16 @@ NRDM <- function(Q,scale.num,save.path=getwd(),save.name="NRDM"){
   li_0_sum[,2] <- paste(li_0[,1],'+',li_0[,2],sep='')
   li_0_sum[,3] <- paste(li_0[,1],'+',li_0[,2],'+',li_0[,3],sep='')
   li_0_sum[,4] <- paste(li_0[,1],'+',li_0[,2],'+',li_0[,3],'+',li_0[,4],sep='')
-  li_0_sum[,5] <- paste(li_0[,1],'+',li_0[,2],'+',li_0[,3],'+',li_0[,4],'+',li_0[,5],sep='')
-  li_0_sum[,6] <- paste(li_0[,1],'+',li_0[,2],'+',li_0[,3],'+',li_0[,4],'+',li_0[,5],'+',li_0[,6],sep='')
+  # li_0_sum[,5] <- paste(li_0[,1],'+',li_0[,2],'+',li_0[,3],'+',li_0[,4],'+',li_0[,5],sep='')
+  # li_0_sum[,6] <- paste(li_0[,1],'+',li_0[,2],'+',li_0[,3],'+',li_0[,4],'+',li_0[,5],'+',li_0[,6],sep='')
   
   #creating a cumulative matrix with a sum of step main effects for each item 
   li_1_sum <- li_1
   li_1_sum[,2] <- paste(li_1[,1],'+',li_1[,2],sep='')
   li_1_sum[,3] <- paste(li_1[,1],'+',li_1[,2],'+',li_1[,3],sep='')
   li_1_sum[,4] <- paste(li_1[,1],'+',li_1[,2],'+',li_1[,3],'+',li_1[,4],sep='')
-  li_1_sum[,5] <- paste(li_1[,1],'+',li_1[,2],'+',li_1[,3],'+',li_1[,4],'+',li_1[,5],sep='')
-  li_1_sum[,6] <- paste(li_1[,1],'+',li_1[,2],'+',li_1[,3],'+',li_1[,4],'+',li_1[,5],'+',li_1[,6],sep='')
+  # li_1_sum[,5] <- paste(li_1[,1],'+',li_1[,2],'+',li_1[,3],'+',li_1[,4],'+',li_1[,5],sep='')
+  # li_1_sum[,6] <- paste(li_1[,1],'+',li_1[,2],'+',li_1[,3],'+',li_1[,4],'+',li_1[,5],'+',li_1[,6],sep='')
   
   Reparm<-array(rep(0,n_items*nclass*(scale.num)),dim = c(n_items,nclass,(scale.num))) # placeholder for the loop results 
   
@@ -51,10 +56,10 @@ NRDM <- function(Q,scale.num,save.path=getwd(),save.name="NRDM"){
   
   # build a Frankenstein 
   Modelcontainer<-paste('vector[Nc] contributionsC;\n','    
-                        vector[Ni] contributionsI;\n\n',sep='')
+                        vector[Ni] contributionsI;\n\n', sep='')
   Parmprior<-paste(c(paste('   //Prior\n'),
-                     paste( li_0,'~normal(0,2)',';\n'),
-                     paste( li_1,'~normal(0,2)', ';\n'),
+                     paste(li_0,'~normal(0,2)',';\n', sep=''),
+                     paste(li_1,'~normal(0,2)', ';\n', sep=''),
                      paste('Vc~dirichlet(rep_vector(2.0, Nc));',sep='')))
   
   #Likelihood Stan code
@@ -131,13 +136,13 @@ sink(NULL)
 
 
 
-Q=matrix(c(rep(c(1,0,0,0),10),
-           rep(c(0,1,0,0),10),
-           rep(c(0,0,1,0),10),
-           rep(c(0,0,0,1),10)),
-           40,4, byrow=T)
+Q <- matrix(c(rep(c(1,0,0,0),n_id),
+              rep(c(0,1,0,0),n_id),
+              rep(c(0,0,1,0),n_id),
+              rep(c(0,0,0,1),n_id)),
+            n_i,n_d, byrow=T)
 
-NRDM(Q,7)
+NRDM(Q,5)
 
 
 
