@@ -3,12 +3,12 @@ library(ggplot2)
 library(reshape2)
 
 
-cell <- 2        # cell number 
+cell <- 1        # cell number 
 n_sim <- 25      # number of replications 
-n_i <- 20        # number of items 
+n_i <- 10        # number of items 
 rows_start <- 5  # first parameter 
 rows_end <- 53   # last parameter 
-n_id <- 10       # number of items per dimension 
+n_id <- 5        # number of items per dimension 
 
 file_name <- paste("RRDM_cell", cell, "_param.txt", sep="")
 rrdm_param <- read.table(file_name)

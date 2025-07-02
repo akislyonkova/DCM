@@ -28,9 +28,9 @@ gendata_rrdm <- function (n_dataset, alpha, item, step) {
 
 ### Generating cell 1: large sample, short test
 
-N <- 1000      # sample size
+N <- 2000      # sample size
 i <- 10        # number of items 
-n_id <- 5     # number of items per dimension 
+n_id <- 5      # number of items per dimension 
 
 t <- matrix(NA, i, s+1)
 r <- matrix(NA, N, i) 
@@ -48,13 +48,13 @@ ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind, ]                                      # simulated pattern ("truth") for all attributes for each person
 
 ###  Generating the intercepts, main effects and steps
-item_i <- matrix(runif(i, min = -2.2, max = -0.9), i, 1, byrow = T) 
+item_i <- matrix(runif(i, min = -2, max = 2), i, 1, byrow = T) 
 item_m <- matrix(runif(i, min = 0.9, max = 2.2), i, 1, byrow = T) 
 item <- cbind(item_i, item_m)
 item <- as.data.frame(round(item,4))
 colnames(item) <- c('I', 'M')
 
-step <- matrix(runif(n_attr * s, min = 0, max = 0.5), n_attr, s, byrow = TRUE)
+step <- matrix(runif(n_attr * s, min = 0.1, max = 0.5), n_attr, s, byrow = TRUE)
 step <- step[rep(1:nrow(step), each = n_id), ]
 step <- as.data.frame(round(step,4))
 colnames(step) <- c('step1_', 'step2_', 'step3_', 'step4_')
