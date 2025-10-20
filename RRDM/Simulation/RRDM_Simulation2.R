@@ -4,19 +4,20 @@ set.seed(2025)
 s <- 4
 
 # function to generate data
-responses <- list() 
-gendata_rrdm <- function (n_dataset, alpha, item, step) {
+gendata_rrdm <- function (n_dataset, alpha, item, step, N, i) {
+  responses <- list()
   for (n in 1:n_dataset){     # n - number of datasets 
+    r <- matrix(NA, N, i)
     for(k in 1:nrow(alpha)) { # k = N 
-      for(i in 1:i) {         # i - item
-        t1=exp(1*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1])
-        t2=exp(2*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2])
-        t3=exp(3*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3])
-        t4=exp(4*(item[i,1]+item[i,2]*alpha[k,1]) + step[i,1] + step[i,2] + step[i,3] + step[i,4])
+      for(m in 1:i) {         # i = items in a test
+        t1=exp(1*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1])
+        t2=exp(2*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2])
+        t3=exp(3*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2] + step[m,3])
+        t4=exp(4*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2] + step[m,3] + step[m,4])
         sum=1+t1+t2+t3+t4
-        t[i,] = c(1/sum, t1/sum,t2/sum,t3/sum, t4/sum)
-        ppp=rmultinom(n=1, size=1, prob=t[i,]) # n- number of random vectors, prob - probabilities sum=1
-        r[k,i]=which(ppp == 1, arr.ind=TRUE)[1] # which() function returns the position/index of the value
+        t[m,] = c(1/sum, t1/sum,t2/sum,t3/sum, t4/sum)
+        ppp=rmultinom(n=1, size=1, prob=t[m,])  # n = number of random vectors, prob = probabilities sum=1
+        r[k,m]=which(ppp == 1, arr.ind=TRUE)[1] # which() function returns the position/index of the value
       }
     }
     responses[[length(responses)+1]] = as.data.frame(r)
@@ -28,12 +29,12 @@ gendata_rrdm <- function (n_dataset, alpha, item, step) {
 
 ### Generating cell 1: large sample, short test
 
-N <- 2000      # sample size
+N <- 3000      # sample size
 i <- 10        # number of items 
 n_id <- 5      # number of items per dimension 
 
 t <- matrix(NA, i, s+1)
-r <- matrix(NA, N, i) 
+#r <- matrix(NA, N, i) 
 
 Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # i items and 2 attributes
 colnames(Q) <- c('A1','A2')
@@ -48,7 +49,7 @@ ind <- sample(x=1:AP , size=N, replace = TRUE , prob=alpha.prob)
 alpha <- alpha.patt[ind, ]                                      # simulated pattern ("truth") for all attributes for each person
 
 ###  Generating the intercepts, main effects and steps
-item_i <- matrix(runif(i, min = -2, max = 2), i, 1, byrow = T) 
+item_i <- matrix(runif(i, min = -1, max = 1), i, 1, byrow = T) 
 item_m <- matrix(runif(i, min = 0.9, max = 2.2), i, 1, byrow = T) 
 item <- cbind(item_i, item_m)
 item <- as.data.frame(round(item,4))
@@ -72,14 +73,14 @@ cell1_param <- rbind(item_unlist, step_selected)
 write.table(cell1_param, file = 'RRDM_cell1_param.txt') # save cell 1 params
 
 ###  Genarate and save datasets for cell 1 
-cell1 <- gendata_rrdm(n_dataset = 25, alpha = alpha, item = item,  step = step) # generate data
+cell1 <- gendata_rrdm(n_dataset = 25, alpha = alpha, item = item,  step = step, N = N, i = i) # generate data
 save(cell1, file = 'rrdm_cell1.rda') # saves generated cell 1 
 
 ##########################################################################################################
 
 ### Generating cell 2: short test, small sample 
 
-N <- 500      
+N <- 1500      
 i <- 10        
 n_id <- 5     
 
@@ -132,9 +133,9 @@ save(cell2, file = 'rrdm_cell2.rda')
 
 ### Generating cell 3: long test, large sample 
 
-N <- 1000      
+N <- 3000      
 i <- 20        
-n_id <- 10     
+n_id <- 10    
 
 t <- matrix(NA, i, s+1)
 r <- matrix(NA, N, i) 
@@ -183,7 +184,7 @@ save(cell3, file = 'rrdm_cell3.rda')
 
 ### Generating cell 4: long test, small sample 
 
-N <- 500      
+N <- 1500      
 i <- 20        
 n_id <- 10     
 
@@ -232,8 +233,8 @@ save(cell4, file = 'rrdm_cell4.rda')
 
 # Extraction of the datasets 
 
-for (i in 1:25) {
-  sim <- cell1[[i]]  
-  file_name <- paste("sim", i, ".txt", sep = '')  
+for (d_idx in 1:25) {
+  sim <- cell1[[d_idx]]  
+  file_name <- paste("sim", d_idx, ".txt", sep = '')  
   write.table(sim, file_name)  
 }

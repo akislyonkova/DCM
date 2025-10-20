@@ -30,8 +30,6 @@ bias <- data.frame(rowSums(sim_param_dif)/n_sim)
 
 
 colnames(bias) <- "raw_bias" 
-rownames(bias) <- paste0("item", seq(1, n_i), "_", rep(c("i", "m", "d"), each = n_i))
-
 bias$rmse <- NA 
 bias$rmse <- sqrt((rowSums(sim_param_dif))^2/(n_sim-1)) 
 
