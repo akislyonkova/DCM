@@ -10,17 +10,17 @@ gendata_rrdm <- function (n_dataset, alpha, item, step, N, i) {
     r <- matrix(NA, N, i)
     for(k in 1:nrow(alpha)) { # k = N 
       for(m in 1:i) {         # i = items in a test
-        t1=exp(1*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1])
-        t2=exp(2*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2])
-        t3=exp(3*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2] + step[m,3])
-        t4=exp(4*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2] + step[m,3] + step[m,4])
-        sum=1+t1+t2+t3+t4
-        t[m,] = c(1/sum, t1/sum,t2/sum,t3/sum, t4/sum)
-        ppp=rmultinom(n=1, size=1, prob=t[m,])  # n = number of random vectors, prob = probabilities sum=1
-        r[k,m]=which(ppp == 1, arr.ind=TRUE)[1] # which() function returns the position/index of the value
+        thr1 <- exp(1*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1])
+        thr2 <- exp(2*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2])
+        thr3 <- exp(3*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2] + step[m,3])
+        thr4 <- exp(4*(item[m,1]+item[m,2]*alpha[k,1]) + step[m,1] + step[m,2] + step[m,3] + step[m,4])
+        summ <- 1+thr1+thr2+thr3+thr4
+        thr[m,] <- c(1/summ, thr1/summ, thr2/summ, thr3/summ, thr4/summ)
+        ppp <- rmultinom(n=1, size=1, prob=thr[m,])  # n = number of random vectors, prob = probabilities sum=1
+        r[k,m] <- which(ppp == 1, arr.ind=TRUE)[1] # which() function returns the position/index of the value
       }
     }
-    responses[[length(responses)+1]] = as.data.frame(r)
+    responses[[length(responses)+1]] <- as.data.frame(r)
   }
   responses
 }
@@ -33,8 +33,7 @@ N <- 3000      # sample size
 i <- 10        # number of items 
 n_id <- 5      # number of items per dimension 
 
-t <- matrix(NA, i, s+1)
-#r <- matrix(NA, N, i) 
+thr <- matrix(NA, i, s+1)
 
 Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # i items and 2 attributes
 colnames(Q) <- c('A1','A2')
@@ -84,8 +83,7 @@ N <- 1500
 i <- 10        
 n_id <- 5     
 
-t <- matrix(NA, i, s+1)
-r <- matrix(NA, N, i) 
+thr <- matrix(NA, i, s+1)
 
 Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # 20 items and 2 attributes
 colnames(Q) <- c('A1','A2')
@@ -137,8 +135,7 @@ N <- 3000
 i <- 20        
 n_id <- 10    
 
-t <- matrix(NA, i, s+1)
-r <- matrix(NA, N, i) 
+thr <- matrix(NA, i, s+1)
 
 Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # i items and 2 attributes
 colnames(Q) <- c('A1','A2')
@@ -188,8 +185,7 @@ N <- 1500
 i <- 20        
 n_id <- 10     
 
-t <- matrix(NA, i, s+1)
-r <- matrix(NA, N, i) 
+thr <- matrix(NA, i, s+1)
 
 Q <- matrix(c(rep(c(1,0), n_id),rep(c(0,1), n_id)), i, 2, byrow = T) # 40 items and 2 attributes
 colnames(Q) <- c('A1','A2')
