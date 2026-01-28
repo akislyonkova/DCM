@@ -54,7 +54,7 @@ item <- cbind(item_i, item_m)
 item <- as.data.frame(round(item,4))
 colnames(item) <- c('I', 'M')
 
-step <- matrix(runif(n_attr * s, min = 0.1, max = 0.5), n_attr, s, byrow = TRUE)
+step <- matrix(runif(n_attr * s, min = -0.5, max = 0), n_attr, s, byrow = TRUE)
 step <- step[rep(1:nrow(step), each = n_id), ]
 step <- as.data.frame(round(step,4))
 colnames(step) <- c('step1_', 'step2_', 'step3_', 'step4_')

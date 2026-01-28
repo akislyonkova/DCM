@@ -28,14 +28,14 @@ parameters{
   real<lower=0> l8M ;
   real<lower=0> l9M ;
   real<lower=0> l10M ;
-  real<lower=0> step1_ID1 ;
-  real<lower=0> step1_ID2 ;
-  real<lower=0> step2_ID1 ;
-  real<lower=0> step2_ID2 ;
-  real<lower=0> step3_ID1 ;
-  real<lower=0> step3_ID2 ;
-  real<lower=0> step4_ID1 ;
-  real<lower=0> step4_ID2 ;
+  real<upper=0> step1_ID1 ;
+  real<upper=0> step1_ID2 ;
+  real<upper=0> step2_ID1 ;
+  real<upper=0> step2_ID2 ;
+  real<upper=0> step3_ID1 ;
+  real<upper=0> step3_ID2 ;
+  real<upper=0> step4_ID1 ;
+  real<upper=0> step4_ID2 ;
 }
 transformed parameters{
   vector[Ns] PImat[Ni, Nc];
