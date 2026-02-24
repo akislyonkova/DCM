@@ -36,11 +36,21 @@ create_misspecified_Q <- function(Q_true, a_type, e_type, e_rate) {
   target_value <- if(e_type == "Omission") 1 else 0         # debug later
   target_cells <- which(Q_mis[, target_cols] == target_value, arr.ind = TRUE)
   
+  if (e_type == "Omission") {
+    # Calculate row sums for the WHOLE Q-matrix
+    row_sums <- rowSums(Q_mis)
+    
+    # Only keep cells where the row sum is > 1
+    # This ensures Kj remains at least 1 after flipping a 1 to a 0
+    valid_rows <- which(row_sums > 1)
+    target_cells <- target_cells[target_cells[, "row"] %in% valid_rows, , drop = FALSE]
+  }
+  
   # Adjust column indices
   target_cells[, 2] <- target_cols[target_cells[, 2]]
     
   # Randomly select cells to flip
-  n_flip <- round(e_rate * nrow(target_cells))
+  n_flip <- ceiling(e_rate * nrow(target_cells))
   flip_idx <- sample(1:nrow(target_cells), n_flip)
   
   for (i in flip_idx) {
@@ -61,18 +71,25 @@ results <- apply(design_factors, 1, function(row) {
   e_rate <- as.numeric(row["e_rate"])
   
   # Generate True Data
-  # sim <- simGDINA(N, Q_true, gs.parm = item_qualities[[qual_name]], 
+  # sim <- simGDINA(N, Q_true, gs.parm = item_qualities[[qual_name]],
   #                 model = "SISM", no.bugs = 3)
   # dat <- extract(sim, "dat")
   
   # Create Misspecified Q-matrix
   Q_mis <- create_misspecified_Q(Q_true, a_type, e_type, e_rate)
   
-  file_name <- paste0("Q_mis_", a_type, "_", e_type, "_", e_rate, ".txt")
+  # file_name <- paste0("Q_mis_", a_type, "_", e_type, "_", e_rate, ".txt")
+  # write.table(Q_mis, file = file_name, sep = "\t", row.names = FALSE, col.names = FALSE)
   
-  # 3. Save as .txt file
-  # row.names = FALSE and col.names = FALSE are usually preferred for Q-matrices
-  write.table(Q_mis, file = file_name, sep = "\t", row.names = FALSE, col.names = FALSE)
+  sim <- simGDINA(N, Q_mis, 
+                  gs.parm = item_qualities[[qual_name]],
+                  model = "SISM", 
+                  no.bugs = 3)
+  
+  dat <- extract(sim, "dat")
+  
+  # Return both the data and the matrix used to generate it for later analysis
+  return(list(dat = dat, Q_used = Q_mis))
 })
 
 
@@ -118,7 +135,7 @@ Q_mis_m_i_01 == Q_true
 ###########################################
 
 
-
+write.table(Q_true, file = "Q_true.txt", sep = "\t", row.names = FALSE, col.names = FALSE)
 
 
 
