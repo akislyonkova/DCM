@@ -62,36 +62,50 @@ create_misspecified_Q <- function(Q_true, a_type, e_type, e_rate) {
   return(Q_mis)
 }
 
+# Define number of replications
+n_reps <- 50
+
 # Simulating data
 results <- apply(design_factors, 1, function(row) {
-  N <- as.numeric(row["N"])
+  N         <- as.numeric(row["N"])
   qual_name <- row["qual_name"]
-  a_type <- row["a_type"]
-  e_type <- row["e_type"]
-  e_rate <- as.numeric(row["e_rate"])
+  a_type    <- row["a_type"]
+  e_type    <- row["e_type"]
+  e_rate    <- as.numeric(row["e_rate"])
   
-  # Generate True Data
-  # sim <- simGDINA(N, Q_true, gs.parm = item_qualities[[qual_name]],
-  #                 model = "SISM", no.bugs = 3)
-  # dat <- extract(sim, "dat")
+  # Log progress for the condition
+  cat(sprintf("\nCondition: N=%d, Qual=%s, Attr=%s, Err=%s, Rate=%.2f\n", 
+              N, qual_name, a_type, e_type, e_rate))
   
-  # Create Misspecified Q-matrix
-  Q_mis <- create_misspecified_Q(Q_true, a_type, e_type, e_rate)
+  condition_reps <- lapply(1:n_reps, function(rep) {
+    
+    # Print every 10th replication to show progress 
+    if(rep %% 10 == 0) cat(paste0("..", rep))
+    
+    # Create a fresh misspecified Q-matrix for each replication 
+    Q_mis <- create_misspecified_Q(Q_true, a_type, e_type, e_rate)
+    
+    # Generate Data based on the SISM model
+    sim <- simGDINA(N = N, 
+                    Q = Q_mis, 
+                    gs.parm = item_qualities[[qual_name]],
+                    model = "SISM", 
+                    no.bugs = 3)
+    
+    dat <- extract(sim, "dat")
+    
+    # Return data and the specific Q used for this rep
+    return(list(dat = dat, Q_used = Q_mis))
+  })
   
-  # file_name <- paste0("Q_mis_", a_type, "_", e_type, "_", e_rate, ".txt")
-  # write.table(Q_mis, file = file_name, sep = "\t", row.names = FALSE, col.names = FALSE)
-  
-  sim <- simGDINA(N, Q_mis, 
-                  gs.parm = item_qualities[[qual_name]],
-                  model = "SISM", 
-                  no.bugs = 3)
-  
-  dat <- extract(sim, "dat")
-  
-  # Return both the data and the matrix used to generate it for later analysis
-  return(list(dat = dat, Q_used = Q_mis))
+  return(list(
+    replications = condition_reps,
+    condition = row
+  ))
 })
 
+# Save the results
+save(results, file = "Study1_Full_Replications.RData")
 
 
 ###########################################
