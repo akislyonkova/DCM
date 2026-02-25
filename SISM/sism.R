@@ -4,6 +4,8 @@ library(GDINA)
 
 # Study 1 - misspesified measurement component 
 
+# 20 items 
+
 Q_true <- matrix(c(1,0,0,0,0,0,0, 0,1,0,0,0,0,0, 0,0,1,0,0,0,0, 0,0,0,1,0,0,0, 
                    0,0,0,0,1,0,0, 0,0,0,0,0,1,0, 0,0,0,0,0,0,1, 1,0,0,0,1,0,0,
                    0,1,0,0,1,0,0, 0,0,1,0,0,0,1, 0,0,0,1,0,1,0, 1,1,0,0,1,0,0,
@@ -109,55 +111,14 @@ save(results, file = "Study1_Full_Replications.RData")
 
 
 ###########################################
-# Debuging 
-Q_mis <- Q_true
-a_type <- "Skill"
-target_cols <- if(a_type == "Skill") 1:4 else 5:7
-e_type <- "Omission"
-e_rate <- 0.05
-
-# Get cells available for flipping based on error type
-target_value <- if(e_type == "Omission") 1 else 0
-target_cells <- which(Q_mis[, target_cols] == target_value, arr.ind = TRUE)
-sum(Q_true[, target_cols])
-
-# Adjust column indices
-# target_cells_new[, 2] <- target_cols[target_cells[, 2]]
-
-# Randomly select cells to flip
-n_flip <- round(e_rate * nrow(target_cells))
-flip_idx <- sample(1:nrow(target_cells), n_flip)
-
-for (i in flip_idx) {
-  row <- target_cells[i, 1]
-  col <- target_cells[i, 2]
-  Q_mis[row, col] <- ifelse(e_type == "Omission", 0, 1)
-}
-
-Q_true == Q_mis
+# Debugging 
 
 
 
 
-Q_mis_m_i_01 <- read.table("Q_mis_Misconception_Inclusion_0.1.txt")
-
-
-sum(Q_mis_m_i_01 != Q_true)
-
-Q_mis_m_i_01 == Q_true
 
 ###########################################
-
-
-write.table(Q_true, file = "Q_true.txt", sep = "\t", row.names = FALSE, col.names = FALSE)
-
-
-
-
-
-
-
-
+# 40 items 
 
 
 
