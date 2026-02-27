@@ -115,8 +115,6 @@ save(results, file = "Study1_Full_Replications.RData")
 
 
 
-
-
 ###########################################
 # 40 items 
 
