@@ -219,3 +219,49 @@ results_study2 <- apply(design_factors_s2, 1, function(row) {
   return(list(replications = condition_reps, condition = row))
 })
 
+#########################################################################################
+# Time estimate 
+library(GDINA)
+
+Q_true <- matrix(c(1,0,0,0,0,0,0, 0,1,0,0,0,0,0, 0,0,1,0,0,0,0, 0,0,0,1,0,0,0, 
+                   0,0,0,0,1,0,0, 0,0,0,0,0,1,0, 0,0,0,0,0,0,1, 1,0,0,0,1,0,0,
+                   0,1,0,0,1,0,0, 0,0,1,0,0,0,1, 0,0,0,1,0,1,0, 1,1,0,0,1,0,0,
+                   1,0,1,0,0,0,1, 1,0,0,1,0,0,1, 0,1,1,0,0,0,1, 0,1,0,1,0,1,1,
+                   0,0,1,1,0,1,1, 1,0,1,0,1,1,0, 1,1,0,1,1,1,0, 0,1,1,1,1,1,0),
+                 ncol = 7, byrow = TRUE)
+
+
+K <- 7
+linear <- list(c(1,2),c(2,3),c(3,4),c(4,5),c(5,6),c(6,7))
+linear_attr <- att.structure(linear, K)
+
+
+N <- 500
+all_patterns <- attributepattern(K) 
+
+
+sampled_rows <- sample(1:nrow(all_patterns), size = N, replace = TRUE, prob = linear_attr$att.prob)
+simulated_attributes <- all_patterns[sampled_rows, ]
+
+
+J <- nrow(Q_true)
+gs_high <- data.frame(guess = rep(0.1, J), slip = rep(0.1, J))
+
+sim <- simGDINA(N = N, 
+                Q = Q_true, 
+                gs.parm = gs_high,
+                model = "SISM", 
+                attribute = simulated_attributes, # Pass the matrix here instead of att.str
+                no.bugs = 3)
+dat <- sim$dat
+
+start.time <- Sys.time()
+
+fit_sism <- GDINA(dat = dat, 
+                  Q = Q_true, 
+                  model = "SISM", 
+                  no.bugs = 3) 
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+
+summary(fit_sism)
