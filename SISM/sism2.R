@@ -251,7 +251,7 @@ sim <- simGDINA(N = N,
                 Q = Q_true, 
                 gs.parm = gs_high,
                 model = "SISM", 
-                attribute = simulated_attributes, # Pass the matrix here instead of att.str
+                attribute = simulated_attributes, 
                 no.bugs = 3)
 dat <- sim$dat
 
