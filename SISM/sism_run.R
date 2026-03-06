@@ -5,13 +5,7 @@ library(foreach)
 library(doParallel)
 
 
-fit <- GDINA(dat = your_data_here, 
-             Q = q_matrix, 
-             model = "SISM", 
-             no.bugs = 3) 
-
-
-n_cores <- parallel::detectCores() - 1 
+n_cores <- 4               ### check that the cluster accepts this command 
 cl <- makeCluster(n_cores)
 registerDoParallel(cl)
 
@@ -24,16 +18,17 @@ n_reps <- 50
 
 final_results <- foreach(cond = 1:n_conditions, 
                          .packages = "GDINA",
-                         .export = c("dat", "Q_used")) %dopar% {
+                         .export = c("dat", "Q_used")) %dopar% {  ### check what is extracted 
                            
                            condition_reps <- vector("list", n_reps)
+                           current_Q <- Q_list[[cond]]            ### Q-list no such object 
                            
                            for (rep in 1:n_reps) {
                              current_data <- dat[[cond]][[rep]]
                              
                              fit_attempt <- tryCatch({
                                GDINA(dat = current_data, 
-                                     Q = Q_used, 
+                                     Q = current_Q, 
                                      model = "SISM", 
                                      no.bugs = 3, 
                                      verbose = 0)
@@ -41,16 +36,16 @@ final_results <- foreach(cond = 1:n_conditions,
                              
                              if (!is.null(fit_attempt)) {
                                condition_reps[[rep]] <- list(
-                                 estimates = coef(fit_attempt),
-                                 fit_stats = mod_indices(fit_attempt),
+                                 estimates = coef(fit_attempt),        ### check how to call the indices 
+                                 fit_stats = mod_indices(fit_attempt), ### protect from crushing if 1 dataset fails 
                                  success = TRUE
                                )
                              } else {
                                condition_reps[[rep]] <- list(success = FALSE)
                              }
                            }
-                           
-                           return(condition_reps) # 
+                           saveRDS(condition_reps, file = paste0("cond_", cond, ".rds"))
+                           return(condition_reps) 
                          }
 
 
