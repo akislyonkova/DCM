@@ -96,9 +96,12 @@ results <- apply(design_factors, 1, function(row) {
                     no.bugs = 3)
     
     dat <- extract(sim, "dat")
+    itemprob <- extract(sim, what = "catprob.parm")
+    delta <- extract(sim, what = "delta.parm")
+    profiles <- extract(sim,what = "attribute")
     
     # Return data and the specific Q used for this rep
-    return(list(dat = dat, Q_used = Q_mis))
+    return(list(dat = dat, Q_used = Q_mis, itemprob = itemprob, delta = delta, profiles = profiles))
   })
   
   return(list(
@@ -109,9 +112,4 @@ results <- apply(design_factors, 1, function(row) {
 
 # Save the results
 save(results, file = "Study1_Full_Replications.RData")
-
-
-
-
-
 

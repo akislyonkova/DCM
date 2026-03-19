@@ -5,7 +5,8 @@ library(foreach)
 library(doParallel)
 
 
-n_cores <- 4               ### check that the cluster accepts this command 
+n_cores <- parallel::detectCores() - 1                      # for local PC
+# n_cores <- as.numeric(Sys.getenv("SLURM_CPUS_PER_TASK"))  # for cluster 
 cl <- makeCluster(n_cores)
 registerDoParallel(cl)
 
@@ -15,16 +16,18 @@ load("Study1_Full.Rdata")
 n_conditions <- 96
 n_reps <- 50
 
+n_conditions <- 2
+n_reps <- 1
 
 final_results <- foreach(cond = 1:n_conditions, 
                          .packages = "GDINA",
-                         .export = c("dat", "Q_used")) %dopar% {  ### check what is extracted 
+                         .export = c("results")) %dopar% {   
                            
                            condition_reps <- vector("list", n_reps)
-                           current_Q <- Q_list[[cond]]            ### Q-list no such object 
+                           current_Q <- results[[1]]$replications[[1]]$Q_used                
                            
                            for (rep in 1:n_reps) {
-                             current_data <- dat[[cond]][[rep]]
+                             current_data <- results[[cond]]$replications[[rep]]$dat
                              
                              fit_attempt <- tryCatch({
                                GDINA(dat = current_data, 
@@ -37,7 +40,10 @@ final_results <- foreach(cond = 1:n_conditions,
                              if (!is.null(fit_attempt)) {
                                condition_reps[[rep]] <- list(
                                  estimates = coef(fit_attempt),        ### check how to call the indices 
-                                 fit_stats = mod_indices(fit_attempt), ### protect from crushing if 1 dataset fails 
+                                 fit_stats = modelfit(fit_attempt),    ### protect from crushing if 1 dataset fails 
+                                 personparm = personparm(fit_attempt, what = "mp"),
+                                 class_prev = coef(fit_attempt, what = "lambda"),
+                                 profiles = personparm(fit_attempt, what = "EAP"),
                                  success = TRUE
                                )
                              } else {
@@ -51,5 +57,5 @@ final_results <- foreach(cond = 1:n_conditions,
 
 stopCluster(cl)
 
-save(final_results, file = "parallel_sism_results.Rdata")
+save(final_results, file = "study1_results.Rdata")
 message("Simulation complete. Results saved.")
