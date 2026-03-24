@@ -1,22 +1,30 @@
 ########################################################################################################
+
 library(GDINA)
 library(foreach)
 library(doParallel)
-n_cores <- parallel::detectCores() - 1                      # for local PC
-# n_cores <- as.numeric(Sys.getenv("SLURM_CPUS_PER_TASK"))  # for cluster 
+library(doRNG)
+
+getwd()
+
+setwd("~/DCM/sism/")
+
+n_cores <- parallel::detectCores() - 1                      
+
 cl <- makeCluster(n_cores)
 registerDoParallel(cl)
-load("Study1_data.Rdata")
-# Simulation Parameters
+load("/home/akislyonkova/DCM/sism/Study1_data.RData")
+
+set.seed(2026)
+
 n_conditions <- 64
 n_reps <- 100
-n_conditions <- 2
-n_reps <- 1
+
 final_results <- foreach(cond = 1:n_conditions, 
                          .packages = "GDINA",
-                         .export = c("data", "n_reps")) %dopar% {   
+                         .export = c("data", "n_reps")) %dorng% {
                            
-                           condition_reps <- vector("list", n_reps)
+                           condition_reps <- vector("list", n_reps);
                            
                            for (rep in 1:n_reps) {
                              current_Q <- data[[cond]]$replications[[rep]]$Q_used
@@ -63,8 +71,9 @@ final_results <- foreach(cond = 1:n_conditions,
                                condition_reps[[rep]] <- list(success = FALSE)
                              }
                            }
-                           saveRDS(condition_reps, file = paste0("cond_", cond, ".rds"))
-                           return(condition_reps) 
+                           saveRDS(condition_reps, file = paste0("cond_", cond, ".rds")) 
+                           message(sprintf("Condition %d complete", cond))
+                           condition_reps 
                          }
 stopCluster(cl)
 save(final_results, file = "study1_results.Rdata")
