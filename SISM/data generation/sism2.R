@@ -10,9 +10,19 @@ generate_q_matrix <- function(hierarchy_list, K = 7, n_items = 20) {
   
   patterns <- att.structure(hierarchy.list = hierarchy_list, K = K)
   
-  Q_indices <- sample(1:nrow(patterns$att.str), n_items, replace = TRUE)
-  Q_matrix <- patterns$att.str[Q_indices, ]
+  valid_patterns <- patterns$att.str[rowSums(patterns$att.str) > 0, ]
   
+  # 2. Sample until we generate a valid Q-matrix
+  valid_Q <- FALSE
+  while (!valid_Q) {
+    Q_indices <- sample(1:nrow(valid_patterns), n_items, replace = TRUE)
+    Q_matrix <- valid_patterns[Q_indices, ]
+    
+    # Ensure every attribute (column) is measured by at least one item
+    if (all(colSums(Q_matrix) > 0)) {
+      valid_Q <- TRUE
+    }
+  }
   colnames(Q_matrix) <- c("S1", "S2", "S3", "S4", "M1", "M2", "M3")
   rownames(Q_matrix) <- paste0("Item_", 1:n_items)
   
@@ -78,7 +88,7 @@ sim2_data <- lapply(seq_len(nrow(design_factors)), function(i) {
   
   condition_reps <- lapply(1:n_reps, function(rep) {
     
-    set.seed(2026 + rep)
+    set.seed(2026 + i * 1000 + rep)
     
     # Print every 10th replication to show progress
     if (rep %% 10 == 0) cat(paste0("..", rep))
@@ -96,7 +106,6 @@ sim2_data <- lapply(seq_len(nrow(design_factors)), function(i) {
     
     return(list(
       dat      = dat,
-      Q_used   = Q_base,   
       itemprob = itemprob,
       delta    = delta,
       profiles = profiles
@@ -105,11 +114,10 @@ sim2_data <- lapply(seq_len(nrow(design_factors)), function(i) {
   
   return(list(
     replications = condition_reps,
-    condition    = row
+    condition    = row,
+    Q_used       = Q_base
   ))
 })
 
 
 save(sim2_data, file = "Study2_data.RData")
-
-
