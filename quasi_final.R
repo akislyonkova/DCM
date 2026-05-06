@@ -43,7 +43,10 @@ run_simulation <- function(N, gs_param, n_reps = 500) {
                          A3_est = alpha_est[,3])
     
     match_out <- matchit(Z ~ A1_est + A2_est + A3_est,
-                         data = df_est, method = "full", distance = "glm")
+                         data = df_est, 
+                         method = "full", # every stratum contains at least 1 treated unit and at least 1 control unit
+                         distance = "glm", # logistic because treatment is binary 
+                         discard = "both") # drop units that fall outside the area of common support
     matched_data <- match.data(match_out)
     
     bal <- summary(match_out, un = FALSE)$sum.matched
@@ -98,14 +101,19 @@ conditions <- data.frame(
   gs        = c(0.10, 0.10, 0.30, 0.30)
 )
 
+tau_true <- 0.5
+
 summary_df <- conditions |>
   mutate(
-    mean_bias = sapply(simulation_results, function(x) x$mean_bias),
-    rmse      = sapply(simulation_results, function(x) x$rmse),
-    label     = paste0("N=", N, "\ngs=", gs)
+    mean_bias  = sapply(simulation_results, function(x) x$mean_bias),
+    rmse       = sapply(simulation_results, function(x) x$rmse),
+    mean_tau   = sapply(simulation_results, function(x) mean(x$results$tau_est)),
+    sd_tau     = sapply(simulation_results, function(x) sd(x$results$tau_est)),
+    mean_smd   = sapply(simulation_results, function(x) x$mean_smd),
+    label      = paste0("N=", N, "\ngs=", gs)
   )
 
-# ── 2. Build a tidy per-rep data frame (for density plots) ────────────────────
+# ── 2. Build a tidy per-rep data frame (for density / boxplot) ────────────────
 reps_df <- mapply(function(res, nm, n, gs) {
   res$results |>
     mutate(condition = nm, N = n, gs = gs,
@@ -118,7 +126,7 @@ gs  = conditions$gs,
 SIMPLIFY = FALSE
 ) |> bind_rows()
 
-# ── 3. Shared theme ────────────────────────────────────────────────────────────
+# ── 3. Shared theme & colours ─────────────────────────────────────────────────
 cond_colors <- c(
   "N500_gs10"  = "#378ADD",
   "N1000_gs10" = "#1D9E75",
@@ -128,12 +136,12 @@ cond_colors <- c(
 
 base_theme <- theme_minimal(base_size = 12) +
   theme(
-    panel.grid.minor  = element_blank(),
+    panel.grid.minor   = element_blank(),
     panel.grid.major.x = element_blank(),
-    axis.text         = element_text(colour = "grey40"),
-    axis.title        = element_text(colour = "grey30", size = 11),
-    strip.text        = element_text(face = "bold"),
-    legend.position   = "none"
+    axis.text          = element_text(colour = "grey40"),
+    axis.title         = element_text(colour = "grey30", size = 11),
+    strip.text         = element_text(face = "bold"),
+    legend.position    = "none"
   )
 
 # ── 4. Plot 1 — Mean bias bar chart ───────────────────────────────────────────
@@ -163,7 +171,7 @@ p_rmse <- ggplot(summary_df, aes(x = label, y = rmse, fill = condition)) +
 p_density <- ggplot(reps_df, aes(x = bias, fill = condition, colour = condition)) +
   geom_density(alpha = 0.25, linewidth = 0.8) +
   geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50", linewidth = 0.5) +
-  scale_fill_manual(values = cond_colors)   +
+  scale_fill_manual(values = cond_colors) +
   scale_colour_manual(values = cond_colors) +
   facet_wrap(~ label, nrow = 1) +
   labs(x = expression(hat(tau) - tau), y = "Density",
@@ -171,8 +179,50 @@ p_density <- ggplot(reps_df, aes(x = bias, fill = condition, colour = condition)
   base_theme +
   theme(panel.grid.major.x = element_line(colour = "grey92"))
 
-# ── 7. Combine and save ───────────────────────────────────────────────────────
-combined <- (p_bias | p_rmse) / p_density +
+# ── 7. Plot 4 — τ̂ distribution (violin + boxplot) ────────────────────────────
+p_tau <- ggplot(reps_df, aes(x = label, y = tau_est, fill = condition, colour = condition)) +
+  geom_violin(alpha = 0.25, linewidth = 0.7, trim = FALSE) +
+  geom_boxplot(width = 0.15, alpha = 0.6, outlier.size = 0.8, outlier.alpha = 0.4,
+               colour = "grey30") +
+  geom_hline(yintercept = tau_true, linetype = "dashed",
+             colour = "grey30", linewidth = 0.6) +
+  annotate("text", x = 4.6, y = tau_true, label = paste0("τ = ", tau_true),
+           hjust = 1, vjust = -0.5, size = 3.2, colour = "grey30") +
+  scale_fill_manual(values = cond_colors) +
+  scale_colour_manual(values = cond_colors) +
+  labs(x = NULL, y = expression(hat(tau)),
+       title = expression("Distribution of " * hat(tau) * " across replications")) +
+  base_theme
+
+# ── 8. Plot 5 — Mean SMD bar chart ────────────────────────────────────────────
+p_smd_bar <- ggplot(summary_df, aes(x = label, y = mean_smd, fill = condition)) +
+  geom_col(width = 0.6, alpha = 0.85) +
+  geom_hline(yintercept = 0.1, linetype = "dashed", colour = "tomato3", linewidth = 0.5) +
+  annotate("text", x = 4.6, y = 0.1, label = "SMD = 0.10",
+           hjust = 1, vjust = -0.5, size = 3.2, colour = "tomato3") +
+  geom_text(aes(label = round(mean_smd, 3)), vjust = -0.5,
+            size = 3.5, colour = "grey30") +
+  scale_fill_manual(values = cond_colors) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(x = NULL, y = "Mean |SMD|",
+       title = "Post-matching balance: mean |SMD| by condition") +
+  base_theme
+
+# ── 9. Plot 6 — SMD distribution (density) ────────────────────────────────────
+p_smd_dens <- ggplot(reps_df, aes(x = mean_smd, fill = condition, colour = condition)) +
+  geom_density(alpha = 0.25, linewidth = 0.8) +
+  geom_vline(xintercept = 0.1, linetype = "dashed",
+             colour = "tomato3", linewidth = 0.5) +
+  scale_fill_manual(values = cond_colors) +
+  scale_colour_manual(values = cond_colors) +
+  facet_wrap(~ label, nrow = 1) +
+  labs(x = "Mean |SMD|", y = "Density",
+       title = "SMD distribution across replications") +
+  base_theme +
+  theme(panel.grid.major.x = element_line(colour = "grey92"))
+
+# ── 10. Assemble & save — Panel 1: bias/RMSE (original) ──────────────────────
+panel_bias_rmse <- (p_bias | p_rmse) / p_density +
   plot_annotation(
     title    = "Simulation results: bias and RMSE",
     subtitle = "500 replications per condition | true τ = 0.5",
@@ -182,7 +232,37 @@ combined <- (p_bias | p_rmse) / p_density +
     )
   )
 
-ggsave("simulation_bias_plots.png", combined,
+ggsave("simulation_bias_plots.png", panel_bias_rmse,
        width = 12, height = 8, dpi = 300, bg = "white")
-
 message("Saved: simulation_bias_plots.png")
+
+# ── 11. Panel 2: τ̂ estimates ─────────────────────────────────────────────────
+panel_tau <- p_tau +
+  plot_annotation(
+    title    = expression("Estimated treatment effect " * hat(tau)),
+    subtitle = "500 replications per condition | dashed line = true τ = 0.5",
+    theme    = theme(
+      plot.title    = element_text(size = 14, face = "bold", colour = "grey20"),
+      plot.subtitle = element_text(size = 11, colour = "grey40")
+    )
+  )
+
+ggsave("simulation_tau_plots.png", panel_tau,
+       width = 10, height = 5, dpi = 300, bg = "white")
+message("Saved: simulation_tau_plots.png")
+
+# ── 12. Panel 3: SMD balance ──────────────────────────────────────────────────
+panel_smd <- p_smd_bar / p_smd_dens +
+  plot_annotation(
+    title    = "Post-matching covariate balance (standardised mean difference)",
+    subtitle = "500 replications per condition | dashed line = SMD threshold 0.10",
+    theme    = theme(
+      plot.title    = element_text(size = 14, face = "bold", colour = "grey20"),
+      plot.subtitle = element_text(size = 11, colour = "grey40")
+    )
+  )
+
+ggsave("simulation_smd_plots.png", panel_smd,
+       width = 12, height = 8, dpi = 300, bg = "white")
+message("Saved: simulation_smd_plots.png")
+
