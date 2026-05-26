@@ -8,10 +8,6 @@ library(dplyr)
 library(tidyr)
 
 
-load("Study1_data.RData")          
-load("study1_results.Rdata")       
-
-
 compute_condition <- function(cond_idx) {
   
   cond   <- data[[cond_idx]]$condition
@@ -35,7 +31,7 @@ compute_condition <- function(cond_idx) {
   mean_abs_bias <- mean(abs(all_diffs), na.rm = TRUE)
   rmse          <- sqrt(mean(all_diffs^2, na.rm = TRUE))
   
- 
+  
   pcr <- mean(vapply(seq_len(n_reps), function(r) {
     tp <- reps[[r]]$profiles
     ep <- res[[r]]$profiles
@@ -96,7 +92,7 @@ p_bias <- ggplot(plot_df,
                      fill = mean_abs_bias)) +
   geom_tile(colour = "white") +
   geom_text(aes(label = sprintf("%.3f", mean_abs_bias)), size = 2.8) +
-  scale_fill_gradient(low = "#d4f1c4", high = "#c0392b",
+  scale_fill_gradient(low = "white", high = "black",
                       name = "MAB") +
   facet_grid(Error ~ ., switch = "y") +
   labs(title = "Mean Absolute Bias of Item Response Probability Estimates",
@@ -112,10 +108,8 @@ p_pcr <- ggplot(plot_df,
                     fill = qual, colour = a_type)) +
   geom_col(position = position_dodge(0.85), width = 0.75,
            linewidth = 0.5) +
-  scale_fill_manual(values = c(High = "#2ecc71", Low = "#e74c3c"),
-                    name = "Q-quality") +
-  scale_colour_manual(values = c(Skill = "#2c3e50", Misconception = "#8e44ad"),
-                      name = "Attribute type") +
+  scale_fill_grey(start = 0.8, end = 0.2, name = "Q-quality") +
+  scale_colour_grey(start = 0.0, end = 0.5, name = "Attribute type") +
   facet_grid(e_rate ~ e_type, labeller = label_both) +
   scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
   labs(title = "Correct Profile Recovery Rate",
@@ -139,10 +133,15 @@ attr_long <- summary_df %>%
 
 p_attr <- ggplot(attr_long,
                  aes(x = Attribute, y = Accuracy,
-                     colour = Group, group = Group)) +
+                     colour = Group, linetype = Group,
+                     shape = Group, group = Group)) +
   geom_line(linewidth = 0.8) +
   geom_point(size = 1.8) +
-  scale_colour_brewer(palette = "Dark2", name = "Q-quality / Attr. type") +
+  scale_colour_grey(start = 0.0, end = 0.6, name = "Q-quality / Attr. type") +
+  scale_linetype_manual(values = c("solid", "dashed", "dotted", "dotdash"),
+                        name = "Q-quality / Attr. type") +
+  scale_shape_manual(values = c(16, 17, 15, 18),
+                     name = "Q-quality / Attr. type") +
   facet_grid(interaction(e_type, e_rate, sep = " ") ~ Condition,
              labeller = label_value) +
   scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
