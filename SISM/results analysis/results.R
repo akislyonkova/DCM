@@ -83,17 +83,21 @@ theme_set(theme_bw(base_size = 12))
 plot_df <- summary_df %>%
   mutate(
     Condition = paste0("N=", N, ", J=", J),
-    Error     = paste0(e_type, " (", e_rate, ")")
+    Error     = paste0(e_type, " (", e_rate, ")"),
+    QA_group  = interaction(qual, a_type, sep = " / ")
   )
 
 
 p_bias <- ggplot(plot_df,
                  aes(x = Condition, y = interaction(a_type, qual, sep = "\n"),
                      fill = mean_abs_bias)) +
-  geom_tile(colour = "white") +
-  geom_text(aes(label = sprintf("%.3f", mean_abs_bias)), size = 2.8) +
-  scale_fill_gradient(low = "white", high = "black",
-                      name = "MAB") +
+  geom_tile(colour = "grey80") +
+  geom_text(aes(label = sprintf("%.3f", mean_abs_bias),
+                colour = mean_abs_bias > 0.04),    # <-- adaptive colour
+            size = 3.0) +                           # slightly larger than 2.8
+  scale_fill_gradient(low = "white", high = "black", name = "MAB") +
+  scale_colour_manual(values = c("FALSE" = "black", "TRUE" = "white"),
+                      guide = "none") +             # <-- don't show in legend
   facet_grid(Error ~ ., switch = "y") +
   labs(title = "Mean Absolute Bias of Item Response Probability Estimates",
        x = "Sample Size × Items", y = "Attribute type × Q-quality") +
@@ -104,12 +108,13 @@ ggsave("bias_heatmap.png", p_bias, width = 11, height = 8, dpi = 150)
 
 
 p_pcr <- ggplot(plot_df,
-                aes(x = Condition, y = profile_recovery,
-                    fill = qual, colour = a_type)) +
+                aes(x = Condition, y = profile_recovery, fill = QA_group)) +
   geom_col(position = position_dodge(0.85), width = 0.75,
-           linewidth = 0.5) +
-  scale_fill_grey(start = 0.8, end = 0.2, name = "Q-quality") +
-  scale_colour_grey(start = 0.0, end = 0.5, name = "Attribute type") +
+           colour = "black", linewidth = 0.6) +          # fixed black border
+  scale_fill_manual(
+    values = c("white", "grey65", "grey35", "black"),    # 4 clearly separated fills
+    name   = "Q-quality / Attr. type"
+  ) +
   facet_grid(e_rate ~ e_type, labeller = label_both) +
   scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
   labs(title = "Correct Profile Recovery Rate",
