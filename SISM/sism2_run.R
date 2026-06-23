@@ -45,7 +45,7 @@ generate_q <- function(exclusive_pairs, K = 7, n_items = 20) {
   colnames(Q_matrix) <- c("S1", "S2", "S3", "S4", "M1", "M2", "M3")
   rownames(Q_matrix) <- paste0("Item_", 1:n_items)
   
-  return(Q_matrix)
+  return(list(Q = Q_matrix, profiles = valid_patterns))
 }
 
 exclusive_pairs <- list(
@@ -63,7 +63,8 @@ all_Q_matrices <- lapply(exclusive_pairs, function(h) {
   
   list(
     items_20 = items_20,
-    items_40 = items_40
+    items_40 = items_40,
+    valid_profiles = valid_profiles
   )
 })
 
@@ -82,14 +83,17 @@ final_results2_pt1 <- foreach(cond = 1:n_conditions,
                               .packages = "GDINA",
                               .export = c("sim2_true_data1", "estimation_factors", "all_Q_matrices", "n_reps")) %dorng% {
                                 
-                                condition_reps <- vector("list", n_reps);
+                                condition_reps <- vector("list", n_reps)
+                                
+                                current_hierarchy <- estimation_factors$hierarchy[cond]
+                                current_length    <- estimation_factors$item_length[cond]
+                                current_data_idx  <- estimation_factors$true_data_idx[cond]
+                                
+                                current_Q      <- all_Q_matrices[[current_hierarchy]][[current_length]]
+                                valid_profiles <- all_Q_matrices[[current_hierarchy]]$valid_profiles
                                 
                                 for (rep in 1:n_reps) {
-                                  q_type <- data[[cond]]$type       
-                                  q_items <- data[[cond]]$items
-                                  current_Q <- all_Q_matrices[[q_type]][[q_items]]
-                                  #current_Q <- data[[cond]]$replications[[rep]]$Q_used
-                                  current_data <- data[[cond]]$replications[[rep]]$dat
+                                  current_data <- sim2_true_data1[[current_data_idx]]$replications[[rep]]$dat
                                   
                                   fit_attempt <- tryCatch({
                                     GDINA(dat = current_data, 
