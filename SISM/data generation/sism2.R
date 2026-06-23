@@ -2,57 +2,12 @@
 
 # Study 2 - misspecified structural component 
 
+
+# Part 1 - over-specifying the structure 
+
 library(GDINA)
 
 n_reps <- 100
-
-generate_q_matrix <- function(hierarchy_list, K = 7, n_items = 20) {
-  
-  patterns <- att.structure(hierarchy.list = hierarchy_list, K = K)
-  
-  valid_patterns <- patterns$att.str[rowSums(patterns$att.str) > 0, ]
-  
-  # 2. Sample until we generate a valid Q-matrix
-  valid_Q <- FALSE
-  while (!valid_Q) {
-    Q_indices <- sample(1:nrow(valid_patterns), n_items, replace = TRUE)
-    Q_matrix <- valid_patterns[Q_indices, ]
-    
-    # Ensure every attribute (column) is measured by at least one item
-    if (all(colSums(Q_matrix) > 0)) {
-      valid_Q <- TRUE
-    }
-  }
-  colnames(Q_matrix) <- c("S1", "S2", "S3", "S4", "M1", "M2", "M3")
-  rownames(Q_matrix) <- paste0("Item_", 1:n_items)
-  
-  return(Q_matrix)
-}
-
-
-set.seed(456)
-
-
-hierarchies <- list(
-  "Linear_A_to_B"        = list(c(1, 2)),
-  "Linear_B_to_A"        = list(c(2, 1)),
-  "Convergent_Basic"     = list(c(1, 3), c(2, 3)),
-  "Convergent_Complex"   = list(c(1, 2), c(2, 4), c(3, 4)),
-  "Divergent_Basic"      = list(c(1, 2), c(1, 3)),
-  "Divergent_Complex"    = list(c(1, 2), c(1, 3), c(2, 4)) 
-)
-
-
-all_Q_matrices <- lapply(hierarchies, function(h) {
-  items_20 <- generate_q_matrix(h, n_items = 20)
-  items_40 <- rbind(items_20, items_20)
-  rownames(items_40) <- paste0("Item_", 1:40)
-  
-  list(
-    items_20 = items_20,
-    items_40 = items_40
-  )
-})
 
 
 design_factors <- expand.grid(
@@ -64,7 +19,7 @@ design_factors <- expand.grid(
 )
 
 
-sim2_data <- lapply(seq_len(nrow(design_factors)), function(i) {
+sim2_data1 <- lapply(seq_len(nrow(design_factors)), function(i) {
   row       <- design_factors[i, ]
   N         <- row$N
   J         <- row$J
@@ -120,4 +75,7 @@ sim2_data <- lapply(seq_len(nrow(design_factors)), function(i) {
 })
 
 
-save(sim2_data, file = "Study2_data.RData")
+save(sim2_data1, file = "Study2_data1.RData")
+
+
+# Part 2 - under-specifying the structure 
