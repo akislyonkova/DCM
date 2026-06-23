@@ -13,11 +13,11 @@ n_cores <- parallel::detectCores() - 1
 
 cl <- makeCluster(n_cores)
 registerDoParallel(cl)
-load("/home/akislyonkova/DCM/sism/Study1_data.RData")
+load("/home/akislyonkova/DCM/sism/Study2_data.RData")
 
 set.seed(2026)
 
-n_conditions <- 64
+n_conditions <- 48
 n_reps <- 100
 
 final_results <- foreach(cond = 1:n_conditions, 
@@ -35,8 +35,8 @@ final_results <- foreach(cond = 1:n_conditions,
                                      Q = current_Q, 
                                      model = "SISM", 
                                      no.bugs = 3,
-                                     att.str = valid_profiles,       # Tells GDINA to ignore impossible classes
-                                     att.dist = "saturated",         # Required when att.str is specified
+                                     att.str = valid_profiles,       
+                                     att.dist = "saturated",         
                                      verbose = 0)
                              }, error = function(e) {
                                warning(sprintf("GDINA fit failed — cond %d, rep %d: %s", cond, rep, e$message))
@@ -78,7 +78,7 @@ final_results <- foreach(cond = 1:n_conditions,
                            condition_reps 
                          }
 stopCluster(cl)
-save(final_results, file = "study1_results.Rdata")
+save(final_results, file = "study2_results1.Rdata")
 message("Simulation complete. Results saved.")
 
 #############################################################################################
