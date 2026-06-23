@@ -34,7 +34,9 @@ final_results <- foreach(cond = 1:n_conditions,
                                GDINA(dat = current_data, 
                                      Q = current_Q, 
                                      model = "SISM", 
-                                     no.bugs = 3, 
+                                     no.bugs = 3,
+                                     att.str = valid_profiles,       # Tells GDINA to ignore impossible classes
+                                     att.dist = "saturated",         # Required when att.str is specified
                                      verbose = 0)
                              }, error = function(e) {
                                warning(sprintf("GDINA fit failed — cond %d, rep %d: %s", cond, rep, e$message))
@@ -83,8 +85,6 @@ message("Simulation complete. Results saved.")
 
 set.seed(456)
 
-
-
 generate_q_matrix <- function(exclusive_pairs, K = 7, n_items = 20) {
   
   patterns <- att.structure(K = K)
@@ -97,10 +97,16 @@ generate_q_matrix <- function(exclusive_pairs, K = 7, n_items = 20) {
     valid_patterns <- valid_patterns[!(valid_patterns[, attr1] == 1 & valid_patterns[, attr2] == 1), ]
   }
   
+  I_matrix <- diag(K)
+  
+  n_remaining <- n_items - K
+  
   valid_Q <- FALSE
   while (!valid_Q) {
-    Q_indices <- sample(1:nrow(valid_patterns), n_items, replace = TRUE)
-    Q_matrix <- valid_patterns[Q_indices, ]
+    Q_indices <- sample(1:nrow(valid_patterns), n_remaining, replace = TRUE)
+    Q_sampled <- valid_patterns[Q_indices, ]
+    
+    Q_matrix <- rbind(I_matrix, Q_sampled)
     
     if (all(colSums(Q_matrix) > 0)) {
       valid_Q <- TRUE
@@ -112,8 +118,6 @@ generate_q_matrix <- function(exclusive_pairs, K = 7, n_items = 20) {
   
   return(Q_matrix)
 }
-
-
 
 exclusive_pairs <- list(
   "Type1"        = list(c(5, 1)),
@@ -143,70 +147,3 @@ for (type_name in names(exclusive_pairs)) {
   
   print(unique_patterns)
 }
-
-
-#############################################################################################
-
-set.seed(456)
-
-
-
-generate_q_matrix <- function(exclusive_pairs, K = 7, n_items = 20) {
-  
-  patterns <- att.structure(K = K)
-  valid_patterns <- patterns$att.str[rowSums(patterns$att.str) > 0, ]
-  
-  for (pair in exclusive_pairs) {
-    attr1 <- pair[1]
-    attr2 <- pair[2]
-    
-    valid_patterns <- valid_patterns[!(valid_patterns[, attr1] == 1 & valid_patterns[, attr2] == 1), ]
-  }
-  
-  valid_Q <- FALSE
-  while (!valid_Q) {
-    Q_indices <- sample(1:nrow(valid_patterns), n_items, replace = TRUE)
-    Q_matrix <- valid_patterns[Q_indices, ]
-    
-    if (all(colSums(Q_matrix) > 0)) {
-      valid_Q <- TRUE
-    }
-  }
-  
-  colnames(Q_matrix) <- c("S1", "S2", "S3", "S4", "M1", "M2", "M3")
-  rownames(Q_matrix) <- paste0("Item_", 1:n_items)
-  
-  return(Q_matrix)
-}
-
-
-
-exclusive_pairs <- list(
-  "Type1"        = list(c(5, 1)),
-  "Type2"        = list(c(1, 5), c(5, 2)),
-  "Type3"        = list(c(1, 5), c(1, 6), c(5, 2), c(6, 2)),
-  "Type4"        = list(c(1, 5), c(5, 2), c(5, 3))
-)
-
-
-all_Q_matrices <- lapply(exclusive_pairs, function(h) {
-  items_20 <- generate_q_matrix(h, n_items = 20)
-  items_40 <- rbind(items_20, items_20)
-  rownames(items_40) <- paste0("Item_", 1:40)
-  
-  list(
-    items_20 = items_20,
-    items_40 = items_40
-  )
-})
-
-for (type_name in names(exclusive_pairs)) {
-  cat("\n=========================================\n")
-  cat("Testing", type_name, "\n")
-  cat("=========================================\n")
-  
-  unique_patterns <- unique(all_Q_matrices[[type_name]])
-  
-  print(unique_patterns)
-}
-
