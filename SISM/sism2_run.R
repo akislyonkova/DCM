@@ -16,21 +16,21 @@ registerDoParallel(cl)
 load("/home/akislyonkova/DCM/sism/Study2_Data1.RData")
 
 
-n_conditions <- nrow(estimation_factors)
+n_conditions <- nrow(estimation_grid)
 n_reps       <- 100
 
 set.seed(2026)
 
 final_results2_pt1 <- foreach(cond = 1:n_conditions, 
                               .packages = "GDINA",
-                              .export = c("sim2_true_data1", "estimation_factors",
+                              .export = c("sim2_true_data1", "estimation_grid",
                                           "all_Q_matrices", "n_reps", "output_dir")) %dorng% {
                                             
                                             condition_reps <- vector("list", n_reps)
                                             
-                                            current_hierarchy <- estimation_factors$hierarchy[cond]
-                                            current_length    <- estimation_factors$item_length[cond]
-                                            current_data_idx  <- estimation_factors$true_data_idx[cond]
+                                            current_hierarchy <- estimation_grid$hierarchy[cond]
+                                            current_length    <- estimation_grid$item_length[cond]
+                                            current_data_idx  <- estimation_grid$true_data_idx[cond]
                                             
                                             current_Q      <- all_Q_matrices[[current_hierarchy]][[current_length]]
                                             valid_profiles <- all_Q_matrices[[current_hierarchy]]$valid_profiles
