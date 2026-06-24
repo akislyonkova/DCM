@@ -57,20 +57,22 @@ exclusive_pairs <- list(
 
 
 all_Q_matrices <- lapply(exclusive_pairs, function(h) {
-  items_20 <- generate_q(h, n_items = 20)
-  items_40 <- rbind(items_20, items_20)
-  rownames(items_40) <- paste0("Item_", 1:40)
+  result_20 <- generate_q(h, n_items = 20)
+  items_20_Q <- result_20$Q
+  items_40_Q <- rbind(items_20_Q, items_20_Q)
+  rownames(items_40_Q) <- paste0("Item_", 1:40)
   
   list(
-    items_20 = items_20,
-    items_40 = items_40,
-    valid_profiles = valid_profiles
+    items_20 = items_20_Q,
+    items_40 = items_40_Q,
+    valid_profiles = result_20$profiles
   )
 })
 
 estimation_factors <- expand.grid(
   true_data_idx = 1:8,
   hierarchy     = names(exclusive_pairs),
+  item_length   = c("items_20", "items_40"),
   stringsAsFactors = FALSE
 )
 
@@ -81,7 +83,8 @@ set.seed(2026)
 
 final_results2_pt1 <- foreach(cond = 1:n_conditions, 
                               .packages = "GDINA",
-                              .export = c("sim2_true_data1", "estimation_factors", "all_Q_matrices", "n_reps")) %dorng% {
+                              .export = c("sim2_true_data1", "estimation_factors",
+                                          "all_Q_matrices", "n_reps", "output_dir")) %dorng% {
                                 
                                 condition_reps <- vector("list", n_reps)
                                 
@@ -138,9 +141,10 @@ final_results2_pt1 <- foreach(cond = 1:n_conditions,
                                     condition_reps[[rep]] <- list(success = FALSE)
                                   }
                                 }
-                                saveRDS(condition_reps, file = paste0("cond_", cond, ".rds")) 
+                                saveRDS(condition_reps,
+                                        file = file.path(output_dir, paste0("cond_", cond, ".rds")))
                                 message(sprintf("Condition %d complete", cond))
-                                condition_reps 
+                                condition_reps
                               }
 stopCluster(cl)
 save(final_results2_pt1, file = "study2_results1.Rdata")
