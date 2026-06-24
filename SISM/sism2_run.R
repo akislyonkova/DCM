@@ -8,6 +8,7 @@ library(doRNG)
 getwd()
 
 setwd("~/DCM/sism/")
+output_dir <- path.expand("~/DCM/sism/")
 
 n_cores <- parallel::detectCores() - 1                      
 
