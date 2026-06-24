@@ -101,9 +101,6 @@ estimation_factors <- expand.grid(
   stringsAsFactors = FALSE
 )
 
-
-n_reps <- 100
-
 design_factors <- expand.grid(
   N          = c(500, 1000),
   J          = c(20, 40),
@@ -112,6 +109,18 @@ design_factors <- expand.grid(
 )
 
 design_factors$true_data_idx <- 1:nrow(design_factors)
+
+estimation_grid <- merge(
+  estimation_factors, 
+  design_factors, 
+  by = "true_data_idx"
+)
+
+estimation_grid$item_length <- paste0("items_", estimation_grid$J)
+estimation_grid <- estimation_grid[order(estimation_grid$true_data_idx, estimation_grid$hierarchy), ]
+estimation_grid$cond_idx <- 1:nrow(estimation_grid)
+
+n_reps <- 100
 
 sim2_true_data1 <- lapply(seq_len(nrow(design_factors)), function(i) {
   row       <- design_factors[i, ]
@@ -166,7 +175,8 @@ sim2_true_data1 <- lapply(seq_len(nrow(design_factors)), function(i) {
   ))
 })
 
-save(sim2_true_data1, all_Q_matrices, design_factors, file = "Study2_Data1.RData")
+save(sim2_true_data1, all_Q_matrices, estimation_grid, file = "Study2_Data1.RData")
+
 
 
 # Part 2 - under-specifying the structure 
