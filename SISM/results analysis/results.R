@@ -174,6 +174,36 @@ p_attr <- ggplot(attr_long,
 
 ggsave("attr_recovery_plot.png", p_attr, width = 14, height = 9, dpi = 150)
 
+###################################################################################
+
+# Additional statistics 
+
 summary(summary_df$mean_bias)
 summary(summary_df$rmse)
 hist(summary_df$rmse)
+
+
+# Model fit 
+
+library(purrr)
+library(dplyr)
+
+
+averaged_fit_stats <- map_dfr(final_results, function(condition) {
+  
+  rep_stats <- map_dfr(condition, function(rep) {
+    
+    stats <- rep$fit_stats
+    
+  
+    scalar_stats <- keep(stats, ~ is.numeric(.x) && length(.x) == 1)
+    
+    as_tibble(scalar_stats)
+  })
+  
+  rep_stats %>%
+    summarise(across(everything(), ~ mean(.x, na.rm = TRUE)))
+  
+}, .id = "condition_id") # Adds a column "condition_id" ranging from 1 to 64
+
+head(averaged_fit_stats)
