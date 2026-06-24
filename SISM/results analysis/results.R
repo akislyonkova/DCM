@@ -204,6 +204,14 @@ averaged_fit_stats <- map_dfr(final_results, function(condition) {
   rep_stats %>%
     summarise(across(everything(), ~ mean(.x, na.rm = TRUE)))
   
-}, .id = "condition_id") # Adds a column "condition_id" ranging from 1 to 64
+}, .id = "condition_id") 
+
+write.csv(averaged_fit_stats, 
+          file = "averaged_fit_stats.csv", 
+          row.names = FALSE)
 
 head(averaged_fit_stats)
+
+hist(averaged_fit_stats$M2.pvalue)
+hist(averaged_fit_stats$SRMSR)
+hist(averaged_fit_stats$RMSEA2)
