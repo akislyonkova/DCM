@@ -86,7 +86,7 @@ names(simulation_results) <- c("N500_gs10", "N1000_gs10", "N500_gs30", "N1000_gs
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(patchwork)   # install.packages("patchwork") if needed
+library(patchwork)   
 
 # ── 0. Load results ────────────────────────────────────────────────────────────
 simulation_results <- readRDS("simulation_results.rds")   # adjust path if needed
