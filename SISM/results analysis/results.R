@@ -8,10 +8,6 @@ library(dplyr)
 library(tidyr)
 
 
-load("Study1_data.RData")          
-load("study1_results.Rdata")       
-
-
 compute_condition <- function(cond_idx) {
   
   cond   <- data[[cond_idx]]$condition
@@ -35,7 +31,7 @@ compute_condition <- function(cond_idx) {
   mean_abs_bias <- mean(abs(all_diffs), na.rm = TRUE)
   rmse          <- sqrt(mean(all_diffs^2, na.rm = TRUE))
   
- 
+  
   pcr <- mean(vapply(seq_len(n_reps), function(r) {
     tp <- reps[[r]]$profiles
     ep <- res[[r]]$profiles
@@ -87,38 +83,58 @@ theme_set(theme_bw(base_size = 12))
 plot_df <- summary_df %>%
   mutate(
     Condition = paste0("N=", N, ", J=", J),
-    Error     = paste0(e_type, " (", e_rate, ")")
+    Error     = paste0(e_type, " (", e_rate, ")"),
+    QA_group  = interaction(qual, a_type, sep = " / ")
   )
 
 
 p_bias <- ggplot(plot_df,
                  aes(x = Condition, y = interaction(a_type, qual, sep = "\n"),
                      fill = mean_abs_bias)) +
-  geom_tile(colour = "white") +
-  geom_text(aes(label = sprintf("%.3f", mean_abs_bias)), size = 2.8) +
-  scale_fill_gradient(low = "#d4f1c4", high = "#c0392b",
-                      name = "MAB") +
+  geom_tile(colour = "grey80") +
+  geom_text(aes(label = sprintf("%.3f", mean_abs_bias),
+                colour = mean_abs_bias > 0.04),    
+            size = 3.0) +                          
+  scale_fill_gradient(low = "white", high = "black", name = "MAB") +
+  scale_colour_manual(values = c("FALSE" = "black", "TRUE" = "white"),
+                      guide = "none") +             
   facet_grid(Error ~ ., switch = "y") +
-  labs(title = "Mean Absolute Bias of Item Response Probability Estimates",
-       x = "Sample Size × Items", y = "Attribute type × Q-quality") +
+  labs(title = "Mean Absolute Bias of Item-Level Estimates",
+       x = "Sample Size × Items", y = "Attribute type × Item-quality") +
   theme(axis.text.x = element_text(angle = 30, hjust = 1),
         strip.text.y.left = element_text(angle = 0))
 
 ggsave("bias_heatmap.png", p_bias, width = 11, height = 8, dpi = 150)
 
+p_rmse <- ggplot(plot_df,
+                 aes(x = Condition, y = interaction(a_type, qual, sep = "\n"),
+                     fill = rmse)) +
+  geom_tile(colour = "grey80") +
+  geom_text(aes(label = sprintf("%.3f", rmse),
+                colour = rmse > 0.04),    
+            size = 3.0) +                          
+  scale_fill_gradient(low = "white", high = "black", name = "MAB") +
+  scale_colour_manual(values = c("FALSE" = "black", "TRUE" = "white"),
+                      guide = "none") +             
+  facet_grid(Error ~ ., switch = "y") +
+  labs(title = "Root Mean Square Error of Item-Level Estimates",
+       x = "Sample Size × Items", y = "Attribute type × Item-quality") +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        strip.text.y.left = element_text(angle = 0))
+
+ggsave("rmse_heatmap.png", p_rmse, width = 11, height = 8, dpi = 150)
 
 p_pcr <- ggplot(plot_df,
-                aes(x = Condition, y = profile_recovery,
-                    fill = qual, colour = a_type)) +
+                aes(x = Condition, y = profile_recovery, fill = QA_group)) +
   geom_col(position = position_dodge(0.85), width = 0.75,
-           linewidth = 0.5) +
-  scale_fill_manual(values = c(High = "#2ecc71", Low = "#e74c3c"),
-                    name = "Q-quality") +
-  scale_colour_manual(values = c(Skill = "#2c3e50", Misconception = "#8e44ad"),
-                      name = "Attribute type") +
+           colour = "black", linewidth = 0.6) +          
+  scale_fill_manual(
+    values = c("white", "grey65", "grey35", "black"),   
+    name   = "Item-quality / Attr. type"
+  ) +
   facet_grid(e_rate ~ e_type, labeller = label_both) +
   scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
-  labs(title = "Correct Profile Recovery Rate",
+  labs(title = "Pattern Classification Rate",
        x = "N × J", y = "Proportion correctly classified") +
   theme(axis.text.x = element_text(angle = 35, hjust = 1))
 
@@ -139,10 +155,15 @@ attr_long <- summary_df %>%
 
 p_attr <- ggplot(attr_long,
                  aes(x = Attribute, y = Accuracy,
-                     colour = Group, group = Group)) +
+                     colour = Group, linetype = Group,
+                     shape = Group, group = Group)) +
   geom_line(linewidth = 0.8) +
   geom_point(size = 1.8) +
-  scale_colour_brewer(palette = "Dark2", name = "Q-quality / Attr. type") +
+  scale_colour_grey(start = 0.0, end = 0.6, name = "Q-quality / Attr. type") +
+  scale_linetype_manual(values = c("solid", "dashed", "dotted", "dotdash"),
+                        name = "Q-quality / Attr. type") +
+  scale_shape_manual(values = c(16, 17, 15, 18),
+                     name = "Q-quality / Attr. type") +
   facet_grid(interaction(e_type, e_rate, sep = " ") ~ Condition,
              labeller = label_value) +
   scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
@@ -152,3 +173,45 @@ p_attr <- ggplot(attr_long,
         legend.position = "bottom")
 
 ggsave("attr_recovery_plot.png", p_attr, width = 14, height = 9, dpi = 150)
+
+###################################################################################
+
+# Additional statistics 
+
+summary(summary_df$mean_bias)
+summary(summary_df$rmse)
+hist(summary_df$rmse)
+
+
+# Model fit 
+
+library(purrr)
+library(dplyr)
+
+
+averaged_fit_stats <- map_dfr(final_results, function(condition) {
+  
+  rep_stats <- map_dfr(condition, function(rep) {
+    
+    stats <- rep$fit_stats
+    
+  
+    scalar_stats <- keep(stats, ~ is.numeric(.x) && length(.x) == 1)
+    
+    as_tibble(scalar_stats)
+  })
+  
+  rep_stats %>%
+    summarise(across(everything(), ~ mean(.x, na.rm = TRUE)))
+  
+}, .id = "condition_id") 
+
+write.csv(averaged_fit_stats, 
+          file = "averaged_fit_stats.csv", 
+          row.names = FALSE)
+
+head(averaged_fit_stats)
+
+hist(averaged_fit_stats$M2.pvalue)
+hist(averaged_fit_stats$SRMSR)
+hist(averaged_fit_stats$RMSEA2)
