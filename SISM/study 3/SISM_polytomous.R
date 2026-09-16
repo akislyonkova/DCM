@@ -1,18 +1,13 @@
 library(GDINA)
 
-Qc <- data.frame(
-  Item = c(1,1, 2,2, 3, 4, 5),
-  Cat  = c(1,2, 1,2, 1, 1, 1),
-  A1   = c(1,1, 0,0, 0, 1, 0),
-  A2   = c(0,0, 1,1, 0, 1, 1),
-  A3   = c(0,0, 0,0, 1, 0, 1),
-  B1   = c(1,0, 1,0, 1, 0, 1),
-  B2   = c(0,1, 0,1, 0, 1, 1)
-)
+sim_out <- readRDS("sequential_SISM_simulation_data.rds")
+Qc      <- sim_out$Qc
+Qexp    <- sim_out$Qexp
+no.bugs <- sim_out$no.bugs
 
-no.bugs  <- 2                          # number of bug columns (must match layout above)
-K.skills <- ncol(Qc) - 2 - no.bugs     # number of real skill attributes
-Qexp     <- as.matrix(Qc[, -(1:2)])    # drop Item/Cat -> plain Q-matrix, 1 row per pseudo-item
+# pick one condition, e.g. first N=1000 replication:
+one_run <- sim_out$data[["N1000_rep1"]]
+dat     <- one_run$dat
 
 
 
