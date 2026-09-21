@@ -76,16 +76,10 @@ for (cc in seq_len(n_conditions)) {
 
 set.seed(2026)
 
-fit_comparison_model <- TRUE   # also fits BUGDINO and runs anova() against it, for
-# the "which model is statistically preferred" IC
-# comparison in the study design -- roughly doubles
-# runtime; set FALSE if the server run needs to be faster
-
 final_results <- foreach(cond = 1:n_conditions,
                          .packages = "GDINA",
                          .export = c("sim_out", "idx_matrix", "cond_key",
-                                     "n_reps", "no.bugs", "skill_cols", "bug_cols",
-                                     "fit_comparison_model")) %dorng% {
+                                     "n_reps", "no.bugs", "skill_cols", "bug_cols")) %dorng% {
                                        
                                        condition_reps <- vector("list", n_reps)
                                        
@@ -123,6 +117,9 @@ final_results <- foreach(cond = 1:n_conditions,
                                            profiles   <- tryCatch(personparm(fit_attempt, what = "MAP"),
                                                                   error = function(e) { warning(sprintf("personparm(MAP) failed -- cond %d, rep %d: %s", cond, rep, e$message)); NULL })
                                            
+                                           # Correct classification rate vs. the KNOWN true attribute profiles --
+                                           # overall, whole-profile, and split by Skill vs. Misconception columns,
+                                           # since that split is exactly what Attribute_Type manipulates.
                                            ccr_overall <- ccr_pattern <- ccr_skill <- ccr_misconception <- NA
                                            if (!is.null(profiles)) {
                                              est_mat <- as.matrix(profiles)[, seq_len(ncol(true_attr)), drop = FALSE]
@@ -132,18 +129,6 @@ final_results <- foreach(cond = 1:n_conditions,
                                              ccr_pattern        <- mean(rowSums(match_mat) == ncol(match_mat))
                                              ccr_skill          <- mean(match_mat[, colnames(true_attr) %in% skill_cols, drop = FALSE])
                                              ccr_misconception  <- mean(match_mat[, colnames(true_attr) %in% bug_cols,   drop = FALSE])
-                                           }
-                                           
-                                           comparison <- NULL
-                                           if (fit_comparison_model) {
-                                             comparison <- tryCatch({
-                                               mod_comp <- GDINA(current_data, current_Q, model = "BUGDINO",
-                                                                 no.bugs = no.bugs, verbose = 0)
-                                               anova(fit_attempt, mod_comp)
-                                             }, error = function(e) {
-                                               warning(sprintf("BUGDINO comparison failed -- cond %d, rep %d: %s", cond, rep, e$message))
-                                               NULL
-                                             })
                                            }
                                            
                                            condition_reps[[rep]] <- list(
@@ -156,7 +141,6 @@ final_results <- foreach(cond = 1:n_conditions,
                                              ccr_pattern       = ccr_pattern,
                                              ccr_skill         = ccr_skill,
                                              ccr_misconception = ccr_misconception,
-                                             comparison        = comparison,
                                              n_flips           = entry$condition$n_flips,
                                              condition         = cond_key[cond, ],
                                              success           = TRUE
