@@ -134,7 +134,7 @@ master_seed <- 20260908
 set.seed(master_seed)
 
 sim_conditions <- expand.grid(
-  N   = c(500, 1000, 2000),
+  N   = c(500, 1000),
   rep = 1:100,
   KEEP.OUT.ATTRS = FALSE
 )
@@ -153,5 +153,5 @@ saveRDS(
   list(master_seed = master_seed, Qc = Qc, Qexp = Qexp, no.bugs = no.bugs,
        true_sism_probs = true_sism_probs, conditions = sim_conditions,
        data = sim_data_list),
-  file = "sequential_SISM_simulation_data.rds"
+  file = "sequential_SISM_true_data.rds"
 )

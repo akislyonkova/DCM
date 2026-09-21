@@ -78,10 +78,6 @@ mod_seqSISM <- GDINA(
   model           = "SISM",
   sequential      = FALSE,                # expansion above already IS the "sequential" step
   no.bugs         = no.bugs,
-  # mono.constraint is NOT used here: SISM's parameterization (delta_j0/1/2/12
-  # with delta_j1, delta_j2, delta_j12 >= 0) already guarantees the ordering
-  # pi00 <= pi10,pi01 <= pi11 structurally -- GDINA() errors if you try to
-  # additionally impose mono.constraint on SISM or BUGDINO.
   control         = list(nstarts = 5,     # multiple random starts -> avoid local optima
                           conv.crit = 1e-5,
                           conv.type = c("ip","mp"))
