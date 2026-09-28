@@ -2,8 +2,8 @@ library(GDINA)
 set.seed(2026)
 
 
-K.skills <- 3         # A1, A2, A3  (skill attributes)
-no.bugs  <- 2         # B1, B2      (misconception/bug attributes)
+K.skills <- 3         
+no.bugs  <- 2         
 K        <- K.skills + no.bugs
 att_cols <- c("A1", "A2", "A3", "B1", "B2")
 
@@ -74,8 +74,6 @@ for (j in seq_len(J_items)) {
 }
 dat <- as.data.frame(dat)
 
-cat("\nPolytomous score distributions:\n")
-print(lapply(dat, table))
 
 custom_sism <- function(Qrow, K.skills, no.bugs) {
   qrow      <- as.numeric(Qrow)
