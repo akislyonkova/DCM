@@ -1,274 +1,252 @@
-#Study 3: Errors in the measurement component -- polytomous study
-
-
 library(GDINA)
 
-Qc <- data.frame(
-  Item = c(1, 1, 2, 2, 3, 4, 5),
-  Cat  = c(1, 2, 1, 2, 1, 1, 1),
-  A1   = c(1, 1, 0, 0, 0, 1, 0),
-  A2   = c(0, 0, 1, 1, 0, 1, 1),
-  A3   = c(0, 0, 0, 0, 1, 0, 1),
-  B1   = c(1, 0, 1, 0, 1, 0, 1),
-  B2   = c(0, 1, 0, 1, 0, 1, 1)
+
+master_seed <- 20260908
+N           <- 2000          
+n_rep       <- 100
+n_blocks    <- 4             # for J =20
+disc_skill  <- 1.5             
+disc_bug    <- 1.5             
+loc_val     <- c(neg = -0.75, pos = 0.75)   
+step_val    <- c(small = 0.4, large = 1.2)  
+skew_r      <- 0.7                          # geometric ratio for skewed target
+error_rate  <- 0.10          
+out_dir     <- "polytomous_SISM_sim"
+dir.create(out_dir, showWarnings = FALSE)
+
+
+dgp_design <- expand.grid(
+  dist = c("skew", "flat"),
+  ncat = c(3, 5),
+  loc  = c("neg", "pos"),
+  step = c("small", "large"),
+  stringsAsFactors = FALSE
 )
-no.bugs    <- 2
-K.skills   <- ncol(Qc) - 2 - no.bugs
-skill_cols <- colnames(Qc)[3:(2 + K.skills)]                          # "A1" "A2" "A3"
-bug_cols   <- colnames(Qc)[(3 + K.skills):(2 + K.skills + no.bugs)]   # "B1" "B2"
-Qexp       <- as.matrix(Qc[, -(1:2)])   # plain Q-matrix, 1 row per pseudo-item (step)
-J          <- nrow(Qc)                  # total number of steps (here: 7)
+dgp_design$cond <- seq_len(nrow(dgp_design))
+
+misspec_design <- expand.grid(
+  Attribute_Type = c("skill", "misconception"),
+  Error_Type     = c("omission", "inclusion"),
+  stringsAsFactors = FALSE
+)
+misspec_design$misspec <- seq_len(nrow(misspec_design))
+
+# Full 64-cell grid (cross of the two designs)
+full_design <- merge(dgp_design, misspec_design, by = NULL)
+full_design <- full_design[order(full_design$cond, full_design$misspec), ]
+full_design$cell <- seq_len(nrow(full_design))
 
 
-set.seed(2026)
-gen_true_sism_probs <- function(J, Qc, quality = c("high", "low"), seed) {
-  quality <- match.arg(quality)
-  set.seed(seed)
-  
-  if (quality == "high") {           # s = g = 0.10
-    g <- 0.10; s <- 0.10
-  } else {                            # s = g = 0.25
-    g <- 0.25; s <- 0.25
-  }
-  
-  pi00 <- round(runif(J, g - 0.05, g + 0.05), 3) # neither skills nor bug-free
-  pi11 <- round(runif(J, (1 - s) - 0.05, (1 - s) + 0.05), 3) # skills mastered, bug still present
-  pi10 <- round(runif(J, 0.35, 0.50), 3) # skills not mastered, but bug-free
-  pi01 <- round(runif(J, 0.35, 0.50), 3) # skills mastered AND bug-free (best)
-  
-  true_probs <- data.frame(
-    Item = Qc$Item, Cat = Qc$Cat,
-    pi00 = pi00, pi10 = pi10, pi01 = pi01, pi11 = pi11
-  )
-  
-  stopifnot(
-    all(true_probs$pi11 > pmax(true_probs$pi10, true_probs$pi01)),
-    all(pmin(true_probs$pi10, true_probs$pi01) > true_probs$pi00)
-  )
-  true_probs
-}
+no_skills <- 3; no_bugs <- 2
+skill_cols <- paste0("A", 1:no_skills)
+bug_cols   <- paste0("B", 1:no_bugs)
+attr_cols  <- c(skill_cols, bug_cols)
 
-build_sism_catprob <- function(Qc, K.skills, no.bugs, true_probs) {
-  catprob <- vector("list", nrow(Qc))
-  for (r in seq_len(nrow(Qc))) {
-    qrow <- as.numeric(Qc[r, -(1:2)])
-    skill_pos <- which(qrow[1:K.skills] == 1)                                     # required skill cols
-    bug_pos   <- K.skills + which(qrow[(K.skills + 1):(K.skills + no.bugs)] == 1) # required bug cols
-    req_pos   <- sort(c(skill_pos, bug_pos))                                      # preserves left-to-right column order
-    is_skill  <- req_pos %in% skill_pos
-    Kj <- length(req_pos)
-    
-    patt <- attributepattern(Kj)                                                  # 2^Kj x Kj, GDINA's own enumeration
-    pi00 <- true_probs$pi00[r]; pi10 <- true_probs$pi10[r]
-    pi01 <- true_probs$pi01[r]; pi11 <- true_probs$pi11[r]
-    
-    probs <- apply(patt, 1, function(bits) {
-      skill_mastered <- all(bits[is_skill] == 1)
-      bug_free       <- all(bits[!is_skill] == 0)
-      if (skill_mastered && bug_free)       pi11
-      else if (skill_mastered && !bug_free) pi10
-      else if (!skill_mastered && bug_free) pi01
-      else                                  pi00
-    })
-    catprob[[r]] <- probs
-  }
-  names(catprob) <- paste0("Item", Qc$Item, "_Cat", Qc$Cat)
-  catprob
+Q_base <- matrix(c(            #  A1 A2 A3 B1 B2
+  1, 0, 0, 1, 0,              # item 1
+  0, 1, 0, 0, 1,              # item 2
+  0, 0, 1, 1, 0,              # item 3
+  1, 1, 0, 0, 1,              # item 4
+  0, 1, 1, 1, 1               # item 5
+), ncol = 5, byrow = TRUE, dimnames = list(NULL, attr_cols))
+Qitem <- Q_base[rep(seq_len(nrow(Q_base)), n_blocks), , drop = FALSE]
+J     <- nrow(Qitem)
+
+
+set.seed(master_seed)
+item_shift <- rnorm(J, 0, 0.2)
+
+
+expand_Q <- function(Qitem, ncat) {
+  m   <- ncat - 1
+  idx <- rep(seq_len(nrow(Qitem)), each = m)
+  data.frame(Item = idx, Cat = rep(seq_len(m), times = nrow(Qitem)),
+             Qitem[idx, , drop = FALSE], row.names = NULL)
 }
 
 
+pass_prob <- function(eta, skill_mastered, bug_free) {
+  plogis(eta + (disc_skill * (2 * skill_mastered - 1) +
+                disc_bug   * (2 * bug_free       - 1)) / 2)
+}
 
-# catprob_list <- build_sism_catprob(Qc, K.skills, no.bugs, true_sism_probs)
+step_eta <- function(ncat, loc, step) {         # J x (ncat-1) matrix of pass logits
+  m     <- ncat - 1
+  k_off <- (seq_len(m) - mean(seq_len(m))) * step_val[[step]]
+  -(loc_val[[loc]] + outer(item_shift, k_off, "+"))
+}
+
+
+build_sism_catprob <- function(Qc, eta) {
+  Qatt <- as.matrix(Qc[, attr_cols])
+  lapply(seq_len(nrow(Qc)), function(r) {
+    req      <- which(Qatt[r, ] == 1)
+    is_skill <- req <= no_skills
+    patt     <- attributepattern(length(req))
+    sm <- rowSums(patt[,  is_skill, drop = FALSE]) == sum(is_skill)
+    bf <- rowSums(patt[, !is_skill, drop = FALSE]) == 0     # bug attribute 1 = present
+    pass_prob(eta[Qc$Item[r], Qc$Cat[r]], sm, bf)
+  })
+}
+
+
+target_props <- function(dist, ncat) {
+  p <- if (dist == "flat") rep(1, ncat) else skew_r^(0:(ncat - 1))
+  p / sum(p)
+}
+
+cat_probs <- function(p) {                       # category probs from step pass probs
+  c(1, cumprod(p)) * c(1 - p, 1)
+}
+
+expected_props <- function(pi, eta) {
+  n_s <- rowSums(Qitem[, skill_cols, drop = FALSE])
+  n_b <- rowSums(Qitem[, bug_cols,   drop = FALSE])
+  props <- sapply(seq_len(J), function(j) {
+    ps <- pi^n_s[j]; pb <- pi^n_b[j]
+    w  <- c(both = ps * pb, skill_only = ps * (1 - pb),
+            bug_free_only = (1 - ps) * pb, neither = (1 - ps) * (1 - pb))
+    st <- list(c(1, 1), c(1, 0), c(0, 1), c(0, 0))   # (skill mastered, bug free)
+    Reduce(`+`, Map(function(wi, s) wi * cat_probs(pass_prob(eta[j, ], s[1], s[2])),
+                    w, st))
+  })
+  rowMeans(props)
+}
+
+calibrate_prev <- function(eta, target) {     # makes the model-implied category proportions as close as possible to the target
+  f <- function(pi) sum((expected_props(pi, eta) - target)^2)
+  pi_hat <- optimize(f, c(0.02, 0.98))$minimum
+  list(pi = pi_hat, expected = expected_props(pi_hat, eta))
+}
+
+attribute_prior <- function(pi) {
+  pats <- attributepattern(no_skills + no_bugs)
+  apply(pats, 1, function(a) {
+    s <- a[1:no_skills]; b <- a[(no_skills + 1):(no_skills + no_bugs)]
+    prod(ifelse(s == 1, pi, 1 - pi)) * prod(ifelse(b == 1, 1 - pi, pi))
+  })
+}
 
 
 collapse_to_polytomous <- function(step_dat, Qc) {
   items <- unique(Qc$Item)
-  N <- nrow(step_dat)
-  poly <- matrix(NA_integer_, N, length(items)); colnames(poly) <- paste0("Item", items)
-  exp_masked <- step_dat
-
-  for (jx in seq_along(items)) {
-    j <- items[jx]
-    cats <- sort(Qc$Cat[Qc$Item == j])
-    score <- rep(0L, N)
-    reached <- rep(TRUE, N)
-    for (h in cats) {
-      col <- which(Qc$Item == j & Qc$Cat == h)
-      resp <- step_dat[, col]          
-      exp_masked[!reached, col] <- NA
-      succeeded <- reached & (resp == 1)
-      score[succeeded] <- h
-      reached <- succeeded
+  poly  <- matrix(0L, nrow(step_dat), length(items),
+                  dimnames = list(NULL, paste0("Item", items)))
+  for (j in items) {
+    reached <- rep(TRUE, nrow(step_dat))
+    for (h in sort(Qc$Cat[Qc$Item == j])) {
+      col     <- which(Qc$Item == j & Qc$Cat == h)
+      success <- reached & (step_dat[, col] == 1)
+      poly[success, j] <- h
+      reached <- success
     }
-    poly[, jx] <- score
   }
-  list(dat = as.data.frame(poly), dat_expanded = exp_masked)
+  poly
+}
+
+expand_steps <- function(dat, Qc) {
+  dat <- as.matrix(dat)
+  out <- sapply(seq_len(nrow(Qc)), function(r) {
+    s <- dat[, Qc$Item[r]]; h <- Qc$Cat[r]
+    ifelse(s >= h, 1L, ifelse(s == h - 1, 0L, NA_integer_))
+  })
+  colnames(out) <- paste0("Item", Qc$Item, "_Cat", Qc$Cat)
+  out
+}
+
+simulate_one <- function(N, seed, Qc, catprob, prior) {
+  set.seed(seed)
+  Qexp <- as.matrix(Qc[, attr_cols])
+  sim  <- simGDINA(N, Qexp, catprob.parm = catprob,
+                   att.dist = "categorical", att.prior = prior)
+  list(dat       = collapse_to_polytomous(extract(sim, "dat"), Qc),
+       attribute = extract(sim, "attribute"))
 }
 
 
-simulate_one <- function(N, seed, Qc, Qexp, catprob_list) {
+misspecify_Q <- function(Qc, attribute_type, error_type, error_rate, seed) {
   set.seed(seed)
-  sim_steps <- simGDINA(N = N, Q = Qexp, catprob.parm = catprob_list)
-  step_dat  <- extract(sim_steps, "dat")
-  collapsed <- collapse_to_polytomous(step_dat, Qc)
-  
-  list(
-    dat          = collapsed$dat,
-    dat_expanded = collapsed$dat_expanded,
-    attribute    = extract(sim_steps, "attribute"),
-    seed         = seed,
-    N            = N
-  )
-}
-
-
-
-misspecify_Q <- function(Qc, skill_cols, bug_cols,
-                         attribute_type = c("skill", "misconception"),
-                         error_type     = c("omission", "inclusion"),
-                         error_rate, seed) {
-  attribute_type <- match.arg(attribute_type)
-  error_type     <- match.arg(error_type)
-  set.seed(seed)
-  
-  Qmis <- Qc
+  Qatt        <- as.matrix(Qc[, attr_cols])
   target_cols <- if (attribute_type == "skill") skill_cols else bug_cols
-  target_val  <- if (error_type == "omission") 1 else 0    # value that gets miscoded
-  flip_to     <- 1 - target_val
+  target_val  <- if (error_type == "omission") 1 else 0
   
-  flips <- data.frame(Item = integer(0), Cat = integer(0), Column = character(0),
-                      From = integer(0), To = integer(0))
+  cells  <- which(Qatt[, target_cols, drop = FALSE] == target_val, arr.ind = TRUE)
+  n_flip <- max(1, round(error_rate * nrow(cells)))
+  pick   <- cells[sample(nrow(cells), n_flip), , drop = FALSE]
+  col_ix <- match(target_cols[pick[, 2]], attr_cols)
   
-  for (col in target_cols) {
-    eligible_rows <- which(Qmis[[col]] == target_val)
-    if (length(eligible_rows) == 0) next
-    flip_rows <- eligible_rows[runif(length(eligible_rows)) < error_rate]
-    if (length(flip_rows) > 0) {
-      flips <- rbind(flips, data.frame(
-        Item = Qmis$Item[flip_rows], Cat = Qmis$Cat[flip_rows],
-        Column = col, From = target_val, To = flip_to
-      ))
-      Qmis[flip_rows, col] <- flip_to
-    }
-  }
+  Qmis <- Qatt
+  Qmis[cbind(pick[, 1], col_ix)] <- 1 - target_val
+  stopifnot(all(rowSums(Qmis) > 0))               # no empty Q-matrix rows
   
-  list(Q = Qmis, flips = flips,
-       attribute_type = attribute_type, error_type = error_type, error_rate = error_rate)
-}
-
-demo_true_probs <- gen_true_sism_probs(J, Qc, quality = "high", seed = 111)
-demo_catprob    <- build_sism_catprob(Qc, K.skills, no.bugs, demo_true_probs)
-demo_data       <- simulate_one(N = 1000, seed = 12345, Qc = Qc, Qexp = Qexp,
-                                catprob_list = demo_catprob)
-demo_qmis       <- misspecify_Q(Qc, skill_cols, bug_cols,
-                                attribute_type = "skill", error_type = "omission",
-                                error_rate = 0.15, seed = 999)
-
-print(demo_true_probs)
-print(sapply(demo_data$dat, function(x) var(as.numeric(x))))
-print(demo_qmis$flips)   # which true 1's got miscoded as 0 in this draw
-
-for (col in seq_len(ncol(demo_data$dat_expanded))) {
-  vals <- unique(na.omit(demo_data$dat_expanded[, col]))
-  if (length(vals) < 2) {
-    warning(sprintf("Demo Item %d Cat %d is degenerate (only value %s).",
-                    Qc$Item[col], Qc$Cat[col], paste(vals, collapse = ",")))
-  }
+  list(Q = Qmis,
+       flips = data.frame(Item = Qc$Item[pick[, 1]], Cat = Qc$Cat[pick[, 1]],
+                          Column = attr_cols[col_ix],
+                          From = target_val, To = 1 - target_val))
 }
 
 
-
-
-
-
-master_seed <- 20260908
 set.seed(master_seed)
-
-sim_conditions <- expand.grid(
-  Attribute_Type = c("skill", "misconception"),
-  Error_Type     = c("omission", "inclusion"),
-  Error_Rate     = c(0.05, 0.15),
-  N              = 2000,
-  Item_Quality   = c("high", "low"),
-  rep            = 1:100,
-  KEEP.OUT.ATTRS   = FALSE,
-  stringsAsFactors = FALSE
-)
-stopifnot(nrow(sim_conditions) == 3200)
+n_draw    <- nrow(full_design) * n_rep
+seed_pool <- sample(1e5:1e7, 2 * n_draw)
+data_seed <- matrix(seed_pool[1:n_draw],                  nrow(full_design), n_rep)
+qmis_seed <- matrix(seed_pool[(n_draw + 1):(2 * n_draw)], nrow(full_design), n_rep)
 
 
-sim_conditions$data_seed <- sample(1e5:1e7, nrow(sim_conditions))
-sim_conditions$qmis_seed <- sample(1e5:1e7, nrow(sim_conditions))
+setup_dgp <- function(cr) {
+  Qc  <- expand_Q(Qitem, cr$ncat)
+  eta <- step_eta(cr$ncat, cr$loc, cr$step)
+  target <- target_props(cr$dist, cr$ncat)
+  cal    <- calibrate_prev(eta, target)
+  list(Qc = Qc, eta = eta, target = target, pi = cal$pi, expected = cal$expected,
+       catprob = build_sism_catprob(Qc, eta), prior = attribute_prior(cal$pi))
+}
+dgp_setup <- lapply(seq_len(nrow(dgp_design)), function(i) setup_dgp(dgp_design[i, ]))
 
 
-param_seed <- c(high = 111, low = 222)
-true_probs_by_quality <- lapply(c(high = "high", low = "low"), function(q) {
-  gen_true_sism_probs(J, Qc, quality = q, seed = param_seed[[q]])
-})
-catprob_by_quality <- lapply(names(true_probs_by_quality), function(q) {
-  build_sism_catprob(Qc, K.skills, no.bugs, true_probs_by_quality[[q]])
-})
-names(catprob_by_quality) <- names(true_probs_by_quality)
+check <- vector("list", nrow(full_design))
 
-sim_data_list <- vector("list", nrow(sim_conditions))
-n_flips       <- integer(nrow(sim_conditions))
-
-for (i in seq_len(nrow(sim_conditions))) {
-  cond <- sim_conditions[i, ]
+for (i in seq_len(nrow(full_design))) {
+  cr <- full_design[i, ]
+  su <- dgp_setup[[cr$cond]]
   
-  true_dat <- simulate_one(
-    N = N,
-    Qc = Qc, Qexp = Qexp,
-    catprob_list = catprob_by_quality[[cond$Item_Quality]]
-  )
+  reps <- lapply(seq_len(n_rep), function(r) {
+    d <- simulate_one(N, data_seed[i, r], su$Qc, su$catprob, su$prior)
+    d$data_seed <- data_seed[i, r]
+    d$Q_mis     <- misspecify_Q(su$Qc, cr$Attribute_Type, cr$Error_Type,
+                                error_rate, qmis_seed[i, r])
+    d$qmis_seed <- qmis_seed[i, r]
+    d
+  })
   
-  qmis <- misspecify_Q(
-    Qc = Qc, skill_cols = skill_cols, bug_cols = bug_cols,
-    attribute_type = cond$Attribute_Type, error_type = cond$Error_Type,
-    error_rate = cond$Error_Rate, seed = cond$qmis_seed
-  )
-  n_flips[i] <- nrow(qmis$flips)
+  # calibration + degenerate-category checks
+  obs <- prop.table(table(factor(unlist(reps[[1]]$dat), levels = 0:(cr$ncat - 1))))
+  missing_cat <- sum(sapply(reps, function(x)
+    any(apply(x$dat, 2, function(v) length(unique(v)) < cr$ncat))))
+  if (missing_cat > 0)
+    warning(sprintf("Cell %d: %d/%d reps have an item with an unobserved category.",
+                    i, missing_cat, n_rep))
+  check[[i]] <- data.frame(cr, prev = round(su$pi, 3),
+                           max_dev_expected = round(max(abs(su$expected - su$target)), 3),
+                           max_dev_observed = round(max(abs(as.numeric(obs) - su$target)), 3),
+                           reps_with_missing_cat = missing_cat)
   
-  for (col in seq_len(ncol(true_dat$dat_expanded))) {
-    vals <- unique(na.omit(true_dat$dat_expanded[, col]))
-    if (length(vals) < 2) {
-      warning(sprintf(
-        "Row %d (%s, N=%d, %s): Item %d Cat %d is degenerate at seed %d.",
-        i, cond$Item_Quality, cond$N, cond$Attribute_Type,
-        Qc$Item[col], Qc$Cat[col], cond$data_seed))
-    }
-  }
-  
-  sim_data_list[[i]] <- list(
-    dat            = true_dat$dat,                    # polytomous item scores (N x 5)
-    dat_expanded   = true_dat$dat_expanded,            # step-level 0/1 responses (masked)
-    true_attribute = true_dat$attribute,               # true attribute profiles
-    Q_true         = Qexp,                             # correct Q-matrix (steps x 5 attrs)
-    Q_misspecified = as.matrix(qmis$Q[, -(1:2)]),       # Q-matrix WITH measurement error
-    flips          = qmis$flips,                       # log of exactly which cells flipped
-    condition      = cond
-  )
+  saveRDS(list(condition = cr, Qc_true = su$Qc, eta = su$eta, catprob = su$catprob,
+               pi = su$pi, target = su$target, expected = su$expected,
+               N = N, error_rate = error_rate, reps = reps),
+          file = file.path(out_dir, sprintf(
+            "cell%02d_dist-%s_ncat-%d_loc-%s_step-%s_attr-%s_err-%s.rds",
+            cr$cell, cr$dist, cr$ncat, cr$loc, cr$step,
+            cr$Attribute_Type, cr$Error_Type)))
+  message(sprintf("Saved cell %d / %d", i, nrow(full_design)))
 }
 
-sim_conditions$n_flips <- n_flips   # realized flips per row, vs. nominal error_rate
+check <- do.call(rbind, check)
+print(check)
 
-names(sim_data_list) <- with(sim_conditions, paste0(
-  "Attr-", Attribute_Type, "_Err-", Error_Type, "_Rate-", Error_Rate * 100,
-  "_N-", N, "_Qual-", Item_Quality, "_rep-", rep
-))
-
-saveRDS(
-  list(
-    master_seed            = master_seed,
-    Qc                      = Qc,
-    Qexp                    = Qexp,
-    K.skills                = K.skills,
-    no.bugs                 = no.bugs,
-    skill_cols               = skill_cols,
-    bug_cols                 = bug_cols,
-    true_probs_by_quality    = true_probs_by_quality,
-    conditions               = sim_conditions,
-    data                     = sim_data_list
-  ),
-  file = "polytomous_SISM_data.rds"
-)
+saveRDS(list(master_seed = master_seed, N = N, n_rep = n_rep, J = J,
+             error_rate = error_rate, Qitem = Qitem, item_shift = item_shift,
+             skill_cols = skill_cols, bug_cols = bug_cols,
+             design = full_design, data_seed = data_seed, qmis_seed = qmis_seed,
+             calibration_check = check),
+        file = file.path(out_dir, "design_info.rds"))
