@@ -1,22 +1,8 @@
 #Study 3: Errors in the measurement component -- polytomous study
 
-#   Attribute Type : Skill columns (A1-A3)  vs. Misconception columns (B1-B2)
-#   Error Type     : Omission (true q_jk=1 miscoded as 0)
-#                    Inclusion (true q_jk=0 miscoded as 1)
-#   Error Rate     : 5% vs. 15% of the targeted Q-matrix cells flipped
-#   Sample Size    : N = 500 vs. 1000
-#   Item Quality   : High (s=g=0.10) vs. Low (s=g=0.25)
-
-
-#   pi00 = P(success | skills NOT mastered, bug(s) present)   worst case
-#   pi10 = P(success | skills mastered,     bug(s) present)
-#   pi01 = P(success | skills NOT mastered, bug(s) absent)
-#   pi11 = P(success | skills mastered,     bug(s) absent)    best case
-
 
 library(GDINA)
 
-#1. True Q-matrix
 Qc <- data.frame(
   Item = c(1, 1, 2, 2, 3, 4, 5),
   Cat  = c(1, 2, 1, 2, 1, 1, 1),
@@ -33,9 +19,6 @@ bug_cols   <- colnames(Qc)[(3 + K.skills):(2 + K.skills + no.bugs)]   # "B1" "B2
 Qexp       <- as.matrix(Qc[, -(1:2)])   # plain Q-matrix, 1 row per pseudo-item (step)
 J          <- nrow(Qc)                  # total number of steps (here: 7)
 
-#eligible-cell counts per targeted column set 
-# skill columns (A1-A3): 9 ones/12 zeros  (21 cells)
-# misconception columns (B1-B2): 8 ones/6 zeros  (14 cells)
 
 set.seed(2026)
 gen_true_sism_probs <- function(J, Qc, quality = c("high", "low"), seed) {
@@ -205,7 +188,7 @@ sim_conditions <- expand.grid(
   Attribute_Type = c("skill", "misconception"),
   Error_Type     = c("omission", "inclusion"),
   Error_Rate     = c(0.05, 0.15),
-  N              = c(500, 1000),
+  N              = 2000,
   Item_Quality   = c("high", "low"),
   rep            = 1:100,
   KEEP.OUT.ATTRS   = FALSE,
@@ -213,12 +196,11 @@ sim_conditions <- expand.grid(
 )
 stopifnot(nrow(sim_conditions) == 3200)
 
-# independent seeds per dataset: one for the true response draw, one for
-# the Q-matrix misspecification draw
+
 sim_conditions$data_seed <- sample(1e5:1e7, nrow(sim_conditions))
 sim_conditions$qmis_seed <- sample(1e5:1e7, nrow(sim_conditions))
 
-# true item parameters: one fixed set per item quality level, shared across all reps/conditions of that quality level 
+
 param_seed <- c(high = 111, low = 222)
 true_probs_by_quality <- lapply(c(high = "high", low = "low"), function(q) {
   gen_true_sism_probs(J, Qc, quality = q, seed = param_seed[[q]])
@@ -234,14 +216,12 @@ n_flips       <- integer(nrow(sim_conditions))
 for (i in seq_len(nrow(sim_conditions))) {
   cond <- sim_conditions[i, ]
   
-  # TRUE response data  generated from the TRUE Q-matrix
   true_dat <- simulate_one(
-    N = cond$N, seed = cond$data_seed,
+    N = N,
     Qc = Qc, Qexp = Qexp,
     catprob_list = catprob_by_quality[[cond$Item_Quality]]
   )
   
-  # Misspecified Q-matrix 
   qmis <- misspecify_Q(
     Qc = Qc, skill_cols = skill_cols, bug_cols = bug_cols,
     attribute_type = cond$Attribute_Type, error_type = cond$Error_Type,
@@ -249,7 +229,6 @@ for (i in seq_len(nrow(sim_conditions))) {
   )
   n_flips[i] <- nrow(qmis$flips)
   
-  # (c) degeneracy check on the true data
   for (col in seq_len(ncol(true_dat$dat_expanded))) {
     vals <- unique(na.omit(true_dat$dat_expanded[, col]))
     if (length(vals) < 2) {
