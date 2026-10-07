@@ -130,6 +130,38 @@ l0 <- paste0("l0_", rep(1:n_i, times = n_t), "step", rep(1:n_t, each = n_i))
 l1 <- paste0("l1_", rep(1:n_i, times = n_t), "step", rep(1:n_t, each = n_i))
 nrdm_param <- c("Vc", l0, l1)
 
+#H
+
+rsdm_param <- c(
+  # l1I - l40I
+  "l1I", "l2I", "l3I", "l4I", "l5I", "l6I", "l7I", "l8I", "l9I", "l10I",
+  "l11I", "l12I", "l13I", "l14I", "l15I", "l16I", "l17I", "l18I", "l19I", "l20I",
+  "l21I", "l22I", "l23I", "l24I", "l25I", "l26I", "l27I", "l28I", "l29I", "l30I",
+  "l31I", "l32I", "l33I", "l34I", "l35I", "l36I", "l37I", "l38I", "l39I", "l40I",
+  
+  # l1M - l40M
+  "l1M", "l2M", "l3M", "l4M", "l5M", "l6M", "l7M", "l8M", "l9M", "l10M",
+  "l11M", "l12M", "l13M", "l14M", "l15M", "l16M", "l17M", "l18M", "l19M", "l20M",
+  "l21M", "l22M", "l23M", "l24M", "l25M", "l26M", "l27M", "l28M", "l29M", "l30M",
+  "l31M", "l32M", "l33M", "l34M", "l35M", "l36M", "l37M", "l38M", "l39M", "l40M",
+  
+  # step1_ID1 - step6_ID4
+  "step1_ID1", "step1_ID2", "step1_ID3", "step1_ID4",
+  "step2_ID1", "step2_ID2", "step2_ID3", "step2_ID4",
+  "step3_ID1", "step3_ID2", "step3_ID3", "step3_ID4",
+  "step4_ID1", "step4_ID2", "step4_ID3", "step4_ID4",
+  "step5_ID1", "step5_ID2", "step5_ID3", "step5_ID4",
+  "step6_ID1", "step6_ID2", "step6_ID3", "step6_ID4",
+  
+  # step1_MD1 - step6_MD4
+  "step1_MD1", "step1_MD2", "step1_MD3", "step1_MD4",
+  "step2_MD1", "step2_MD2", "step2_MD3", "step2_MD4",
+  "step3_MD1", "step3_MD2", "step3_MD3", "step3_MD4",
+  "step4_MD1", "step4_MD2", "step4_MD3", "step4_MD4",
+  "step5_MD1", "step5_MD2", "step5_MD3", "step5_MD4",
+  "step6_MD1", "step6_MD2", "step6_MD3", "step6_MD4"
+)
+
 
 for (p in rsdm_param){
   print(traceplot(rsdm, pars = p))
@@ -141,7 +173,7 @@ for (p in nrdm_param){
   print(traceplot(nrdm, pars = p))
 }
 
-
+traceplot(rsdm, p = "step5_MD4")
 
 # LOOIC
 
