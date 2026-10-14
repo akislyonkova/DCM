@@ -180,3 +180,119 @@ save(sim2_true_data1, all_Q_matrices, estimation_grid, file = "Study2_Data1.RDat
 
 
 # Part 2 - under-specifying the structure 
+
+
+K <- 7
+attr_names <- c("S1", "S2", "S3", "S4", "M1", "M2", "M3")
+
+convergent_prereqs <- list("5" = c(1, 2))
+
+
+all_patterns <- attributepattern(K)
+
+
+hierarchy_ok <- function(pat) {
+  for (a in names(convergent_prereqs)) {
+    if (pat[as.numeric(a)] == 1 && !all(pat[convergent_prereqs[[a]]] == 1)) return(FALSE)
+  }
+  TRUE
+}
+is_valid_pattern <- apply(all_patterns, 1, hierarchy_ok)
+convergent_profiles <- all_patterns[is_valid_pattern, , drop = FALSE]
+
+
+convergent_prior <- as.numeric(is_valid_pattern) / sum(is_valid_pattern)
+
+# 80 of 128 attribute profiles are permissible
+
+generate_q_convergent <- function(K = 7, n_items = 20) {
+  
+  valid_patterns <- convergent_profiles[rowSums(convergent_profiles) > 0, , drop = FALSE]
+  
+  I_matrix    <- diag(K)
+  n_remaining <- n_items - K
+  
+  valid_Q <- FALSE
+  while (!valid_Q) {
+    Q_indices <- sample(1:nrow(valid_patterns), n_remaining, replace = TRUE)
+    Q_sampled <- valid_patterns[Q_indices, ]
+    
+    Q_matrix <- rbind(I_matrix, Q_sampled)
+    
+    if (all(colSums(Q_matrix) > 0)) valid_Q <- TRUE
+  }
+  
+  colnames(Q_matrix) <- attr_names
+  rownames(Q_matrix) <- paste0("Item_", 1:n_items)
+  
+  return(Q_matrix)
+}
+
+set.seed(2026 + 2)
+convergent_Q20 <- generate_q_convergent(K = 7, n_items = 20)
+convergent_Q40 <- rbind(convergent_Q20, convergent_Q20)
+rownames(convergent_Q40) <- paste0("Item_", 1:40)
+
+estimation_grid2 <- design_factors
+estimation_grid2$true_hierarchy <- "Convergent"
+estimation_grid2$fit_structure  <- "Unstructured"
+estimation_grid2$item_length    <- paste0("items_", estimation_grid2$J)
+estimation_grid2$cond_idx       <- 1:nrow(estimation_grid2)
+
+n_reps <- 100
+sim2_true_data2 <- lapply(seq_len(nrow(design_factors)), function(i) {
+  row       <- design_factors[i, ]
+  N         <- row$N
+  J         <- row$J
+  qual_name <- row$qual_name
+  
+  Q_base <- if (J == 20) convergent_Q20 else convergent_Q40
+  
+  if (qual_name == "High") {
+    gs_parms <- data.frame(guess = rep(0.1,  J), slip = rep(0.1,  J))
+  } else {
+    gs_parms <- data.frame(guess = rep(0.25, J), slip = rep(0.25, J))
+  }
+  
+  cat(sprintf("\nGenerating Part 2 Data for Condition %d/8: N=%d, J=%d, Qual=%s",
+              i, N, J, qual_name))
+  
+  condition_reps <- lapply(1:n_reps, function(rep) {
+    
+    # offset keeps Part 2 seeds distinct from Part 1
+    set.seed(2026 + 100000 + i * 1000 + rep)
+    
+    if (rep %% 10 == 0) cat(paste0("..", rep))
+    
+    sim <- simGDINA(N          = N,
+                    Q          = Q_base,
+                    gs.parm    = gs_parms,
+                    model      = "SISM",
+                    no.bugs    = 3,
+                    att.dist   = "categorical",
+                    att.prior  = convergent_prior)
+    
+    dat      <- extract(sim, "dat")
+    itemprob <- extract(sim, what = "catprob.parm")
+    delta    <- extract(sim, what = "delta.parm")
+    profiles <- extract(sim, what = "attribute")
+    
+    return(list(
+      dat      = dat,
+      itemprob = itemprob,
+      delta    = delta,
+      profiles = profiles
+    ))
+  })
+  
+  return(list(
+    replications = condition_reps,
+    condition    = row,
+    Q_used       = Q_base,
+    valid_profiles = convergent_profiles
+  ))
+})
+
+save(sim2_true_data2, convergent_Q20, convergent_Q40, convergent_profiles,
+     estimation_grid2, file = "Study2_Data2.RData")
+
