@@ -4,7 +4,7 @@ library(doParallel)
 library(doRNG)
 
 getwd()
-setwd("~/DCM/sism/")     
+setwd("~/DCM/sism/poly_sism")     
 n_cores <- parallel::detectCores() - 1
 cl <- makeCluster(n_cores)
 registerDoParallel(cl)
