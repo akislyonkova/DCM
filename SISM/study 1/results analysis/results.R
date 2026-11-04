@@ -13,15 +13,38 @@ all_fits <- unlist(final_results, recursive = FALSE)
 n_success <- sum(map_lgl(all_fits, ~ isTRUE(.x$success)))
 cat(sprintf("Successful fits: %d of %d\n", n_success, length(all_fits)))
 
-as_item_by_class <- function(M, n_items, n_classes) {
-  M <- unname(as.matrix(M))
-  if (nrow(M) == n_items && ncol(M) == n_classes) return(M)
-  if (nrow(M) == n_classes && ncol(M) == n_items) return(t(M))
-  stop("Unexpected dimensions for class-level probabilities")
+K <- ncol(data[[1]]$replications[[1]]$Q_true)
+all_profiles <- as.matrix(expand.grid(rep(list(0:1), K)))
+
+match_label <- function(pat, labs) {
+  idx <- match(pat, labs)
+  if (!is.na(idx)) return(idx)
+  star <- which(grepl("*", labs, fixed = TRUE))
+  if (length(star) > 0) {
+    rx <- paste0("^", gsub("*", "[01]", labs[star], fixed = TRUE), "$")
+    hit <- star[vapply(rx, function(r) grepl(r, pat), logical(1))]
+    if (length(hit) == 1) return(hit)
+  }
+  stop(sprintf("Cannot match latent group '%s' to labels: %s",
+               pat, paste(labs, collapse = ", ")))
+}
+
+class_probs <- function(item_probs, Q, profiles) {
+  P <- matrix(NA_real_, nrow = nrow(Q), ncol = nrow(profiles))
+  for (j in seq_len(nrow(Q))) {
+    p    <- unlist(item_probs[[j]])
+    labs <- sub("^P\\((.*)\\)$", "\\1", names(p))
+    pat  <- apply(profiles[, which(Q[j, ] == 1), drop = FALSE], 1, paste, collapse = "")
+    upat <- unique(pat)
+    idx  <- setNames(vapply(upat, match_label, integer(1), labs = labs), upat)
+    P[j, ] <- unname(p[idx[pat]])
+  }
+  stopifnot(!anyNA(P), all(P >= 0 & P <= 1))
+  P
 }
 
 rep_metrics <- function(true_rep, fit_rep) {
-  if (!isTRUE(fit_rep$success) || is.null(fit_rep$LCprob) || is.null(fit_rep$profiles)) {
+  if (!isTRUE(fit_rep$success) || is.null(fit_rep$estimates) || is.null(fit_rep$profiles)) {
     return(NULL)
   }
 
@@ -29,11 +52,8 @@ rep_metrics <- function(true_rep, fit_rep) {
   ep <- unname(as.matrix(fit_rep$profiles))
   stopifnot(identical(dim(tp), dim(ep)))
 
-  n_items   <- nrow(true_rep$Q_true)
-  n_classes <- 2^ncol(tp)
-
-  P_true <- as_item_by_class(true_rep$LCprob, n_items, n_classes)
-  P_est  <- as_item_by_class(fit_rep$LCprob,  n_items, n_classes)
+  P_true <- class_probs(true_rep$itemprob, true_rep$Q_true, all_profiles)
+  P_est  <- class_probs(fit_rep$estimates, true_rep$Q_used, all_profiles)
 
   d   <- P_est - P_true
   hit <- tp == ep
